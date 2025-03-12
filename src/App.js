@@ -40,7 +40,9 @@ const ShippingTable = () => {
   // Fetch vessel names
   const fetchVesselNames = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/vessel`);
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/vessel`,{
+        "ngrok-skip-browser-warning": "true",
+      });
       const { data } = await response.json();
       console.log(data);
       setVesselOptions(data || []);
@@ -52,7 +54,9 @@ const ShippingTable = () => {
   // Fetch countries for origin port filter
   const fetchCountries = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/location/countries`);
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/location/countries`,{
+        "ngrok-skip-browser-warning": "true",
+      });
       const { data } = await response.json();
       console.log(data);
       setCountryOptions(data || []);
@@ -66,7 +70,9 @@ const ShippingTable = () => {
     if (!country) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/port/${country}`);
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/port/${country}`,{
+        "ngrok-skip-browser-warning": "true",
+      });
       const { data } = await response.json();
       console.log(data);
       setPortOptions(data || []);
@@ -87,7 +93,9 @@ const ShippingTable = () => {
     if (!port) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`);
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`,{
+        "ngrok-skip-browser-warning": "true",
+      });
       const { data } = await response.json();
       console.log(data);
       setOriginDestinationOptions(data || []);
@@ -104,7 +112,9 @@ const ShippingTable = () => {
     if (!vessel) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/voyages/${vessel}`);
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/voyages/${vessel}`,{
+        "ngrok-skip-browser-warning": "true",
+      });
       const { data } = await response.json();
       console.log(data);
       setVoyageOptions(data || []);
@@ -125,7 +135,9 @@ const ShippingTable = () => {
     if (!vessel || !voyage) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/ports/${voyage}`);
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/ports/${voyage}`,{
+        "ngrok-skip-browser-warning": "true",
+      });
       const { data } = await response.json();
       console.log(data);
       setTransitOptions(data || []);
@@ -144,7 +156,9 @@ const ShippingTable = () => {
     if (!vessel || !voyage || !transit) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`);
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`,{
+        "ngrok-skip-browser-warning": "true",
+      });
       const { data } = await response.json();
       console.log(data);
       setDestinationOptions(data || []);
@@ -162,7 +176,9 @@ const ShippingTable = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`
+        `${process.env.REACT_APP_BASE_URL}/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`,{
+          "ngrok-skip-browser-warning": "true",
+        }
       );
       const { data } = await response.json();
       console.log(data);
@@ -178,7 +194,9 @@ const ShippingTable = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitHub=${selectedPort}&destination=${selectedOriginDestination}`
+        `${process.env.REACT_APP_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitHub=${selectedPort}&destination=${selectedOriginDestination}`,{
+          "ngrok-skip-browser-warning": "true",
+        }
       );
       const { data } = await response.json();
       console.log(data);
