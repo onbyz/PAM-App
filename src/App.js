@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 const ShippingTable = () => {
   console.log(process.env.REACT_APP_BASE_URL);
@@ -472,14 +473,14 @@ const ShippingTable = () => {
                   <td style={{ padding: '10px' }}>{row.id || (index + 1)}</td>
                   <td style={{ padding: '10px' }}>{row.vessel_name}</td>
                   <td style={{ padding: '10px' }}>{row.voyage_no}</td>
-                  <td style={{ padding: '10px' }}>{row.cfs_closing}</td>
-                  <td style={{ padding: '10px' }}>{row.fcl_closing}</td>
+                  <td style={{ padding: '10px' }}>{new Date(row.cfs_closing).toLocaleDateString("en-GB")}</td>
+                  <td style={{ padding: '10px' }}>{new Date(row.fcl_closing).toLocaleDateString("en-GB")}</td>
                   <td style={{ padding: '10px' }}>{row.origin}</td>
-                  <td style={{ padding: '10px' }}>{row.etd || "N/A"}</td>
-                  <td style={{ padding: '10px' }}>{row.eta_dubai || row.eta_transit}</td>
-                  <td style={{ padding: '10px' }}>{row.dst_eta}</td>
+                  <td style={{ padding: '10px' }}>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
+                  <td style={{ padding: '10px' }}>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
+                  <td style={{ padding: '10px' }}>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
                   <td style={{ padding: '10px' }}>{row.transit_time}</td>
-                  <td style={{ padding: '10px' }}>•••</td>
+                  <td style={{ padding: '10px' }} ><Link to={`/edit/${row.uuid}`}> Edit</Link></td>
                 </tr>
               ))
             ) : (
