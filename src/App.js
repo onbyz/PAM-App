@@ -140,7 +140,7 @@ const ShippingTable = () => {
     if (!vessel || !voyage) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/ports/${voyage}`,{
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/ports/${voyage}/${selectedVessel}`,{
         headers:{
           "ngrok-skip-browser-warning": "true"
         }
@@ -367,6 +367,7 @@ const ShippingTable = () => {
               disabled={!selectedVessel}
             >
               <option value="">Select...</option>
+              <option value="ALL">All</option>
               {voyageOptions.map((voyage, index) => (
                 <option key={index} value={voyage.voyage_no}>{voyage.voyage_no}</option>
               ))}
