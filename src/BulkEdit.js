@@ -9,8 +9,8 @@ const ShippingEdit = () => {
   const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     voyage_no: '',
-    port_id: '',
-    vessel_id: '',
+    port_uuid: '',
+    vessel_uuid: '',
     cfs_closing: '',
     fcl_closing: '',
     eta_transit: '',
@@ -24,6 +24,34 @@ const ShippingEdit = () => {
   const [portOptions, setPortOptions] = useState([]);
   const [vesselOptions, setVesselOptions] = useState([]);
   const [destinationOptions, setDestinationOptions] = useState([]);
+
+  // Field labels mapping
+  const fieldLabels = {
+    voyage_no: 'Voyage Number',
+    port_uuid: 'Port',
+    vessel_uuid: 'Vessel',
+    cfs_closing: 'CFS Closing Date',
+    fcl_closing: 'FCL Closing Date',
+    eta_transit: 'ETA at Transit',
+    etd: 'ETD',
+    destination: 'Destination',
+    dst_eta: 'Destination ETA',
+    transit_time: 'Transit Time (Days)'
+  };
+
+  // List of fields to show in the form
+  const fieldsToShow = [
+    'voyage_no',
+    'port_uuid',
+    'vessel_uuid',
+    'cfs_closing',
+    'fcl_closing',
+    'eta_transit',
+    'etd',
+    'destination',
+    'dst_eta',
+    'transit_time'
+  ];
 
   // Fetch options for dropdowns
   useEffect(() => {
@@ -68,14 +96,23 @@ const ShippingEdit = () => {
         const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/${id}`, {
           headers: { "ngrok-skip-browser-warning": "true" }
         });
-        
+
         if (!response.ok) throw new Error(`Failed to fetch record: ${response.status}`);
-        
+
         const result = await response.json();
         if (result.error === false && result.data?.length > 0) {
           const formattedData = result.data[0];
+
+          // Pick only the fields we need
+          const filteredData = {};
+          fieldsToShow.forEach(field => {
+            if (field in formattedData) {
+              filteredData[field] = formattedData[field];
+            }
+          });
+
           setFormData({
-            ...formattedData,
+            ...filteredData,
             cfs_closing: formatDateForInput(formattedData.cfs_closing),
             fcl_closing: formatDateForInput(formattedData.fcl_closing),
             eta_transit: formatDateForInput(formattedData.eta_transit),
@@ -120,16 +157,39 @@ const ShippingEdit = () => {
     e.preventDefault();
     try {
       setLoading(true);
+
+      // Prepare data for backend - map port_uuid and vessel_uuid to port_id and vessel_id
+      const dataToSend = { ...formData };
+
+      // Map port_uuid to port_id
+      if (dataToSend.port_uuid) {
+        dataToSend.port_id = dataToSend.port_uuid;
+        delete dataToSend.port_uuid;
+      }
+
+      // Map vessel_uuid to vessel_id
+      if (dataToSend.vessel_uuid) {
+        dataToSend.vessel_id = dataToSend.vessel_uuid;
+        delete dataToSend.vessel_uuid;
+      }
+
       const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/${id}/edit`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', "ngrok-skip-browser-warning": "true" },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(dataToSend)
       });
 
-      if (!response.ok) throw new Error(`Failed to update record: ${response.status}`);
-      
-      alert('Record updated successfully!');
-      navigate(-1);
+      const result = await response.json();
+
+      if (result.error) {
+        // Show error message from API
+        window.alert(result.data || result.message || "An error occurred during update");
+      } else {
+        // Success message
+        window.alert('Record updated successfully!');
+        navigate(-1);
+      }
+
     } catch (error) {
       console.error('Error updating record:', error);
       setError('Failed to update record. Please try again.');
@@ -142,7 +202,7 @@ const ShippingEdit = () => {
 
   const renderFormField = (name) => {
     // Check if the field should be a dropdown
-    if (name === 'port_id') {
+    if (name === 'port_uuid') {
       return (
         <select
           name={name}
@@ -153,13 +213,13 @@ const ShippingEdit = () => {
         >
           <option value="">Select Port</option>
           {portOptions.map((port) => (
-            <option key={port.id} value={port.id}>
+            <option key={port.uuid} value={port.uuid}>
               {port.transit}
             </option>
           ))}
         </select>
       );
-    } else if (name === 'vessel_id') {
+    } else if (name === 'vessel_uuid') {
       return (
         <select
           name={name}
@@ -170,7 +230,7 @@ const ShippingEdit = () => {
         >
           <option value="">Select Vessel</option>
           {vesselOptions.map((vessel) => (
-            <option key={vessel.id} value={vessel.id}>
+            <option key={vessel.uuid} value={vessel.uuid}>
               {vessel.name}
             </option>
           ))}
@@ -187,7 +247,7 @@ const ShippingEdit = () => {
         >
           <option value="">Select Destination</option>
           {destinationOptions.map((destination) => (
-            <option key={destination.id} value={destination.id}>
+            <option key={destination.uuid} value={destination.uuid}>
               {destination.destination}
             </option>
           ))}
@@ -201,7 +261,7 @@ const ShippingEdit = () => {
           value={formData[name] || ''}
           onChange={handleInputChange}
           style={{ padding: '8px', width: '100%', boxSizing: 'border-box' }}
-          required={['voyage_no', 'vessel_id', 'port_id', 'destination'].includes(name)}
+          required={['voyage_no', 'vessel_uuid', 'port_uuid', 'destination'].includes(name)}
         />
       );
     } else {
@@ -212,7 +272,7 @@ const ShippingEdit = () => {
           value={formData[name] || ''}
           onChange={handleInputChange}
           style={{ padding: '8px', width: '100%', boxSizing: 'border-box' }}
-          required={['voyage_no', 'vessel_id', 'port_id', 'destination'].includes(name)}
+          required={['voyage_no', 'vessel_uuid', 'port_uuid', 'destination'].includes(name)}
         />
       );
     }
@@ -226,23 +286,25 @@ const ShippingEdit = () => {
       <h2>Edit Shipping Schedule</h2>
       <form onSubmit={handleSubmit}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '20px', marginBottom: '20px' }}>
-          {['voyage_no', 'vessel_id', 'port_id', 'cfs_closing', 'fcl_closing', 'etd', 'eta_transit', 'destination', 'dst_eta', 'transit_time'].map((name) => (
+          {fieldsToShow.map((name) => (
             <div key={name}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>{name.replace('_', ' ').toUpperCase()}</label>
+              <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>
+                {fieldLabels[name] || name.replace(/_/g, ' ').toUpperCase()}
+              </label>
               {renderFormField(name)}
             </div>
           ))}
         </div>
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-          <button 
-            type="button" 
-            onClick={handleCancel} 
+          <button
+            type="button"
+            onClick={handleCancel}
             style={{ padding: '10px 20px', backgroundColor: '#ccc', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
           >
             Cancel
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
             disabled={loading}
           >

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 const ShippingTable = () => {
-  console.log(process.env.REACT_APP_BASE_URL);
   
   const [filterBy, setFilterBy] = useState('vessel'); // 'vessel' or 'origin'
 
@@ -47,7 +46,6 @@ const ShippingTable = () => {
         }
       });
       const { data } = await response.json();
-      console.log(data);
       setVesselOptions(data || []);
     } catch (error) {
       console.error('Error fetching vessel names:', error);
@@ -63,7 +61,6 @@ const ShippingTable = () => {
         }
       });
       const { data } = await response.json();
-      console.log(data);
       setCountryOptions(data || []);
     } catch (error) {
       console.error('Error fetching countries:', error);
@@ -81,12 +78,11 @@ const ShippingTable = () => {
         }
       });
       const { data } = await response.json();
-      console.log(data);
       setPortOptions(data || []);
     } catch (error) {
       console.error('Error fetching ports:', error);
       // Fallback data if API is not available
-      setPortOptions([{ id: 'CGP-DXB', name: 'BANGLADESH - CHITTAGONG VIA DUBAI' }]);
+      setPortOptions([{ uuid: 'CGP-DXB', name: 'BANGLADESH - CHITTAGONG VIA DUBAI' }]);
     }
 
     setSelectedPort('');
@@ -106,7 +102,6 @@ const ShippingTable = () => {
         }
       });
       const { data } = await response.json();
-      console.log(data);
       setOriginDestinationOptions(data || []);
     } catch (error) {
       console.error('Error fetching origin destinations:', error);
@@ -127,7 +122,6 @@ const ShippingTable = () => {
         }
       });
       const { data } = await response.json();
-      console.log(data);
       setVoyageOptions(data || []);
     } catch (error) {
       console.error('Error fetching voyage refs:', error);
@@ -152,7 +146,6 @@ const ShippingTable = () => {
         }
       });
       const { data } = await response.json();
-      console.log(data);
       setTransitOptions(data || []);
     } catch (error) {
       console.error('Error fetching transit hubs:', error);
@@ -175,7 +168,6 @@ const ShippingTable = () => {
         }
       });
       const { data } = await response.json();
-      console.log(data);
       setDestinationOptions(data || []);
     } catch (error) {
       console.error('Error fetching destinations:', error);
@@ -198,13 +190,12 @@ const ShippingTable = () => {
         }
       );
       const { data } = await response.json();
-      console.log(data);
       setTableData(data || []);
     } catch (error) {
       console.error('Error fetching vessel table data:', error);
     }
   };
-
+  
   // Fetch table data based on origin port filter
   const fetchOriginTableData = async () => {
     if (!selectedCountry || !selectedPort || !selectedOriginDestination) return;
@@ -218,7 +209,6 @@ const ShippingTable = () => {
         }
       );
       const { data } = await response.json();
-      console.log(data);
       setTableData(data || []);
     } catch (error) {
       console.error('Error fetching origin table data:', error);
@@ -313,6 +303,19 @@ const ShippingTable = () => {
     }
   }, [filterBy, selectedCountry, selectedPort, selectedOriginDestination]);
 
+
+  const getSelectedTransitName = () => {
+    if (filterBy === 'vessel' && selectedTransit) {
+      const transit = transitOptions.find(t => t.uuid === selectedTransit);
+      return transit ? transit.transit : 'Transit';
+    } else if (filterBy === 'origin' && selectedPort) {
+      const port = portOptions.find(p => p.uuid === selectedPort);
+      return port ? port.origin : 'Transit';
+    }
+    return 'Transit';
+  };
+
+
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       {/* Filter options */}
@@ -350,7 +353,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {vesselOptions.map((vessel, index) => (
-                <option key={index} value={vessel.id}>{vessel.name}</option>
+                <option key={index} value={vessel.uuid}>{vessel.name}</option>
               ))}
             </select>
           </div>
@@ -380,7 +383,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {transitOptions.map((transit, index) => (
-                <option key={index} value={transit.id}>{transit.transit}</option>
+                <option key={index} value={transit.uuid}>{transit.transit}</option>
               ))}
             </select>
           </div>
@@ -395,7 +398,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {destinationOptions.map((destination, index) => (
-                <option key={index} value={destination.destination}>{destination.destination}</option>
+                <option key={index} value={destination.uuid}>{destination.destination}</option>
               ))}
             </select>
           </div>
@@ -412,7 +415,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {countryOptions.map((country, index) => (
-                <option key={index} value={country.id}>{country.name}</option>
+                <option key={index} value={country.uuid}>{country.name}</option>
               ))}
             </select>
           </div>
@@ -427,7 +430,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {portOptions.map((port, index) => (
-                <option key={index} value={port.id}>{port.origin}</option>
+                <option key={index} value={port.uuid}>{port.origin}</option>
               ))}
             </select>
           </div>
@@ -442,7 +445,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {originDestinationOptions.map((destination, index) => (
-                <option key={index} value={destination.id}>{destination.destination}</option>
+                <option key={index} value={destination.uuid}>{destination.destination}</option>
               ))}
             </select>
           </div>
@@ -460,7 +463,7 @@ const ShippingTable = () => {
               <th style={{ padding: '10px', textAlign: 'left' }}>FCL Closing</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Origin</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>ETD</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>ETA Dubai</th>
+              <th style={{ padding: '10px', textAlign: 'left' }}>ETA{getSelectedTransitName()}</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>ETA {selectedOriginDestination || selectedDestination}</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Transit Time</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Action</th>
