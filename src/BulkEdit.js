@@ -28,8 +28,8 @@ const ShippingEdit = () => {
   // Field labels mapping
   const fieldLabels = {
     voyage_no: 'Voyage Number',
-    port_uuid: 'Port',
-    vessel_uuid: 'Vessel',
+    port_uuid: 'Transit Hub',
+    vessel_uuid: 'Vessel Name',
     cfs_closing: 'CFS Closing Date',
     fcl_closing: 'FCL Closing Date',
     eta_transit: 'ETA at Transit',
@@ -142,14 +142,27 @@ const ShippingEdit = () => {
     setFormData((prevData) => ({ ...prevData, [name]: value }));
   };
 
+  // Modified to only format date (no time)
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
     try {
       const date = new Date(dateString);
-      return date.toISOString().slice(0, 16);
+      return date.toISOString().split('T')[0]; // Get only YYYY-MM-DD part
     } catch (e) {
       console.error('Invalid date format:', e);
       return '';
+    }
+  };
+
+  // Prepare date for sending to backend - maintain original format
+  const formatDateForSubmission = (dateString) => {
+    if (!dateString) return '';
+    try {
+      // Ensure we have the date in YYYY-MM-DD format and add T00:00:00 to maintain API format
+      return `${dateString}T00:00:00`;
+    } catch (e) {
+      console.error('Error formatting date for submission:', e);
+      return dateString;
     }
   };
 
@@ -160,6 +173,14 @@ const ShippingEdit = () => {
 
       // Prepare data for backend - map port_uuid and vessel_uuid to port_id and vessel_id
       const dataToSend = { ...formData };
+
+      // Format date fields for API submission
+      const dateFields = ['cfs_closing', 'fcl_closing', 'eta_transit', 'etd', 'dst_eta'];
+      dateFields.forEach(field => {
+        if (dataToSend[field]) {
+          dataToSend[field] = formatDateForSubmission(dataToSend[field]);
+        }
+      });
 
       // Map port_uuid to port_id
       if (dataToSend.port_uuid) {
@@ -256,7 +277,7 @@ const ShippingEdit = () => {
     } else if (['cfs_closing', 'fcl_closing', 'etd', 'eta_transit', 'dst_eta'].includes(name)) {
       return (
         <input
-          type="datetime-local"
+          type="date"
           name={name}
           value={formData[name] || ''}
           onChange={handleInputChange}
