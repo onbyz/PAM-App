@@ -342,6 +342,7 @@ const ShippingTable = () => {
           {' '}List by Origin Port
         </label>
         <Link to={"/add"} style={{marginLeft:'20px'}} ><button>Add +</button></Link>
+        <Link to={"/bulk"} style={{marginLeft:'20px'}} ><button>Bulk add</button></Link>
       </div>
 
       {/* Filter dropdowns */}
