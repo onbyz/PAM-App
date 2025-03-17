@@ -202,7 +202,7 @@ const ShippingTable = () => {
 
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitHub=${selectedPort}&destination=${selectedOriginDestination}`, {
+        `${process.env.REACT_APP_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`, {
         headers: {
           "ngrok-skip-browser-warning": "true"
         }
@@ -253,8 +253,11 @@ const ShippingTable = () => {
   // Handle port selection for origin port filter
   const handlePortChange = (e) => {
     const port = e.target.value;
+
+    const selectedPort = portOptions.find(option => option.uuid === port);
+
     setSelectedPort(port);
-    fetchOriginDestinations(port);
+    fetchOriginDestinations(selectedPort?.transit);
   };
 
   // Handle destination selection for origin port filter
@@ -432,7 +435,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {portOptions.map((port, index) => (
-                <option key={index} value={port.transit}>{port.name}</option>
+                <option key={index} value={port.uuid}>{port.name}</option>
               ))}
             </select>
           </div>
