@@ -334,7 +334,7 @@ const ShippingScheduleForm = () => {
           <option value="">Select Port</option>
           {portOptions.map((port) => (
             <option key={port.uuid} value={port.uuid}>
-              {port.origin}
+              {isEditMode ? port.transit : port.name}
             </option>
           ))}
         </select>

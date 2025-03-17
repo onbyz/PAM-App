@@ -72,7 +72,7 @@ const ShippingTable = () => {
     if (!country) return;
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/schedule/ports?countryID=${country}`, {
+      const response = await fetch(`${process.env.REACT_APP_BASE_URL}/api/admin/port?countryID=${country}`, {
         headers: {
           "ngrok-skip-browser-warning": "true"
         }
@@ -385,7 +385,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {transitOptions.map((transit, index) => (
-                <option key={index} value={transit.uuid}>{transit.transit}</option>
+                <option key={index} value={transit.transit}>{transit.transit}</option>
               ))}
             </select>
           </div>
@@ -432,7 +432,7 @@ const ShippingTable = () => {
             >
               <option value="">Select...</option>
               {portOptions.map((port, index) => (
-                <option key={index} value={port.uuid}>{port.origin}</option>
+                <option key={index} value={port.transit}>{port.name}</option>
               ))}
             </select>
           </div>
