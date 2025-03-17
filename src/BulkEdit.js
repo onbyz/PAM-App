@@ -28,16 +28,16 @@ const ShippingScheduleForm = () => {
 
   // Field labels mapping
   const fieldLabels = {
-    voyage_no: 'Voyage Number',
-    port_uuid: 'Transit Hub',
-    vessel_uuid: 'Vessel Name',
-    cfs_closing: 'CFS Closing Date',
-    fcl_closing: 'FCL Closing Date',
+    voyage_no: 'Voyage No',
+    port_uuid: 'Choose Name of Origin Port',
+    vessel_uuid: 'Choose Vessel',
+    cfs_closing: 'CFS Closing',
+    fcl_closing: 'FCL Closing',
     eta_transit: 'ETA at Transit',
-    etd: 'ETD',
-    destination: 'Destination',
+    etd: 'Enter ETD  ',
+    destination: 'Choose Name of Destination ',
     dst_eta: 'Destination ETA',
-    transit_time: 'Transit Time (Days)'
+    transit_time: 'Transit Time'
   };
 
   // List of fields to show in the form
@@ -166,9 +166,7 @@ const ShippingScheduleForm = () => {
     if (!vesselId) return;
     
     try {
-      const portsUrl = isEditMode
-      ? `${process.env.REACT_APP_BASE_URL}/api/admin/schedule/ports?vesselID=${vesselId}`
-      : `${process.env.REACT_APP_BASE_URL}/api/admin/port`;
+      const portsUrl =  `${process.env.REACT_APP_BASE_URL}/api/admin/port`;
 
       const portsResponse = await fetch(portsUrl, {
         headers: { "ngrok-skip-browser-warning": "true" }
@@ -318,7 +316,7 @@ const ShippingScheduleForm = () => {
 
   const renderFormField = (name) => {
     // Determine if field should be disabled in edit mode
-    const isDisabledInEditMode = isEditMode && ['voyage_no', 'vessel_uuid',"port_uuid","destination"].includes(name);
+    const isDisabledInEditMode = isEditMode && ['voyage_no'].includes(name);
     
     // Check if the field should be a dropdown
     if (name === 'port_uuid') {
@@ -334,7 +332,7 @@ const ShippingScheduleForm = () => {
           <option value="">Select Port</option>
           {portOptions.map((port) => (
             <option key={port.uuid} value={port.uuid}>
-              {isEditMode ? port.transit : port.name}
+              {port.name}
             </option>
           ))}
         </select>
