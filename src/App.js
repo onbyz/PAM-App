@@ -307,18 +307,6 @@ const ShippingTable = () => {
   }, [filterBy, selectedCountry, selectedPort, selectedOriginDestination]);
 
 
-  const getSelectedTransitName = () => {
-    if (filterBy === 'vessel' && selectedTransit) {
-      const transit = transitOptions.find(t => t.uuid === selectedTransit);
-      return transit ? transit.transit : 'Transit';
-    } else if (filterBy === 'origin' && selectedPort) {
-      const port = portOptions.find(p => p.uuid === selectedPort);
-      return port ? port.origin : 'Transit';
-    }
-    return 'Transit';
-  };
-
-
   return (
     <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       {/* Filter options */}
@@ -469,8 +457,8 @@ const ShippingTable = () => {
               <th style={{ padding: '10px', textAlign: 'left' }}>FCL Closing</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Origin</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>ETD</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>ETA{getSelectedTransitName()}</th>
-              <th style={{ padding: '10px', textAlign: 'left' }}>ETA {selectedOriginDestination || selectedDestination}</th>
+              <th style={{ padding: '10px', textAlign: 'left' }}>ETA {selectedTransit || portOptions.find(val => val.uuid === selectedPort)?.transit }</th>
+              <th style={{ padding: '10px', textAlign: 'left' }}>ETA {selectedOriginDestination || selectedDestination }</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Transit Time</th>
               <th style={{ padding: '10px', textAlign: 'left' }}>Action</th>
             </tr>
