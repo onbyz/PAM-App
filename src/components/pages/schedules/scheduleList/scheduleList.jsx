@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import Sidebar from "@components/layouts/sidebar/sidebar";
 import Header from '@components/layouts/header/header';
-import { FaXmark, FaEllipsis } from "react-icons/fa6";
+import { FaXmark, FaEllipsis, FaPlus } from "react-icons/fa6";
 
 export default function ScheduleList() {
 
@@ -61,6 +61,14 @@ export default function ScheduleList() {
         setByVessel(false);
     };
 
+    const scheduleList = [
+        {id: "1", vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing: "04-11-2024", fcl_closing: "05-11-2024", origin: "Chittagong via Dubai", etd: "01-02-2025", eta_dubai: "21-02-2025", eta_europe: "25-02-2025", transit_time: "1" },
+        {id: "1", vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing: "05-11-2024", fcl_closing: "06-11-2024", origin: "Dalian via Dubai", etd: "02-02-2025", eta_dubai: "22-02-2025", eta_europe: "26-02-2025", transit_time: "2" },
+        {id: "1", vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing: "06-11-2024", fcl_closing: "07-11-2024", origin: "Hong Kong via Dubai", etd: "03-02-2025", eta_dubai: "23-02-2025", eta_europe: "27-02-2025", transit_time: "3" },
+        {id: "1", vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing: "07-11-2024", fcl_closing: "08-11-2024", origin: "India Chennai via Dubai", etd: "04-02-2025", eta_dubai: "24-02-2025", eta_europe: "28-02-2025", transit_time: "4" },
+        {id: "1", vessel_name: "COSCO SHIPPING PLANET", voyage_no: "067W", cfs_closing: "08-11-2024", fcl_closing: "09-11-2024", origin: "Chittagong via Dubai", etd: "05-02-2025", eta_dubai: "25-02-2025", eta_europe: "01-03-2025", transit_time: "5" },
+    ]
+
     return (
         <div>
             <div className='flex'>
@@ -71,14 +79,22 @@ export default function ScheduleList() {
                     <Header />
 
                     <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
-                        <h3 className='text-[26px] leading-[56px] font-medium'>Schedule</h3>
-                                
-                        <a href="/">
-                            <button className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white font-medium text-[14px] flex justify-center items-center gap-2 '> 
-                                <FaXmark className='mt-[2px]'/>
-                                Close
-                            </button>
-                        </a>
+                        <h4 className='leading-[56px]'>Schedule</h4>
+                        
+                        <div className='flex gap-8'>
+                            <a href="/">
+                                <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
+                                    Bulk Edit
+                                </button>
+                            </a>
+
+                            <a href="/create-schedule">
+                                <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
+                                    <FaPlus className='mt-[2px]'/>
+                                    Create Schedule
+                                </button>
+                            </a>
+                        </div>
                     </div>
 
                     <div className='flex flex-col md:flex-row gap-6 md:gap-16'>
@@ -213,7 +229,7 @@ export default function ScheduleList() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {schedules?.map((schedule, index) => (
+                                        {scheduleList?.map((schedule, index) => (
                                             <tr key={schedule.id} className="border-t text-sm">
                                                 <td className="py-3 px-4">{index + 1}</td>
                                                 <td className="py-3 px-4">{schedule.vessel_name}</td>
@@ -319,7 +335,7 @@ export default function ScheduleList() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {schedules?.map((schedule, index) => (
+                                        {scheduleList?.map((schedule, index) => (
                                             <tr key={schedule.id} className="border-t text-sm">
                                                 <td className="py-3 px-4">{index + 1}</td>
                                                 <td className="py-3 px-4">{schedule.vessel_name}</td>

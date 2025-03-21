@@ -6,6 +6,9 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import Sidebar from "@components/layouts/sidebar/sidebar";
 import Header from '@components/layouts/header/header';
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function CreateSchedule() {
 
@@ -42,37 +45,70 @@ export default function CreateSchedule() {
 
   const countries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'India'];
 
-  // form submition handling
-  const [formData, setFormData] = useState({
-    port_id : "",
-    etd: "",
-    vessel_id : "",
-    voyage_no : "",
-    cfs_closing : "",
-    fcl_closing : "",
-    eta_transit : "",
-    destination : "",
-    dst_eta : "",
-    transit_time : "",
+  const handleCancel = () => {
+    setFormData({
+      port_id: "",
+      etd: "",
+      vessel_id: "",
+      voyage_no: "",
+      cfs_closing: "",
+      fcl_closing: "",
+      eta_transit: "",
+      destination: "",
+      dst_eta: "",
+      transit_time: "",
+    })
+  };
+
+  const formSchema = z.object({
+    country: z.string().optional(),
+    port_id: z.string().nonempty("Port is required"),
+    etd: z.string().nonempty("ETD is required"),
+    vessel_id: z.string().nonempty("Vessel is required"),
+    voyage_no: z.string().nonempty("Voyage No is required"),
+    cfs_closing: z.string().nonempty("CFS Closing is required"),
+    fcl_closing: z.string().nonempty("FCL Closing is required"),
+    eta_transit: z.string().nonempty("ETA Transit is required"),
+    destination: z.string().nonempty("Destination is required"),
+    dst_eta: z.string().nonempty("Destination ETA is required"),
+    transit_time: z.string().nonempty("Transit Time is required"),
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const form = useForm({
+    resolver: zodResolver(formSchema),
+    mode: "onChange",
+    reValidateMode: "onChange",
+    defaultValues: {
+      port_id : "",
+      etd: "",
+      vessel_id : "",
+      voyage_no : "",
+      cfs_closing : "",
+      fcl_closing : "",
+      eta_transit : "",
+      destination : "",
+      dst_eta : "",
+      transit_time : "",
+    },
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    console.log("Submitting Data:", formData);
+  const onSubmit = async (data) => {
+    console.log("Submitting Data:", data);
 
     try {
-      const response = await axios.post("/api/admin/schedule", formData)
+      const response = await axios.post("/api/admin/schedule", data);
       console.log("Form data : ", response.data);
+      alert("Schedule created successfully!");
+      form.reset();
     } catch (error) {
-      console.log("Error Creating Schedule : ", error)
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.data);
+      } else {
+        alert("Error occurred while creating the schedule.");
+      }
+      console.error("Error Creating Schedule : ", error);
     }
   };
-
 
   return (
     <div>
@@ -85,10 +121,10 @@ export default function CreateSchedule() {
           <Header />
 
           <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
-            <h3 className='text-[26px] leading-[56px] font-medium'>Create Schedule</h3>
+            <h4 className='leading-[56px]'>Create Schedule</h4>
             
             <a href="/">
-              <button className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white font-medium text-[14px] flex justify-center items-center gap-2 '> 
+              <button className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                 <FaXmark className='mt-[2px]'/>
                 Close
               </button>
@@ -96,243 +132,229 @@ export default function CreateSchedule() {
           </div>
 
           <div className='mt-4'>
-            <p className='text-[16px] text-[#16A34A] border-b-[1px] font-medium border-[#0000001A] pb-4'>
+            <h6 className='text-[#16A34A] border-b-[1px] border-[#0000001A] pb-4'>
               Origin Port
-            </p>
+            </h6>
           </div>
 
           <div>
             <Form {...form}>
-              <form className='my-8' onSubmit={handleSubmit}>
+              <form className='my-8' onSubmit={form.handleSubmit(onSubmit)}>
                 <div className='flex flex-col md:flex-row gap-12'>
                   <div className='flex flex-col'>
-                    <label htmlFor="country" className="text-[14px] mb-2">
-                      Choose Country
-                    </label>
-
-                    <select
-                      name="country"
-                      className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                    >
-                      <option value="" className='text-[16px]'>Select a country</option>
-                      {countries.map((country, index) => (
-                        <option key={index} value={country}>{country}</option>
-                      ))}
-                    </select>
+                    <FormField name="country" control={form.control} render={({ field }) => (
+                      <FormItem>
+                          <FormLabel className="text-[14px]">Choose Country</FormLabel>
+                          <FormControl>
+                              <Select onValueChange={field.onChange}>
+                                  <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                                      <SelectValue/>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {countries.map((country) => (
+                                          <SelectItem key={country} value={country} className="text-[16px]">
+                                              {country}
+                                          </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                              </Select>
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )} />
                   </div>
 
 
                   <div className='flex flex-col'>
-                    <label className="text-[14px] mb-2">
-                      Choose Name of Origin Port
-                    </label>
-
-                    <select
-                      name='port_id'
-                      className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                      required
-                      value={formData.port_id}
-                      onChange={handleChange}
-                    >
-                      <option value="" className='text-[16px]'>Select Port</option>
-                      {ports?.map((item) => (
-                        <option key={item.uuid} value={item.uuid} className='text-[16px]'>{item.origin}</option>
-                      ))}
-
-                    </select>
+                    <FormField name="port_id" control={form.control} render={({ field }) => (
+                      <FormItem>
+                          <FormLabel className="text-[14px]">Choose Name of Origin Port</FormLabel>
+                          <FormControl>
+                              <Select onValueChange={field.onChange}>
+                                  <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                                      <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {ports.map((item) => (
+                                          <SelectItem key={item.uuid} value={item.uuid} className="text-[16px]">
+                                              {item.origin}
+                                          </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                              </Select>
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )} />
                   </div>
 
                   <div className="flex flex-col">
-                    <label htmlFor="etd" className="text-[14px] mb-2">
-                      Enter ETD
-                    </label>
-
-                    <div className="relative w-[300px]">
-                      <input
-                        type="date"
-                        name="etd"
-                        className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-10 focus:outline-none appearance-none bg-white"
-                        required
-                        value={formData.etd}
-                        onChange={handleChange}
-                      />  
-                    </div>
+                    <FormField control={form.control} name="etd" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[14px]">Enter ETD</FormLabel>
+                          <FormControl>
+                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )}/>
                   </div>
                 </div>
 
                 <div className='my-8'>
-                  <p className='text-[16px] text-[#16A34A] border-b-[1px] font-medium border-[#0000001A] pb-4'>
+                  <h6 className='text-[#16A34A] border-b-[1px] border-[#0000001A] pb-4'>
                     Vessel, Voyage, CFS & FCL
-                  </p>
+                  </h6>
                 </div>
 
                 <div className='flex flex-col md:flex-row gap-8'>
                   <div className='flex flex-col'>
-                    <label className="text-[14px] mb-2">
-                      Choose Vessel
-                    </label>
-
-                    <select
-                      className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                      name="vessel_id"
-                      value={formData.vessel_id}
-                      onChange={handleChange}
-                      required
-                    >
-                      <option value="" className='text-[16px]'>Select vessel</option>
-                      {vessels?.map((item) => (
-                        <option key={item.uuid} value={item.uuid} className='text-[16px]'>{item.name}</option>
-                      ))}
-
-                    </select>
+                    <FormField name="vessel_id" control={form.control} render={({ field }) => (
+                      <FormItem>
+                          <FormLabel className="text-[14px]">Choose Vessel</FormLabel>
+                          <FormControl>
+                              <Select onValueChange={field.onChange}>
+                                  <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                                      <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {vessels.map((item) => (
+                                          <SelectItem key={item.uuid} value={item.uuid} className="text-[16px]">
+                                              {item.name}
+                                          </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                              </Select>
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )} />
                   </div>
 
                   <div className='flex flex-col'>
-                    <label htmlFor="country" className="text-[14px] mb-2">
-                      Voyage No
-                    </label>
+                    <FormField control={form.control} name="voyage_no" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[14px]">Voyage No</FormLabel>
+                          <FormControl>
+                              <Input className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )}/>
 
-                    <input 
-                      className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                      required
-                      name="voyage_no"
-                      value={formData.voyage_no}
-                      onChange={handleChange}
-                    >
-                    </input>
-                    
                   </div>
                 </div>
 
                 <div className='flex flex-col md:flex-row gap-8 my-8'>
                   <div className="flex flex-col">
-                    <label htmlFor="etd" className="text-[14px] mb-2">
-                      CFS Closing
-                    </label>
-
-                    <div className="relative w-[300px]">
-                      <input
-                        type="date"
-                        className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-10 focus:outline-none appearance-none bg-white"
-                        required
-                        name="cfs_closing"
-                        value={formData.cfs_closing}
-                        onChange={handleChange}
-                      />  
-                    </div>
+                    <FormField control={form.control} name="cfs_closing" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[14px]">CFS Closing</FormLabel>
+                          <FormControl>
+                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )}/>
                   </div>
 
                   <div className="flex flex-col">
-                    <label htmlFor="etd" className="text-[14px] mb-2">
-                      FCL Closing
-                    </label>
+                    <FormField control={form.control} name="fcl_closing" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[14px]">FCL Closing</FormLabel>
+                          <FormControl>
+                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )}/>
 
-                    <div className="relative w-[300px]">
-                      <input
-                        type="date"
-                        className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-10 focus:outline-none appearance-none bg-white"
-                        name="fcl_closing"
-                        required
-                        value={formData.fcl_closing}
-                        onChange={handleChange}
-                      />  
-                    </div>
                   </div>
                 </div>
 
                 <div className='my-8'>
-                  <p className='text-[16px] text-[#16A34A] border-b-[1px] font-medium border-[#0000001A] pb-4'>
+                  <h6 className='text-[#16A34A] border-b-[1px] border-[#0000001A] pb-4'>
                     Transit Hub
-                  </p>
+                  </h6>
                 </div>
 
                 <div className="flex flex-col">
-                    <label htmlFor="etd" className="text-[14px] mb-2">
-                      Enter ETA Dubai
-                    </label>
-
-                    <div className="relative w-[300px]">
-                      <input
-                        type="date"
-                        className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-10 focus:outline-none appearance-none bg-white"
-                        required
-                        name="eta_transit"
-                        value={formData.eta_transit}
-                        onChange={handleChange}
-                      />  
-                    </div>
-                  </div>
+                  <FormField control={form.control} name="eta_transit" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[14px]">Enter ETA Dubai</FormLabel>
+                        <FormControl>
+                            <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                        </FormControl>
+                        <FormMessage className='text-[14px]'/>
+                    </FormItem>
+                  )}/>
+                </div>
 
                 <div className='my-8'>
-                  <p className='text-[16px] text-[#16A34A] border-b-[1px] font-medium border-[#0000001A] pb-4'>
+                  <h6 className='text-[#16A34A] border-b-[1px] border-[#0000001A] pb-4'>
                     Destination
-                  </p>
+                  </h6>
                 </div>
 
                 <div className='flex flex-col md:flex-row gap-12'>
                   <div className='flex flex-col'>
-                    <label htmlFor="country" className="text-[14px] mb-2">
-                      Choose Name of Destination
-                    </label>
-
-                    <select
-                      className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                      required
-                      name="destination"
-                      value={formData.destination}
-                      onChange={handleChange}
-
-                    >
-                      <option value="" className='text-[16px]'>Select Destination</option>
-                      {destinations.map((item) => (
-                        <option key={item.destination} value={item.destination} className='text-[16px]'>{item.destination}</option>
-                      ))}
-                        
-                      
-                    </select>
+                    <FormField name="destination" control={form.control} render={({ field }) => (
+                      <FormItem>
+                          <FormLabel className="text-[14px]">Choose Destination</FormLabel>
+                          <FormControl>
+                              <Select onValueChange={field.onChange}>
+                                  <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                                      <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                      {destinations.map((item) => (
+                                          <SelectItem key={item.destination} value={item.destination} className="text-[16px]">
+                                              {item.destination}
+                                          </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                              </Select>
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )} />
                   </div>
 
 
                   <div className="flex flex-col">
-                    <label htmlFor="etd" className="text-[14px] mb-2">
-                      Enter ETA
-                    </label>
-
-                    <div className="relative w-[300px]">
-                      <input
-                        type="date"
-                        className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-10 focus:outline-none appearance-none bg-white"
-                        name='dst_eta'
-                        required
-                        value={formData.dst_eta}
-                        onChange={handleChange}
-                      />  
-                    </div>
+                    <FormField control={form.control} name="dst_eta" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[14px]">Enter ETA</FormLabel>
+                          <FormControl>
+                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )}/>
                   </div>
 
                   <div className='flex flex-col'>
-                    <label htmlFor="country" className="text-[14px] mb-2">
-                      Transit Time
-                    </label>
-
-                    <input 
-                      className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                      name="transit_time"
-                      required
-                      value={formData.transit_time}
-                      onChange={handleChange}
-                    >
-                    </input>
-                    
-                  </div>
+                    <FormField control={form.control} name="transit_time" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[14px]">Transit Time</FormLabel>
+                          <FormControl>
+                              <Input className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                          </FormControl>
+                          <FormMessage className='text-[14px]'/>
+                      </FormItem>
+                    )}/>
+                  </div> 
                 </div>
                 
                 <div className='flex gap-6 mt-8'>
-                  <button type='submit' className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white font-medium text-[14px] flex justify-center items-center gap-2 '> 
+                  <button type='submit' className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                     Save
                   </button>
 
-                  <button className='w-[80px] h-[40px] font-medium text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white'> 
+                  <button 
+                    className='w-[80px] h-[40px] text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white'
+                    onClick={handleCancel}
+                  > 
                     Cancel
                   </button>
                 </div>

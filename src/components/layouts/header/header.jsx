@@ -7,7 +7,7 @@ import { FaChevronDown } from "react-icons/fa6";
 export default function Header() {
     return (
         <div className='flex justify-between'>
-            <h3 className='text-[28px] leading-[150%] font-medium'>Welcome, Joel</h3>
+            <h3 className='leading-[150%]'>Welcome, Joel</h3>
 
             <div className='flex gap-6'>
                 <img src={SearchIcon} alt="Icon" className='w-[24px] h-[24px]' />
@@ -16,7 +16,7 @@ export default function Header() {
                 <div className='flex gap-2'>
                     <img src={Avatar} alt="Icon" className='w-[24px] h-[24px]' />
                 
-                    <p className='text-[16px] leading-[24px] font-normal flex gap-3'>
+                    <p className='text-[16px] leading-[24px] flex gap-3'>
                         Joel Sebastian
                         <FaChevronDown className='w-[12px] h-[24px]' />
                     </p>

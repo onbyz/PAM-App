@@ -31,9 +31,9 @@ export default function Sidebar() {
                         {sidebarTitles.map((item, index) => (
                             <div className='flex gap-2 mt-4' key={index}>
                                 <img src={item.icon} alt='icon' className='w-[24px] h-[24px] mt-[3px]' />
-                                <h6 className={`text-[16px] leading-[24px] font-normal ${index === 0 ? 'text-[#16A34A]' : 'text-black'}`}>
+                                <h5 className={`${index === 0 ? 'text-[#16A34A]' : 'text-black'}`}>
                                     {item.title}
-                                </h6>
+                                </h5>
                             </div>
                         ))}
                     </div>
@@ -42,12 +42,12 @@ export default function Sidebar() {
                 <div className='pb-24'>
                     <div className='flex gap-2 mt-4'>
                         <img src={SettingsIcon} alt='Settings' className='w-[24px] h-[24px]' />
-                        <h6 className='text-[16px] leading-[24px] font-normal'>Settings</h6>
+                        <h5>Settings</h5>
                     </div>
         
                     <div className='flex gap-2 mt-4'>
                         <img src={LogoutIcon} alt='Logout' className='w-[24px] h-[24px]' />
-                        <h6 className='text-[16px] leading-[24px] font-normal text-[#FF3B30]'>Logout</h6>
+                        <h5 className='text-[#FF3B30]'>Logout</h5>
                     </div>
                 </div>
             </div>

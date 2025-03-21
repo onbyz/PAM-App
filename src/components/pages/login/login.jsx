@@ -8,11 +8,11 @@ export default function Login() {
       <div className="flex flex-col justify-center items-center w-1/2 p-8">
         <img src={Logo} alt="Pam Cargo Logo" className="w-40 mb-8" />
 
-        <h1 className="text-3xl font-semibold mb-6">Hello, Welcome</h1>
+        <h4 className="mb-6">Hello, Welcome</h4>
 
         <form className="w-full max-w-md">
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium mb-2" >
+            <label htmlFor="email" className="block text-sm mb-2" >
               Email
             </label>
             <input
@@ -25,7 +25,7 @@ export default function Login() {
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <label htmlFor="password" className="block text-sm mb-2">
               Password
             </label>
             <div className="relative">
