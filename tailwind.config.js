@@ -17,6 +17,7 @@ export default {
   			sm: '320px',
   			md: '768px',
   			lg: '1025px',
+			LapL: '1440px',
   			xl: '1700px'
   		},
   		borderRadius: {

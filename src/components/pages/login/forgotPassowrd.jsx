@@ -6,11 +6,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import ScheduleList from '../schedules/scheduleList/scheduleList';
 
-export default function Login() {
-
-  const [ showPassword, setShowPassword ] = useState(false);
+export default function forgotPassowrd() {
 
   const formSchema = z.object({
     email: z.string().email("Invalid email address").nonempty("Email is required"),
@@ -62,49 +60,23 @@ export default function Login() {
               <div className='mb-6'>
                 <FormField control={form.control} name="email" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[16px]">Email</FormLabel>
+                    <FormLabel className="text-[16px]">Enter Email Address</FormLabel>
                       <FormControl>
-                          <Input placeholder="Joelsebastian@pamcargo.com" type="email" className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
+                          <Input placeholder="force@adresseemail.com" type="email" className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
                       </FormControl>
                       <FormMessage className='text-[14px]'/>
                   </FormItem>
                 )}/>
               </div>
-
-              <div className='mb-8'>
-                <FormField control={form.control} name="password" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[16px]">Password</FormLabel>
-                      <FormControl>
-                        <div className='relative'>
-                          <Input placeholder="********************" type={ showPassword ? 'text' : 'password' } className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
-
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword((prev) => !prev)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                          >
-                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-                          </button>
-                        </div>
-                      </FormControl>
-                      <FormMessage className='text-[14px]'/>
-                  </FormItem>
-                )}/>
-              </div>
-        
-              <button
-                type="submit"
-                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
-              >
-                Login →
-              </button>
-
-              <p className="mt-4 text-center">
-                <a href="/forgot-password" className="hover:underline">
-                  Forgot Password?
-                </a>
-              </p>
+              
+              <a href='/resset-password'>
+                <button
+                  type="submit"
+                  className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+                >
+                  Next
+                </button>
+              </a>
             </form>
           </Form>
         </div>

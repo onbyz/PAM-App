@@ -33,6 +33,13 @@ code {
   font-style: normal;
 }
 
+h2 {
+  font-family: 'HelveticaNeueMedium', "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 56px;
+}
+
 h3 {
   font-family: 'HelveticaNeueMedium', "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 500;
@@ -70,6 +77,24 @@ label, button {
   font-family: "Inter", sans-serif !important;
   line-height: 20px;
   font-weight: 500;
+}
+
+
+th {
+  font-family: 'HelveticaNeueMedium', "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 21px;
+  text-align: left;
+  padding: 10px;
+}
+
+td {
+  font-family: 'HelveticaNeueLight', "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 21px;
+  padding: 10px;
 }
 
 
