@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios";
-import Sidebar from "@components/layouts/sidebar/sidebar";
-import Header from '@components/layouts/header/header';
 import { FaXmark, FaEllipsis, FaPlus } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
+import styles from "./scheduleList.module.css";
 
 export default function ScheduleList() {
 
@@ -310,38 +308,37 @@ export default function ScheduleList() {
         }
     }, [filterBy, selectedCountry, selectedPort, selectedOriginDestination]);
 
-
+    const sortedData = [...tableData].sort((a, b) => {
+        const dateA = new Date(a.etd.split('/').reverse().join('-'));
+        const dateB = new Date(b.etd.split('/').reverse().join('-'));
+        return dateA - dateB;
+    });
 
     return (
         <div>
-            <div className='flex'>
-            
-                <Sidebar />
-
-                <div className='w-[90%] md:w-[80%] h-full my-10 mx-6 flex flex-col gap-10'>
-                    <Header />
-
+            <div>
+                <div className='md:mr-[2.5%]'>
                     <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
                         <h4 className='leading-[56px]'>Schedule</h4>
                         
                         <div className='flex flex-col md:flex-row gap-8 mb-8'>
-                            <a href="/">
+                            <Link to="/">
                                 <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                                     Bulk Edit
                                 </button>
-                            </a>
+                            </Link>
 
-                            <a href="/create-schedule">
+                            <Link to="/create-schedule">
                                 <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                                     <FaPlus className='mt-[2px]'/>
                                     Create Schedule
                                 </button>
-                            </a>
+                            </Link>
                         </div>
                     </div>
 
 
-                    <div>
+                    <div className='my-8'>
                         {/* Filter options */}
                         <div className='flex flex-col md:flex-row gap-6 md:gap-16 mb-8'>
                             <label>
@@ -525,7 +522,7 @@ export default function ScheduleList() {
                                 </thead>
                                 <tbody>
                                     {tableData.length > 0 ? (
-                                    tableData.map((row, index) => (
+                                    sortedData.map((row, index) => (
                                         <tr key={index} className='border-[1px] border-[#E6EDFF]'>
                                         <td>{(index + 1)}</td>
                                         <td>{row.vessel_name}</td>
@@ -537,7 +534,7 @@ export default function ScheduleList() {
                                         <td>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
                                         <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
                                         <td>{row.transit_time}</td>
-                                        {/* <td style={{ padding: '10px' }} ><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
+                                        {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
                                         <td className="py-3 px-4 cursor-pointer">
                                             <FaEllipsis className='w-[24px] h-[24px]'/>
                                         </td>
@@ -545,7 +542,7 @@ export default function ScheduleList() {
                                     ))
                                     ) : (
                                     <tr>
-                                        <td colSpan="11" style={{ padding: '2rem', textAlign: 'center' }}>
+                                        <td colSpan="11" className={styles.noDataFound}>
                                             No data available. Please select all filters.
                                         </td>
                                     </tr>

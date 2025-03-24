@@ -6,18 +6,24 @@ import ForgotPassowrd from './components/pages/login/forgotPassowrd.jsx';
 import RessetPassword from './components/pages/login/ressetPassword.jsx';
 import CreateSchedule from '@components/pages/schedules/createSchedule/createSchedule.jsx';
 import ScheduleList from '@components/pages/schedules/scheduleList/scheduleList';
+import Layout from '@components/layouts/Layout.jsx';
 
 export default function App() {
     return (
         <Router>
 			<div>
 				<Routes>
-					<Route path='/' element={<Homepage />} />
-					<Route path ="/login" element={<Login />} />
-					<Route path ="/forgot-password" element={<ForgotPassowrd />} />
-					<Route path ="/resset-password" element={<RessetPassword />} />
-                    <Route path ="/create-schedule" element={<CreateSchedule />} />
-					<Route path ="/schedule-list" element={<ScheduleList />} />
+					{/* Routes without the Layout (no sidebar) */}
+					<Route path="/login" element={<Login />} />
+					<Route path="/" element={<Homepage />} />
+					<Route path="/forgot-password" element={<ForgotPassowrd />} />
+					<Route path="/resset-password" element={<RessetPassword />} />
+
+					{/* Routes with the Layout (with sidebar) */}
+					<Route element={<Layout />}>
+						<Route path="/create-schedule" element={<CreateSchedule />} />
+						<Route path="/schedule-list" element={<ScheduleList />} />
+					</Route>
 				</Routes>
 			</div>
 	    </Router>
