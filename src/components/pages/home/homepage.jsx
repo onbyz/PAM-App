@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom';
 
 export default function Homepage() {
     return (
@@ -7,12 +8,12 @@ export default function Homepage() {
                 <p className='text-[36px] leading-[40px] font-semibold'>Hello World!</p>
                 
                 <div className='flex gap-10 mt-8'>
-                    <a href='/login' className='hover:text-blue-500 hover:underline text-[20px]'>Login</a>
+                    <Link to='/login' className='hover:text-blue-500 hover:underline text-[20px]'>Login</Link>
 
-                    <a href='/create-schedule' className='hover:text-blue-500 hover:underline text-[20px]'>Create Schedule</a>
+                    <Link to='/create-schedule' className='hover:text-blue-500 hover:underline text-[20px]'>Create Schedule</Link>
                 </div>  
 
-                <a href='schedule-list' className='hover:text-blue-500 hover:underline text-[20px] mt-6'>Schedule List</a>
+                <Link to='schedule-list' className='hover:text-blue-500 hover:underline text-[20px] mt-6'>Schedule List</Link>
             </div>
         </div>
     )

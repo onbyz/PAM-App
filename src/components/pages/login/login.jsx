@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
 export default function Login() {
 
@@ -50,9 +51,9 @@ export default function Login() {
     <div className="flex h-full w-[90%] md:w-[70%] my-[25%] md:my-[10%] mx-[5%] md:mx-[15%] bg-[#F1F5F6]">
       {/* Left Section - Form */}
       <div className="w-full md:w-1/2 p-8">
-        <a href='/'>
+        <Link to='/'>
           <img src={Logo} alt="Pam Cargo Logo" className="w-full md:w-40 mb-8" />
-        </a>
+        </Link>
 
         <h2 className="mb-12 md:ml-[10%] xl:ml-[13%]">Hello, Welcome</h2>
 
@@ -101,9 +102,9 @@ export default function Login() {
               </button>
 
               <p className="mt-4 text-center">
-                <a href="/forgot-password" className="hover:underline">
+                <Link to="/forgot-password" className="hover:underline">
                   Forgot Password?
-                </a>
+                </Link>
               </p>
             </form>
           </Form>

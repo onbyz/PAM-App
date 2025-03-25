@@ -6,7 +6,7 @@ import { FaChevronDown } from "react-icons/fa6";
 
 export default function Header() {
     return (
-        <div className='flex justify-between'>
+        <div className='flex justify-between md:mr-[5%]'>
             <h3 className='leading-[150%]'>Welcome, Joel</h3>
 
             <div className='flex gap-6'>

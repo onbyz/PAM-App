@@ -4,11 +4,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import Sidebar from "@components/layouts/sidebar/sidebar";
-import Header from '@components/layouts/header/header';
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Link } from "react-router-dom";
 
 export default function CreateSchedule() {
 
@@ -16,6 +15,11 @@ export default function CreateSchedule() {
   const [vessels, setVessels] = useState([]);
   const [ports, setPorts] = useState([]);
   const [destinations, setDestinations] = useState([]);
+
+  const [etdDate, setEtdDate] = useState('');
+  const [etaDubai, setEtaDubaiDate] = useState('');
+  const [etaDate, setEtaDate] = useState('');
+  const [dayDifference, setDayDifference] = useState(0);
 
   const fetchSchedules = async () => {
     try {
@@ -43,29 +47,28 @@ export default function CreateSchedule() {
     fetchSchedules();
   }, []);
 
-  const countries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'India'];
-
-  const handleCancel = () => {
-    setFormData({
-      port_id: "",
-      etd: "",
-      vessel_id: "",
-      voyage_no: "",
-      cfs_closing: "",
-      fcl_closing: "",
-      eta_transit: "",
-      destination: "",
-      dst_eta: "",
-      transit_time: "",
-    })
+  // Function to calculate day difference
+  const calculateDayDifference = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    return Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)); // Convert ms to days
   };
+  
+  // Update day difference when ETD or ETA changes
+  useEffect(() => {
+    if (etdDate && etaDate) {
+      setDayDifference(calculateDayDifference(etdDate, etaDate));
+    }
+  }, [etdDate, etaDate]);
+
+  const countries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'India'];
 
   const formSchema = z.object({
     country: z.string().optional(),
     port_id: z.string().nonempty("Port is required"),
     etd: z.string().nonempty("ETD is required"),
     vessel_id: z.string().nonempty("Vessel is required"),
-    voyage_no: z.string().nonempty("Voyage No is required"),
+    voyage_no: z.string().nonempty("Voyage No is required").regex(/^[a-zA-Z0-9]+$/, "Voyage No must be alphanumeric (e.g., '037W')"),
     cfs_closing: z.string().nonempty("CFS Closing is required"),
     fcl_closing: z.string().nonempty("FCL Closing is required"),
     eta_transit: z.string().nonempty("ETA Transit is required"),
@@ -88,7 +91,7 @@ export default function CreateSchedule() {
       eta_transit : "",
       destination : "",
       dst_eta : "",
-      transit_time : "",
+      transit_time: calculateDayDifference(etdDate, etaDate) || "",
     },
   });
 
@@ -110,25 +113,35 @@ export default function CreateSchedule() {
     }
   };
 
+  const getNextDay = (date) => {
+    const nextDay = new Date(date);
+    nextDay.setDate(nextDay.getDate() + 1);
+    return nextDay.toISOString().split("T")[0];
+  };
+
+  // const { setValue } = form;
+
+  // useEffect(() => {
+  //   if (etdDate && etaDate) {
+  //     const difference = calculateDayDifference(etdDate, etaDate);
+  //     const formattedDifference = `${difference}Days`; 
+  //     setValue("transit_time", formattedDifference);
+  //   }
+  // }, [etdDate, etaDate, setValue]);
+
   return (
     <div>
-      <div className='flex'>
-        
-        <Sidebar />
-
-        <div className='w-[80%] h-full my-10 mx-6'>
-          
-          <Header />
-
+      <div>
+        <div className='md:mr-[2.5%]'>
           <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
             <h4 className='leading-[56px]'>Create Schedule</h4>
             
-            <a href="/">
+            <Link to="/">
               <button className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                 <FaXmark className='mt-[2px]'/>
                 Close
               </button>
-            </a>
+            </Link>
           </div>
 
           <div className='mt-4'>
@@ -193,7 +206,16 @@ export default function CreateSchedule() {
                       <FormItem>
                         <FormLabel className="text-[14px]">Enter ETD</FormLabel>
                           <FormControl>
-                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                              <Input 
+                                type="date" 
+                                className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" 
+                                min={new Date().toISOString().split('T')[0]}
+                                {...field} 
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  setEtdDate(e.target.value);
+                                }}
+                              />
                           </FormControl>
                           <FormMessage className='text-[14px]'/>
                       </FormItem>
@@ -251,7 +273,12 @@ export default function CreateSchedule() {
                       <FormItem>
                         <FormLabel className="text-[14px]">CFS Closing</FormLabel>
                           <FormControl>
-                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                              <Input 
+                                type="date" 
+                                className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" 
+                                min={new Date().toISOString().split('T')[0]}
+                                {...field} 
+                              />
                           </FormControl>
                           <FormMessage className='text-[14px]'/>
                       </FormItem>
@@ -263,7 +290,12 @@ export default function CreateSchedule() {
                       <FormItem>
                         <FormLabel className="text-[14px]">FCL Closing</FormLabel>
                           <FormControl>
-                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                              <Input 
+                                type="date" 
+                                className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" 
+                                min={new Date().toISOString().split('T')[0]}
+                                {...field} 
+                              />
                           </FormControl>
                           <FormMessage className='text-[14px]'/>
                       </FormItem>
@@ -283,7 +315,16 @@ export default function CreateSchedule() {
                     <FormItem>
                       <FormLabel className="text-[14px]">Enter ETA Dubai</FormLabel>
                         <FormControl>
-                            <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                            <Input 
+                              type="date" 
+                              className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" 
+                              min={etdDate ? getNextDay(etdDate) : new Date().toISOString().split("T")[0]}
+                              {...field} 
+                              onChange={(e) => {
+                                field.onChange(e);
+                                setEtaDubaiDate(e.target.value);
+                              }}
+                            />
                         </FormControl>
                         <FormMessage className='text-[14px]'/>
                     </FormItem>
@@ -326,7 +367,16 @@ export default function CreateSchedule() {
                       <FormItem>
                         <FormLabel className="text-[14px]">Enter ETA</FormLabel>
                           <FormControl>
-                              <Input type="date" className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                              <Input 
+                                type="date" 
+                                className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" 
+                                min={etaDubai ? getNextDay(etaDubai) : new Date().toISOString().split('T')[0]}
+                                {...field} 
+                                onChange={(e) => {
+                                  field.onChange(e);
+                                  setEtaDate(e.target.value);
+                                }}
+                              />
                           </FormControl>
                           <FormMessage className='text-[14px]'/>
                       </FormItem>
@@ -338,7 +388,10 @@ export default function CreateSchedule() {
                       <FormItem>
                         <FormLabel className="text-[14px]">Transit Time</FormLabel>
                           <FormControl>
-                              <Input className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
+                              <Input 
+                                className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" 
+                                {...field} 
+                              />
                           </FormControl>
                           <FormMessage className='text-[14px]'/>
                       </FormItem>
@@ -350,13 +403,14 @@ export default function CreateSchedule() {
                   <button type='submit' className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                     Save
                   </button>
-
-                  <button 
-                    className='w-[80px] h-[40px] text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white'
-                    onClick={handleCancel}
-                  > 
-                    Cancel
-                  </button>
+                  
+                  <Link to="/">
+                    <button 
+                      className='w-[80px] h-[40px] text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white'
+                    > 
+                      Cancel
+                    </button>
+                  </Link>
                 </div>
               </form>
             </Form>

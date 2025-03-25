@@ -7,6 +7,7 @@ import UserIcon from "@assets/icons/user-octagon.svg";
 import SettingsIcon from "@assets/icons/setting.svg";
 import LogoutIcon from "@assets/icons/logout.svg";
 import { FaBars } from "react-icons/fa6";
+import { Link } from 'react-router-dom';
 
 export default function Sidebar() {
 
@@ -21,9 +22,9 @@ export default function Sidebar() {
         <div>
             <div className='w-[270px] h-[1100px] bg-[#FCFCFC] px-6 flex flex-col justify-between'>
                 <div>
-                    <a href="/">
-                        <img src={Logo} alt='Logo' className='h-[65px] w-[170px]' />
-                    </a>
+                    <Link to="/">
+                        <img src={Logo} alt='Logo' className='h-[65px] w-[170px] mt-10' />
+                    </Link>
 
                     {/* <FaBars /> */}
         

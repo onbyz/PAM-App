@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import ScheduleList from '../schedules/scheduleList/scheduleList';
+import { Link } from "react-router-dom";
 
 export default function forgotPassowrd() {
 
@@ -48,9 +49,9 @@ export default function forgotPassowrd() {
     <div className="flex h-full w-[90%] md:w-[70%] my-[25%] md:my-[10%] mx-[5%] md:mx-[15%] bg-[#F1F5F6]">
       {/* Left Section - Form */}
       <div className="w-full md:w-1/2 p-8">
-        <a href='/'>
+        <Link to='/'>
           <img src={Logo} alt="Pam Cargo Logo" className="w-full md:w-40 mb-8" />
-        </a>
+        </Link>
 
         <h2 className="mb-12 md:ml-[10%] xl:ml-[13%]">Hello, Welcome</h2>
 
@@ -69,14 +70,14 @@ export default function forgotPassowrd() {
                 )}/>
               </div>
               
-              <a href='/resset-password'>
+              <Link to='/resset-password'>
                 <button
                   type="submit"
                   className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
                 >
                   Next
                 </button>
-              </a>
+              </Link>
             </form>
           </Form>
         </div>
