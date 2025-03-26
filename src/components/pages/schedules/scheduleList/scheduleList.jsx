@@ -42,7 +42,7 @@ export default function ScheduleList() {
     // Fetch vessel names
     const fetchVesselNames = async () => {
         try {
-        const response = await fetch('/api/admin/vessel', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -57,7 +57,7 @@ export default function ScheduleList() {
     // Fetch countries for origin port filter
     const fetchCountries = async () => {
         try {
-        const response = await fetch('/api/admin/location/countries', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/location/countries`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -74,7 +74,7 @@ export default function ScheduleList() {
         if (!country) return;
 
         try {
-        const response = await fetch(`/api/admin/port?countryID=${country}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port?countryID=${country}`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -98,7 +98,7 @@ export default function ScheduleList() {
         if (!port) return;
 
         try {
-        const response = await fetch(`/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -118,7 +118,7 @@ export default function ScheduleList() {
         if (!vessel) return;
 
         try {
-        const response = await fetch(`/api/admin/schedule/voyages/${vessel}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -142,7 +142,7 @@ export default function ScheduleList() {
         if (!vessel || !voyage) return;
 
         try {
-        const response = await fetch(`/api/admin/schedule/ports?voyageRef=${voyage}&vesselID=${selectedVessel}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/ports?voyageRef=${voyage}&vesselID=${selectedVessel}`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -164,7 +164,7 @@ export default function ScheduleList() {
         if (!vessel || !voyage || !transit) return;
 
         try {
-        const response = await fetch(`/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -185,7 +185,7 @@ export default function ScheduleList() {
 
         try {
         const response = await fetch(
-            `/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`, {
+            `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }
@@ -204,7 +204,7 @@ export default function ScheduleList() {
 
         try {
         const response = await fetch(
-            `/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`, {
+            `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`, {
             headers: {
             "ngrok-skip-browser-warning": "true"
             }

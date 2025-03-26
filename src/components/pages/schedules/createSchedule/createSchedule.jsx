@@ -26,18 +26,18 @@ export default function CreateSchedule() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await axios.get("/api/admin/schedule/");
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/`);
       setSchedules(response.data);
       
-      const vesselData = await axios.get("/api/admin/vessel");
+      const vesselData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`);
       const vesselArray = Array.isArray(vesselData.data.data) ? vesselData.data.data : [];
       setVessels(vesselArray);
 
-      const portsData = await axios.get("/api/admin/schedule/ports");
+      const portsData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/ports`);
       const portsArray = Array.isArray(portsData.data.data) ? portsData.data.data : [];
       setPorts(portsArray);
 
-      const destinationData = await axios.get("/api/admin/schedule/destinations");
+      const destinationData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations`);
       const destinationsArray = Array.isArray(destinationData.data.data) ? destinationData.data.data : [];
       setDestinations(destinationsArray);
 
@@ -103,7 +103,7 @@ export default function CreateSchedule() {
     console.log("Submitting Data:", data);
 
     try {
-      const response = await axios.post("/api/admin/schedule", data);
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`, data);
       console.log("Form data : ", response.data);
       window.scrollTo({ top: 0, behavior: "smooth" });
       setSuccessMessage("Schedule created successfully");
