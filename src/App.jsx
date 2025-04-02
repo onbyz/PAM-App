@@ -7,6 +7,7 @@ import RessetPassword from './components/pages/login/ressetPassword.jsx';
 import CreateSchedule from '@components/pages/schedules/createSchedule/createSchedule.jsx';
 import ScheduleList from '@components/pages/schedules/scheduleList/scheduleList';
 import Layout from '@components/layouts/Layout.jsx';
+import BulkEdit from '@components/pages/schedules/bulkEdit/bulkEdit.jsx';
 
 export default function App() {
     return (
@@ -23,6 +24,7 @@ export default function App() {
 					<Route element={<Layout />}>
 						<Route path="/create-schedule" element={<CreateSchedule />} />
 						<Route path="/schedule-list" element={<ScheduleList />} />
+						<Route path="/bulk-edit" element={<BulkEdit />} />
 					</Route>
 				</Routes>
 			</div>

@@ -12,10 +12,10 @@ import { Link } from 'react-router-dom';
 export default function Sidebar() {
 
     const sidebarTitles = [
-        {id : "1", icon: ClockIcon, title : "Schedule Management" },
-        {id : "2", icon: VesselIcon, title : "Vessel Management" },
-        {id : "3", icon: PortIcon, title : "Port Management" },
-        {id : "4", icon: UserIcon, title : "User Management" },
+        {id : "1", icon: ClockIcon, title : "Schedule Management", link: '/schedule-list' },
+        {id : "2", icon: VesselIcon, title : "Vessel Management", link: "/" },
+        {id : "3", icon: PortIcon, title : "Port Management", link: "/"  },
+        {id : "4", icon: UserIcon, title : "User Management", link: "/"  },
     ]
 
     return (
@@ -32,9 +32,11 @@ export default function Sidebar() {
                         {sidebarTitles.map((item, index) => (
                             <div className='flex gap-2 mt-4' key={index}>
                                 <img src={item.icon} alt='icon' className='w-[24px] h-[24px] mt-[3px]' />
-                                <h5 className={`${index === 0 ? 'text-[#16A34A]' : 'text-black'}`}>
-                                    {item.title}
-                                </h5>
+                                <Link href={item.link}>
+                                    <h5 className={`${index === 0 ? 'text-[#16A34A]' : 'text-black'}`}>
+                                        {item.title}
+                                    </h5>
+                                </Link>
                             </div>
                         ))}
                     </div>
