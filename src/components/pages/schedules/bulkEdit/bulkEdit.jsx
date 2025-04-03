@@ -1,412 +1,304 @@
-import React, {useState, useEffect} from 'react';
-import { useNavigate  } from "react-router-dom";
-import { FaXmark, FaEllipsis } from "react-icons/fa6";
 
-export default function BulkEdit() {
+import { useState } from "react"
+import { XCircle } from "lucide-react"
 
-    const navigate = useNavigate();
+export default function BulkScheduleUpload() {
+  const [file, setFile] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [response, setResponse] = useState(null)
+  const [error, setError] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [uploadType, setUploadType] = useState("bulk") // 'bulk' or 'origin'
+  const [deleteOldData, setDeleteOldData] = useState(true)
+  const [selectedPort, setSelectedPort] = useState("")
+  const [portOptions, setPortOptions] = useState([
+    { uuid: "CGP-DXB", name: "BANGLADESH - CHITTAGONG VIA DUBAI" },
+    { uuid: "SIN-DXB", name: "SINGAPORE VIA DUBAI" },
+    { uuid: "HKG-DXB", name: "HONG KONG VIA DUBAI" },
+  ])
 
-    const handleGoBack = () => {
-        navigate(-1); 
-    };
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile) {
+      setFile(selectedFile)
+      setError(null)
+      setResponse(null)
+      setSuccessMessage(`${selectedFile.name} file added successfully!`)
 
-    const [filterBy, setFilterBy] = useState('bulkEdit');
-    const [oldDataRadioButton, setOldDataRadioButton] = useState('yes');
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [successMessage, setSuccessMessage] = useState("");
-    const [errorMessage, setErrorMessage] = useState("");
-    const [selectedPort, setSelectedPort] = useState('');
-    const [portOptions, setPortOptions] = useState([]);
+      // Auto-hide success message after 5 seconds
+      setTimeout(() => setSuccessMessage(null), 5000)
+    }
+  }
 
-    const handleSelectedFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setSelectedFile(file.name);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-            setTimeout(() => setSuccessMessage(""), 5000);
-            setSuccessMessage(`${file.name} file added successfully!`);
-        }
+  const validateFile = (file) => {
+    if (!file) {
+      setError("Please select a file")
+      return false
     }
 
-    const sortedData = [
-        {id: 1, vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing:"04-11-2024", fcl_closing: "05-11-2024", origin: "Chittagong via Dubai", etd: "02-02-2025", eta_transit: "21-02-2025", dst_eta : "25-02-2025", transit_time: "25 Days"},
-        {id: 2, vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing:"04-11-2024", fcl_closing: "05-11-2024", origin: "Chittagong via Dubai", etd: "02-02-2025", eta_transit: "21-02-2025", dst_eta : "25-02-2025", transit_time: "25 Days"},
-        {id: 3, vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing:"04-11-2024", fcl_closing: "05-11-2024", origin: "Chittagong via Dubai", etd: "02-02-2025", eta_transit: "21-02-2025", dst_eta : "25-02-2025", transit_time: "25 Days"},
-        {id: 4, vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing:"04-11-2024", fcl_closing: "05-11-2024", origin: "Chittagong via Dubai", etd: "02-02-2025", eta_transit: "21-02-2025", dst_eta : "25-02-2025", transit_time: "25 Days"},
-    ];
+    const allowedTypes = [
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+    ]
+    if (!allowedTypes.includes(file.type)) {
+      setError("Please upload only Excel files (.xlsx or .xls)")
+      return false
+    }
 
-    const sortedPortData = [
-        {id: 1, vessel_name: "COSCO SHIPPING PLANET", voyage_no: "037W", cfs_closing:"04-11-2024", fcl_closing: "05-11-2024", origin: "Chittagong via Dubai", etd: "02-02-2025", eta_transit: "21-02-2025", dst_eta : "25-02-2025", transit_time: "25 Days"},
-        {id: 2, vessel_name: "CMA CGM NEVADA", voyage_no: "037W", cfs_closing:"04-11-2024", fcl_closing: "05-11-2024", origin: "Chittagong via Dubai", etd: "02-02-2025", eta_transit: "21-02-2025", dst_eta : "25-02-2025", transit_time: "25 Days"},
-    ];
+    return true
+  }
 
-    const fetchPorts = async () => {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/ports`, {
-                headers: {
-                "ngrok-skip-browser-warning": "true"
-                }
-            });
-            const { data } = await response.json();
-            setPortOptions(data || []);
-        } catch (error) {
-            console.error('Error fetching ports:', error);
-            setPortOptions([{ uuid: 'CGP-DXB', name: 'BANGLADESH - CHITTAGONG VIA DUBAI' }]);
-        }
-    };
+  const handlePortChange = (e) => {
+    setSelectedPort(e.target.value)
+  }
 
-    useEffect(() => {
-        fetchPorts();
-    }, []); 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
 
-    const handlePortChange = (e) => {
-        const port = e.target.value;
+    if (!validateFile(file)) {
+      return
+    }
 
-        const selectedPort = portOptions.find(option => option.uuid === port);
+    if (uploadType === "origin" && !selectedPort) {
+      setError("Please select an origin port")
+      return
+    }
 
-        setSelectedPort(port);
-    };
+    setIsLoading(true)
+    setError(null)
+    setResponse(null)
 
-    return (
-        <div className='md:mr-[2.5%]'>
-            <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
-                <h4 className='leading-[56px]'>Bulk Edit</h4>
-                        
-                {/* <button onClick={handleGoBack} className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
-                    <FaXmark className='mt-[2px]'/>
-                        Close
-                </button> */}
-            </div>
+    const formData = new FormData()
+    if (file) formData.append("scheduleFile", file)
+    formData.append("deleteOldData", deleteOldData.toString())
+    formData.append("uploadType", uploadType)
 
-            {successMessage && (
-                <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
-                    {successMessage}
-                    <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setSuccessMessage("")}/>
-                </div>
-            )}
-            
-            {errorMessage && (
-                <div className="w-full bg-red-100 text-red-600 text-start p-3 rounded-md my-6 flex justify-between">
-                    {errorMessage}
-                    <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setErrorMessage("")}/>
-                </div>
-            )}
+    if (uploadType === "origin" && selectedPort) {
+      formData.append("originPort", selectedPort)
+    }
 
-            <div className='my-8'>
-                <div className='flex flex-col md:flex-row gap-6 md:gap-16 mb-8'>
-                    <label>
-                        <input
-                            type="radio"
-                            name="filterBy"
-                            checked={filterBy === 'bulkEdit'}
-                            // onChange={() => handleFilterByChange('vessel')}
-                            onClick={() => {
-                                setFilterBy('bulkEdit');
-                                setSelectedFile(null);
-                            }}
-                            className='mr-1'
-                        />
-                        {' '}Bulk Schedule Edit
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="filterBy"
-                            checked={filterBy === 'editOriginPort'}
-                            // onChange={() => handleFilterByChange('origin')}
-                            onClick={() => {
-                                setFilterBy('editOriginPort');
-                                setSelectedFile(null);
-                            }}
-                            className='mr-1'
-                        />
-                        {' '}Edit by Origin Port
-                    </label>
-                </div>
-            </div>
-            
-            {filterBy === "bulkEdit" && (
-                <>
-                    <div className='my-16'>
-                        <div className='flex flex-col md:flex-row gap-6 md:gap-16 mb-8'>
-                            <p className='text-[16px] font-normal'>Delete Old Data</p>
+    try {
+      // Using import.meta.env for environment variables
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        body: formData,
+      })
 
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="oldDataRadioButton"
-                                    checked={oldDataRadioButton === 'yes'}
-                                    // onChange={() => handleFilterByChange('vessel')}
-                                    onClick={() => setOldDataRadioButton('yes')}
-                                    className='mr-1'
-                                />
-                                {' '}Yes
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    name="oldDataRadioButton"
-                                    checked={oldDataRadioButton === 'no'}
-                                    // onChange={() => handleFilterByChange('origin')}
-                                    onClick={() => setOldDataRadioButton('no')}
-                                    className='mr-1'
-                                />
-                                {' '}No
-                            </label>
-                        </div>
-                    </div>
+      const data = await response.json()
 
-                    <div className="relative inline-block">
-                        <div className='flex gap-6'>
-                            <input
-                                type="file"
-                                accept=".xls, .xlsx"
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                onChange={handleSelectedFileChange}
-                            />
-                            <button
-                                type="button"
-                                className="w-[115px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2"
-                            >
-                                Choose File
-                            </button>
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to upload schedules")
+      }
 
-                            {selectedFile && (
-                                <p className='text-[16px] leading-[40px] font-normal'>Selected file {selectedFile}</p>
-                            )}
+      setResponse(data)
+      setSuccessMessage("File processed successfully!")
+    } catch (err) {
+      setError(err.message || "Something went wrong")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-                            {!selectedFile && (
-                                <p className='text-[16px] leading-[40px] font-normal'>Only Accepts Excel (.xls, .xlsx) format.</p>
-                            )}
-                        </div>
-                    </div>
-                    
-                    {selectedFile && (
-                        <div>
-                            <div className='my-16'>
-                                <div className='flex flex-col md:flex-row gap-6 md:gap-16 mb-8'>
-                                    <p className='text-[16px] font-normal'>Delete Old Data</p>
+  return (
+    <div className="pt-8 md:mr-[2.5%]">
+      <div className="flex justify-between border-b-[1px] border-[#B6A9A9] pb-2">
+        <h4 className="text-2xl leading-[56px]">Bulk Edit</h4>
+      </div>
 
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="oldDataRadioButton"
-                                            checked={oldDataRadioButton === 'yes'}
-                                            // onChange={() => handleFilterByChange('vessel')}
-                                            onClick={() => setOldDataRadioButton('yes')}
-                                            className='mr-1'
-                                        />
-                                        {' '}Yes
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="oldDataRadioButton"
-                                            checked={oldDataRadioButton === 'no'}
-                                            // onChange={() => handleFilterByChange('origin')}
-                                            onClick={() => setOldDataRadioButton('no')}
-                                            className='mr-1'
-                                        />
-                                        {' '}No
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div className='overflow-auto'>
-                                <table className="border-[#E6EDFF] border-[1px] w-full rounded-lg">
-                                    <thead>
-                                        <tr className='border-[1px] border-[#E6EDFF]'>
-                                        <th>No</th>
-                                        <th>Mother Vessel</th>
-                                        <th>Voyage Ref</th>
-                                        <th>CFS Closing</th>
-                                        <th>FCL Closing</th>
-                                        <th>Origin</th>
-                                        <th>ETD</th>
-                                        <th>ETA Dubai</th>
-                                        <th>ETA Europe</th>
-                                        <th>Transit Time</th>
-                                        <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                        {sortedData.map((row, index) => (
-                                            <tr key={index} className='border-[1px] border-[#E6EDFF]'>
-                                                <td>{(index + 1)}</td>
-                                                <td>{row.vessel_name}</td>
-                                                <td>{row.voyage_no}</td>
-                                                <td>{new Date(row.cfs_closing).toLocaleDateString("en-GB")}</td>
-                                                <td>{new Date(row.fcl_closing).toLocaleDateString("en-GB")}</td>
-                                                <td>{row.origin}</td>
-                                                <td>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
-                                                <td>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
-                                                <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
-                                                <td>{row.transit_time}</td>
-                                                {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
-                                                <td className="py-3 px-4 cursor-pointer">
-                                                    <FaEllipsis className='w-[24px] h-[24px]'/>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className='flex gap-6 mt-8'>
-                                <button type='submit' className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
-                                    Save
-                                </button>
-                                
-                                
-                                <button 
-                                    onClick={handleGoBack}
-                                    type='button'
-                                    className='w-[80px] h-[40px] text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white'
-                                > 
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-
-            {filterBy === "editOriginPort" && (
-                <>
-                    <div className='my-16'>
-                        <div>
-                            <label className="text-[14px] mb-2 block">
-                                Select Origin Port*
-                            </label>
-
-                            <select
-                                value={selectedPort}
-                                onChange={handlePortChange}
-                                className="w-[340px] md:w-[384px] h-[66px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                            >
-                                <option value="">Select...</option>
-                                {portOptions.map((port, index) => (
-                                    <option key={index} value={port.uuid}>{port.name}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div className="relative inline-block">
-                        <div className='flex gap-6'>
-                            <input
-                                type="file"
-                                accept=".xls, .xlsx"
-                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                onChange={handleSelectedFileChange}
-                            />
-                            <button
-                                type="button"
-                                className="w-[115px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2"
-                            >
-                                Choose File
-                            </button>
-
-                            {selectedFile && (
-                                <p className='text-[16px] leading-[40px] font-normal'>Selected file {selectedFile}</p>
-                            )}
-
-                            {!selectedFile && (
-                                <p className='text-[16px] leading-[40px] font-normal'>Only Accepts Excel (.xls, .xlsx) format.</p>
-                            )}
-                        </div>
-                    </div>
-                    
-                    {selectedFile && (
-                        <div>
-                            <div className='my-16'>
-                                <div className='flex flex-col md:flex-row gap-6 md:gap-16 mb-8'>
-                                    <p className='text-[16px] font-normal'>Delete Old Data</p>
-
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="oldDataRadioButton"
-                                            checked={oldDataRadioButton === 'yes'}
-                                            // onChange={() => handleFilterByChange('vessel')}
-                                            onClick={() => setOldDataRadioButton('yes')}
-                                            className='mr-1'
-                                        />
-                                        {' '}Yes
-                                    </label>
-                                    <label>
-                                        <input
-                                            type="radio"
-                                            name="oldDataRadioButton"
-                                            checked={oldDataRadioButton === 'no'}
-                                            // onChange={() => handleFilterByChange('origin')}
-                                            onClick={() => setOldDataRadioButton('no')}
-                                            className='mr-1'
-                                        />
-                                        {' '}No
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div className='overflow-auto'>
-                                <table className="border-[#E6EDFF] border-[1px] w-full rounded-lg">
-                                    <thead>
-                                        <tr className='border-[1px] border-[#E6EDFF]'>
-                                        <th>No</th>
-                                        <th>Mother Vessel</th>
-                                        <th>Voyage Ref</th>
-                                        <th>CFS Closing</th>
-                                        <th>FCL Closing</th>
-                                        <th>Origin</th>
-                                        <th>ETD</th>
-                                        <th>ETA Dubai</th>
-                                        <th>ETA Europe</th>
-                                        <th>Transit Time</th>
-                                        <th>Action</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                        {sortedPortData.map((row, index) => (
-                                            <tr key={index} className='border-[1px] border-[#E6EDFF]'>
-                                                <td>{(index + 1)}</td>
-                                                <td>{row.vessel_name}</td>
-                                                <td>{row.voyage_no}</td>
-                                                <td>{new Date(row.cfs_closing).toLocaleDateString("en-GB")}</td>
-                                                <td>{new Date(row.fcl_closing).toLocaleDateString("en-GB")}</td>
-                                                <td>{row.origin}</td>
-                                                <td>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
-                                                <td>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
-                                                <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
-                                                <td>{row.transit_time}</td>
-                                                {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
-                                                <td className="py-3 px-4 cursor-pointer">
-                                                    <FaEllipsis className='w-[24px] h-[24px]'/>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div className='flex gap-6 mt-8'>
-                                <button type='submit' className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
-                                    Save
-                                </button>
-                                
-                                
-                                <button 
-                                    onClick={handleGoBack}
-                                    type='button'
-                                    className='w-[80px] h-[40px] text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white'
-                                > 
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-
+      {successMessage && (
+        <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
+          {successMessage}
+          <XCircle className="w-5 h-5 cursor-pointer" onClick={() => setSuccessMessage(null)} />
         </div>
-    )
+      )}
+
+      {error && (
+        <div className="w-full bg-red-100 text-red-600 text-start p-3 rounded-md my-6 flex justify-between">
+          {error}
+          <XCircle className="w-5 h-5 cursor-pointer" onClick={() => setError(null)} />
+        </div>
+      )}
+
+      <div className="my-8">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-16 mb-8">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="uploadType"
+              checked={uploadType === "bulk"}
+              onChange={() => {
+                setUploadType("bulk")
+                setFile(null)
+                setResponse(null)
+                setError(null)
+                setSuccessMessage(null)
+              }}
+              className="sr-only"
+            />
+            <span
+              className={`h-4 w-4 rounded-full border ${uploadType === "bulk" ? "border-black bg-black" : "border-gray-300"} flex items-center justify-center mr-2`}
+            >
+              {uploadType === "bulk" && <span className="h-2 w-2 rounded-full bg-white"></span>}
+            </span>
+            <span>Bulk Schedule Edit</span>
+          </label>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="uploadType"
+              checked={uploadType === "origin"}
+              onChange={() => {
+                setUploadType("origin")
+                setFile(null)
+                setResponse(null)
+                setError(null)
+                setSuccessMessage(null)
+              }}
+              className="sr-only"
+            />
+            <span
+              className={`h-4 w-4 rounded-full border ${uploadType === "origin" ? "border-black bg-black" : "border-gray-300"} flex items-center justify-center mr-2`}
+            >
+              {uploadType === "origin" && <span className="h-2 w-2 rounded-full bg-white"></span>}
+            </span>
+            <span>Edit by Origin Port</span>
+          </label>
+        </div>
+      </div>
+
+      {uploadType === "origin" && (
+        <div className="my-8">
+          <div>
+            <label className="text-[14px] mb-2 block">Select Origin Port*</label>
+            <select
+              value={selectedPort}
+              onChange={handlePortChange}
+              className="w-full max-w-[384px] h-[66px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
+            >
+              <option value="">Select...</option>
+              {portOptions.map((port, index) => (
+                <option key={index} value={port.uuid}>
+                  {port.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      )}
+
+      <div className="my-8">
+        <div className="flex flex-col md:flex-row gap-6 md:gap-16 mb-8">
+          <p className="text-[16px] font-normal">Delete Old Data</p>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="deleteOldData"
+              checked={deleteOldData === true}
+              onChange={() => setDeleteOldData(true)}
+              className="sr-only"
+            />
+            <span
+              className={`h-5 w-5 rounded-full border-2 ${deleteOldData ? "border-green-500" : "border-gray-300"} flex items-center justify-center mr-2`}
+            >
+              {deleteOldData && <span className="h-3 w-3 rounded-full bg-green-500"></span>}
+            </span>
+            <span>Yes</span>
+          </label>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="deleteOldData"
+              checked={deleteOldData === false}
+              onChange={() => setDeleteOldData(false)}
+              className="sr-only"
+            />
+            <span
+              className={`h-5 w-5 rounded-full border-2 ${!deleteOldData ? "border-green-500" : "border-gray-300"} flex items-center justify-center mr-2`}
+            >
+              {!deleteOldData && <span className="h-3 w-3 rounded-full bg-green-500"></span>}
+            </span>
+            <span>No</span>
+          </label>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className="relative inline-block">
+          <div className="flex gap-6 items-center">
+            <input
+              type="file"
+              id="scheduleFile"
+              accept=".xlsx, .xls"
+              onChange={handleFileChange}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            <button
+              type="button"
+              className="w-[115px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2"
+              onClick={() => document.getElementById("scheduleFile")?.click()}
+            >
+              Choose File
+            </button>
+            {file ? (
+              <p className="text-[16px] leading-[40px] font-normal">Selected file {file.name}</p>
+            ) : (
+              <p className="text-[16px] leading-[40px] font-normal">Only Accepts Excel (.xls, .xlsx) format.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-6 mt-8">
+          <button
+            type="submit"
+            className={`w-[115px] h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${
+              isLoading || !file ? "bg-gray-400 cursor-not-allowed" : "bg-[#16A34A] hover:bg-green-600"
+            }`}
+            disabled={isLoading || !file}
+          >
+            {isLoading ? "Processing..." : "Process File"}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setFile(null)
+              setError(null)
+              setResponse(null)
+              setSuccessMessage(null)
+            }}
+            className="w-[80px] h-[40px] text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+
+      {response && (
+        <div className="mt-8 p-4 border border-gray-200 rounded-md bg-white">
+          <h3 className="font-semibold text-lg mb-2">Processing Results:</h3>
+          <p>Total records processed: {response.data.total}</p>
+          <p>Created: {response.data.created}</p>
+          <p>Updated: {response.data.updated}</p>
+          <p>Failed: {response.data.failed}</p>
+
+          {response.data.failed > 0 && (
+            <div className="mt-3">
+              <h4 className="font-semibold mb-2">Failed Records:</h4>
+              <ul className="list-disc pl-5">
+                {response.data.errors.map((error, index) => (
+                  <li key={index} className="mb-2">
+                    Row data: {JSON.stringify(error.row)}
+                    <br />
+                    Error: {error.error}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
+
