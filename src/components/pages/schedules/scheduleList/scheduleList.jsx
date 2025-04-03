@@ -322,7 +322,7 @@ export default function ScheduleList() {
                         <h4 className='leading-[56px]'>Schedule</h4>
                         
                         <div className='flex flex-col md:flex-row gap-8 mb-8'>
-                            <Link to="/">
+                            <Link to="/bulk-edit">
                                 <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                                     Bulk Edit
                                 </button>
