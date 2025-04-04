@@ -1,5 +1,5 @@
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { XCircle } from "lucide-react"
 
 export default function BulkScheduleUpload() {
@@ -8,14 +8,10 @@ export default function BulkScheduleUpload() {
   const [response, setResponse] = useState(null)
   const [error, setError] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
-  const [uploadType, setUploadType] = useState("bulk") // 'bulk' or 'origin'
+  const [uploadType, setUploadType] = useState("bulk") // 'bulk' or 'bulk_by_origin_port'
   const [deleteOldData, setDeleteOldData] = useState(true)
   const [selectedPort, setSelectedPort] = useState("")
-  const [portOptions, setPortOptions] = useState([
-    { uuid: "CGP-DXB", name: "BANGLADESH - CHITTAGONG VIA DUBAI" },
-    { uuid: "SIN-DXB", name: "SINGAPORE VIA DUBAI" },
-    { uuid: "HKG-DXB", name: "HONG KONG VIA DUBAI" },
-  ])
+  const [portOptions, setPortOptions] = useState([])
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0]
@@ -48,6 +44,29 @@ export default function BulkScheduleUpload() {
     return true
   }
 
+  useEffect(() => {
+    if (uploadType === 'bulk_by_origin_port') {
+      fetchPorts();
+    }
+  }, [uploadType]);
+
+  const fetchPorts = async () => {
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`, {
+        headers: {
+          "ngrok-skip-browser-warning": "true"
+        }
+      });
+      const { data } = await response.json();
+      setPortOptions(data || []);
+    } catch (error) {
+      console.error('Error fetching ports:', error);
+    }
+
+    setSelectedPort('');
+  };
+
   const handlePortChange = (e) => {
     setSelectedPort(e.target.value)
   }
@@ -59,7 +78,7 @@ export default function BulkScheduleUpload() {
       return
     }
 
-    if (uploadType === "origin" && !selectedPort) {
+    if (uploadType === "bulk_by_origin_port" && !selectedPort) {
       setError("Please select an origin port")
       return
     }
@@ -73,7 +92,7 @@ export default function BulkScheduleUpload() {
     formData.append("deleteOldData", deleteOldData.toString())
     formData.append("uploadType", uploadType)
 
-    if (uploadType === "origin" && selectedPort) {
+    if (uploadType === "bulk_by_origin_port" && selectedPort) {
       formData.append("originPort", selectedPort)
     }
 
@@ -147,9 +166,9 @@ export default function BulkScheduleUpload() {
             <input
               type="radio"
               name="uploadType"
-              checked={uploadType === "origin"}
+              checked={uploadType === "bulk_by_origin_port"}
               onChange={() => {
-                setUploadType("origin")
+                setUploadType("bulk_by_origin_port")
                 setFile(null)
                 setResponse(null)
                 setError(null)
@@ -158,16 +177,16 @@ export default function BulkScheduleUpload() {
               className="sr-only"
             />
             <span
-              className={`h-4 w-4 rounded-full border ${uploadType === "origin" ? "border-black bg-black" : "border-gray-300"} flex items-center justify-center mr-2`}
+              className={`h-4 w-4 rounded-full border ${uploadType === "bulk_by_origin_port" ? "border-black bg-black" : "border-gray-300"} flex items-center justify-center mr-2`}
             >
-              {uploadType === "origin" && <span className="h-2 w-2 rounded-full bg-white"></span>}
+              {uploadType === "bulk_by_origin_port" && <span className="h-2 w-2 rounded-full bg-white"></span>}
             </span>
             <span>Edit by Origin Port</span>
           </label>
         </div>
       </div>
 
-      {uploadType === "origin" && (
+      {uploadType === "bulk_by_origin_port" && (
         <div className="my-8">
           <div>
             <label className="text-[14px] mb-2 block">Select Origin Port*</label>
@@ -251,9 +270,8 @@ export default function BulkScheduleUpload() {
         <div className="flex gap-6 mt-8">
           <button
             type="submit"
-            className={`w-[115px] h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${
-              isLoading || !file ? "bg-gray-400 cursor-not-allowed" : "bg-[#16A34A] hover:bg-green-600"
-            }`}
+            className={`w-[115px] h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${isLoading || !file ? "bg-gray-400 cursor-not-allowed" : "bg-[#16A34A] hover:bg-green-600"
+              }`}
             disabled={isLoading || !file}
           >
             {isLoading ? "Processing..." : "Process File"}
@@ -284,12 +302,10 @@ export default function BulkScheduleUpload() {
 
           {response.data.failed > 0 && (
             <div className="mt-3">
-              <h4 className="font-semibold mb-2">Failed Records:</h4>
+              <h3 className="font-semibold text-lg mb-2">Failed Records:</h3>
               <ul className="list-disc pl-5">
                 {response.data.errors.map((error, index) => (
                   <li key={index} className="mb-2">
-                    Row data: {JSON.stringify(error.row)}
-                    <br />
                     Error: {error.error}
                   </li>
                 ))}
