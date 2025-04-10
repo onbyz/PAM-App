@@ -10,10 +10,10 @@ export default function Homepage() {
                 <div className='flex gap-10 mt-8'>
                     <Link to='/login' className='hover:text-blue-500 hover:underline text-[20px]'>Login</Link>
 
-                    <Link to='/create-schedule' className='hover:text-blue-500 hover:underline text-[20px]'>Create Schedule</Link>
+                    <Link to='/schedule-list/create-schedule' className='hover:text-blue-500 hover:underline text-[20px]'>Create Schedule</Link>
                 </div>  
 
-                <Link to='schedule-list' className='hover:text-blue-500 hover:underline text-[20px] mt-6'>Schedule List</Link>
+                <Link to='/schedule-list' className='hover:text-blue-500 hover:underline text-[20px] mt-6'>Schedule List</Link>
             </div>
         </div>
     )

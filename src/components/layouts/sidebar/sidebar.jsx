@@ -7,15 +7,19 @@ import PortIcon from "@assets/icons/AnchorSimple.svg";
 import UserIcon from "@assets/icons/user-octagon.svg";
 import SettingsIcon from "@assets/icons/setting.svg";
 import LogoutIcon from "@assets/icons/logout.svg";
+import GreenClockIcon from "@assets/greenIcons/clock.svg";
+import GreenVesselIcon from "@assets/greenIcons/box.svg";
+import GreenPortIcon from "@assets/greenIcons/AnchorSimple.svg";
+import GreenUserIcon from "@assets/greenIcons/user-octagon.svg";
 
 export default function Sidebar() {
-  const location = useLocation();
+  const location = useLocation(); 
 
   const sidebarTitles = [
-    { id: "1", icon: ClockIcon, title: "Schedule Management", link: '/schedule-list' },
-    { id: "2", icon: VesselIcon, title: "Vessel Management", link: "/vessel-management" },
-    { id: "3", icon: PortIcon, title: "Port Management", link: "/port-management" },
-    { id: "4", icon: UserIcon, title: "User Management", link: "/" },
+    { id: "1", icon: ClockIcon, title: "Schedule Management", link: '/schedule-list', activeIcon: GreenClockIcon },
+    { id: "2", icon: VesselIcon, title: "Vessel Management", link: "/vessel-management", activeIcon: GreenVesselIcon },
+    { id: "3", icon: PortIcon, title: "Port Management", link: "/port-management", activeIcon: GreenPortIcon },
+    { id: "4", icon: UserIcon, title: "User Management", link: "/user-management", activeIcon: GreenUserIcon },
   ];
 
   return (
@@ -27,11 +31,15 @@ export default function Sidebar() {
 
         <div className='mt-24'>
           {sidebarTitles.map((item, index) => {
-            const isActive = location.pathname === item.link;
+            const isActive = location.pathname.startsWith(item.link);
 
             return (
               <Link to={item.link} key={item.id} className='flex gap-2 mt-4 items-center'>
-                <img src={item.icon} alt='icon' className='w-[24px] h-[24px]' />
+                <img 
+                  src={isActive ? item.activeIcon : item.icon}
+                  alt='icon' 
+                  className='w-[24px] h-[24px]' 
+                />
                 <h5 className={`${isActive ? 'text-[#16A34A]' : 'text-black'}`}>
                   {item.title}
                 </h5>

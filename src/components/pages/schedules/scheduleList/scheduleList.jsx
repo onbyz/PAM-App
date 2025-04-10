@@ -322,13 +322,13 @@ export default function ScheduleList() {
                         <h4 className='leading-[56px]'>Schedule</h4>
                         
                         <div className='flex flex-col md:flex-row gap-8 mb-8'>
-                            <Link to="/bulk-edit">
+                            <Link to="/schedule-list/bulk-edit">
                                 <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                                     Bulk Edit
                                 </button>
                             </Link>
 
-                            <Link to="/create-schedule">
+                            <Link to="/schedule-list/create-schedule">
                                 <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                                     <FaPlus className='mt-[2px]'/>
                                     Create Schedule
