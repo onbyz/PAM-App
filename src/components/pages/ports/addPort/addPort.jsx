@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaXmark } from "react-icons/fa6";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,24 +7,42 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const formSchema = z.object({
-  country: z.string().min(1, "Country is required!"),
-  origin_port: z.string().min(1, "Origin Port is required!"),
-  transit_port: z.string().min(1, "Transit Port is required!"),
+  country_id: z.string().min(1, "Country is required!"),
+  origin: z.string().min(1, "Origin Port is required!"),
+  transit: z.string().min(1, "Transit Port is required!"),
 });
 
 export default function AddPorts() {
-
-  const countries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'India'];
+  const [countries, setCountries] = React.useState([]);
+  const [successMessage, setSuccessMessage] = React.useState("");
   const navigate = useNavigate();
+
+  const fetchCountries = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
+      const data = response.data?.data || [];
+      console.log({ data })
+      setCountries(data);
+
+      // setCountryOptions(data || []);
+    } catch (error) {
+      console.error('Error fetching countries:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCountries();
+  }, []);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      country: "",
-      origin_port: "",
-      transit_port : "",
+      country_id: "",
+      origin: "",
+      transit : "",
     },
   });
 
@@ -32,9 +50,17 @@ export default function AddPorts() {
     navigate(-1); 
   };
 
-  const onSubmit = (data) => {
-    console.log("Form submitted:", data);
-    // You can send this data to backend using axios.post(...)
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`, data);
+      if (response.status === 200) {
+        setSuccessMessage("Port created successfully");
+        form.reset();
+        setTimeout(() => navigate("/port-management"), 3000);
+      }
+    } catch (error) {
+      console.error("Error adding port:", error);
+    }
   };
 
   return (
@@ -50,12 +76,19 @@ export default function AddPorts() {
           </button>
         </div>
 
+        {successMessage && (
+          <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
+            {successMessage}
+            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setSuccessMessage("")}/>
+          </div>
+        )}
+
         <div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className='my-8'>
               <div className='flex flex-col md:flex-row gap-12'>
                 <div>
-                  <FormField name="country" control={form.control} render={({ field }) => (
+                  <FormField name="country_id" control={form.control} render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-[14px]">Choose Country <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
@@ -65,8 +98,8 @@ export default function AddPorts() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {countries.map((country) => (
-                                            <SelectItem key={country} value={country} className="text-[16px]">
-                                                {country}
+                                            <SelectItem key={country.id} value={country.uuid} className="text-[16px]">
+                                                {country.name}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
@@ -80,7 +113,7 @@ export default function AddPorts() {
                 <div>
                   <FormField
                     control={form.control}
-                    name="origin_port"
+                    name="origin"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[14px]">
@@ -101,7 +134,7 @@ export default function AddPorts() {
                 <div>
                   <FormField
                     control={form.control}
-                    name="transit_port"
+                    name="transit"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[14px]">

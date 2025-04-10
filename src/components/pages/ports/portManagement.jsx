@@ -4,13 +4,20 @@ import { useNavigate, Link } from "react-router-dom";
 import { FaXmark, FaEllipsis, FaPlus } from "react-icons/fa6";
 
 export default function VesselManangement() {
+  const [tableData, setTableData] = useState([]);
 
-  const tableData =[
-    {id : "1", port_name : "CHITAGONG VIA DUBAI", voyage_ref: "BANGLADESH"},
-    {id : "2", port_name : "SIHANOUKVILLE VIA SINGAPORE", voyage_ref: "CAMBODIA"},
-    {id : "3", port_name : "DALIAN VIA SINGAPORE", voyage_ref: "CHINA"},
-    {id : "4", port_name : "CHENNAI VIA DUBAI", voyage_ref: "INDIA"},
-  ]
+  const fetchData = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`);
+      setTableData(response.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const navigate = useNavigate();
 
@@ -56,7 +63,7 @@ export default function VesselManangement() {
                                     <tr className='border-[1px] border-[#E6EDFF]'>
                                     <th>SI No.</th>
                                     <th>Port Name</th>
-                                    <th>Voyage Ref</th>
+                                    <th>Country</th>
                                     <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -64,8 +71,8 @@ export default function VesselManangement() {
                                     {tableData.map((row, index) => (
                                         <tr key={index} className='border-[1px] border-[#E6EDFF]'>
                                         <td>{(index + 1)}</td>
-                                        <td>{row.port_name}</td>
-                                        <td>{row.voyage_ref}</td>
+                                        <td>{row.name}</td>
+                                        <td>{row.country}</td>
                                         <td className="py-3 px-4 cursor-pointer">
                                             <FaEllipsis className='w-[24px] h-[24px]'/>
                                         </td>
