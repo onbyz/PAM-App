@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { FaXmark, FaEllipsis, FaPlus } from "react-icons/fa6";
 
-export default function VesselManangement() {
+export default function PortManangement() {
   const [tableData, setTableData] = useState([]);
 
   const fetchData = async () => {
@@ -25,14 +25,16 @@ export default function VesselManangement() {
     navigate(-1); 
   };
 
+  console.log("table data : ", tableData)
+
   return (
     <div>
       <div>
         <div className='md:mr-[2.5%]'>
           <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
-            <h4 className='leading-[56px]'>Vessel Management</h4>
+            <h4 className='leading-[56px]'>Port Management</h4>
             
-            <Link to="/add-port">
+            <Link to="/port-management/add-port">
               <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                 <FaPlus className='mt-[2px]'/>
                 Add Port
