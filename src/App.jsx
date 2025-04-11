@@ -8,12 +8,13 @@ import CreateSchedule from '@components/pages/schedules/createSchedule/createSch
 import ScheduleList from '@components/pages/schedules/scheduleList/scheduleList';
 import Layout from '@components/layouts/Layout.jsx';
 import BulkEdit from '@components/pages/schedules/bulkEdit/bulkEdit.jsx';
-import VesselManangement from '@components/pages/vessels/vesselManagement.jsx'
-import AddVessel from '@components/pages/vessels/addVessel/addVessel.jsx'
-import PortManangement from '@components/pages/ports/portManagement.jsx'
-import AddPort from '@components/pages/ports/addPort/addPort.jsx'
-import UserManangement from '@components/pages/users/userManagement.jsx'
-import AddUser from '@components/pages/users/addUser/addUser.jsx'
+import VesselManangement from '@components/pages/vessels/vesselManagement.jsx';
+import AddVessel from '@components/pages/vessels/addVessel/addVessel.jsx';
+import PortManangement from '@components/pages/ports/portManagement.jsx';
+import AddPort from '@components/pages/ports/addPort/addPort.jsx';
+import EditPort from '@components/pages/ports/editPort/editPort.jsx';
+import UserManangement from '@components/pages/users/userManagement.jsx';
+import AddUser from '@components/pages/users/addUser/addUser.jsx';
 
 export default function App() {
     return (
@@ -35,6 +36,7 @@ export default function App() {
 						<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
 						<Route path="/port-management" element={<PortManangement />} />
 						<Route path="/port-management/add-port" element={<AddPort />} />
+						<Route path="/port-management/edit-port" element={<EditPort />} />
 						<Route path="/user-management" element={<UserManangement />} />
 						<Route path="/user-management/invite-user" element={<AddUser />} />
 					</Route>
