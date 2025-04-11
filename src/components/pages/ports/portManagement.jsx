@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
-import { FaXmark, FaEllipsis, FaPlus } from "react-icons/fa6";
+import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 
 export default function PortManangement() {
   const [tableData, setTableData] = useState([]);
@@ -25,7 +25,13 @@ export default function PortManangement() {
     navigate(-1); 
   };
 
-  console.log("table data : ", tableData)
+  const handleEdit = () => {
+    console.log("Edit button clicked")
+  }
+
+  const handleDelete = () => {
+    console.log("Delete button clicked")
+  }
 
   return (
     <div>
@@ -71,16 +77,27 @@ export default function PortManangement() {
                                 </thead>
                                 <tbody>
                                     {tableData.map((row, index) => (
-                                        <tr key={index} className='border-[1px] border-[#E6EDFF]'>
+                                      <tr key={index} className='border-[1px] border-[#E6EDFF]'>
                                         <td>{(index + 1)}</td>
                                         <td>{row.name}</td>
                                         <td>{row.country}</td>
-                                        <td className="py-3 px-4 cursor-pointer">
-                                            <FaEllipsis className='w-[24px] h-[24px]'/>
+                                        <td className="py-3 px-4 cursor-pointer flex gap-6">
+                                          <div className="relative group inline-block">
+                                            <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleEdit()}/>
+                                            <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                              Edit
+                                            </div>
+                                          </div>
+
+                                          <div className="relative group inline-block">
+                                            <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleDelete()}/>
+                                            <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                              Delete
+                                            </div>
+                                          </div>  
                                         </td>
-                                        </tr>
+                                      </tr>
                                     ))}
-                                    
                                 </tbody>
                             </table>
                         </div>
