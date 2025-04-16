@@ -10,6 +10,7 @@ import Layout from '@components/layouts/Layout.jsx';
 import BulkEdit from '@components/pages/schedules/bulkEdit/bulkEdit.jsx';
 import VesselManangement from '@components/pages/vessels/vesselManagement.jsx';
 import AddVessel from '@components/pages/vessels/addVessel/addVessel.jsx';
+import EditVessel from '@components/pages/vessels/editVessel/editVessel.jsx';
 import PortManangement from '@components/pages/ports/portManagement.jsx';
 import AddPort from '@components/pages/ports/addPort/addPort.jsx';
 import EditPort from '@components/pages/ports/editPort/editPort.jsx';
