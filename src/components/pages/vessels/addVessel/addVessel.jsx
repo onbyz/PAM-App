@@ -6,12 +6,14 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 const formSchema = z.object({
-  vessel_name: z.string().min(1, "Vessel Name is required!"),
+  vessel_name: z.string().min(3, "Vessel Name is required!"),
 });
 
 export default function AddVessel() {
+  const [successMessage, setSuccessMessage] = React.useState("");
   const navigate = useNavigate();
 
   const form = useForm({
@@ -25,9 +27,19 @@ export default function AddVessel() {
     navigate(-1); 
   };
 
-  const onSubmit = (data) => {
-    console.log("Form submitted:", data);
-    // You can send this data to backend using axios.post(...)
+  const onSubmit = async (data) => {
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
+        name: data.vessel_name,
+      });
+      if (response.status === 200) {
+        setSuccessMessage("Vessel created successfully");
+        form.reset();
+        setTimeout(() => navigate("/vessel-management"), 3000);
+      }
+    } catch (error) {
+      console.error("Error adding vessel:", error);
+    }
   };
 
   return (
@@ -42,6 +54,13 @@ export default function AddVessel() {
             Close
           </button>
         </div>
+
+        {successMessage && (
+          <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
+            {successMessage}
+            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setSuccessMessage("")}/>
+          </div>
+        )}
 
         <div>
           <Form {...form}>

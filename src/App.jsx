@@ -35,6 +35,7 @@ export default function App() {
 						<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
 						<Route path="/vessel-management" element={<VesselManangement />} />
 						<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
+						<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
 						<Route path="/port-management" element={<PortManangement />} />
 						<Route path="/port-management/add-port" element={<AddPort />} />
 						<Route path="/port-management/edit-port" element={<EditPort />} />
