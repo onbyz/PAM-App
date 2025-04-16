@@ -15,6 +15,7 @@ import AddPort from '@components/pages/ports/addPort/addPort.jsx';
 import EditPort from '@components/pages/ports/editPort/editPort.jsx';
 import UserManangement from '@components/pages/users/userManagement.jsx';
 import AddUser from '@components/pages/users/addUser/addUser.jsx';
+import NotFound from '@components/pages/notFound/notFound.jsx';
 
 export default function App() {
     return (
@@ -40,6 +41,9 @@ export default function App() {
 						<Route path="/user-management" element={<UserManangement />} />
 						<Route path="/user-management/invite-user" element={<AddUser />} />
 					</Route>
+
+					{/* Not Found page */}
+					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</div>
 	    </Router>
