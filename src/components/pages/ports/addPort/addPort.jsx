@@ -90,7 +90,7 @@ export default function AddPorts() {
                 <div>
                   <FormField name="country_id" control={form.control} render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-[14px]">Choose Country <span className="text-red-500">*</span></FormLabel>
+                            <FormLabel className="text-[14px] text-black">Choose Country <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
                                 <Select value={field.value} onValueChange={field.onChange}>
                                     <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
@@ -116,7 +116,7 @@ export default function AddPorts() {
                     name="origin"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">
+                        <FormLabel className="text-[14px] text-black">
                           Enter Origin Port <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
@@ -137,7 +137,7 @@ export default function AddPorts() {
                     name="transit"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">
+                        <FormLabel className="text-[14px] text-black">
                           Enter Transit Port <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
