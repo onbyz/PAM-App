@@ -50,9 +50,13 @@ export default function AddPorts() {
     navigate(-1); 
   };
 
+  function toCapitalCase(str) {
+    return str?.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+  }
+
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`, data);
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`, {...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim())});
       if (response.status === 200) {
         setSuccessMessage("Port created successfully");
         form.reset();
