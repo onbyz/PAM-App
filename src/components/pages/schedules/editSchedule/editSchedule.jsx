@@ -12,7 +12,6 @@ import {useNavigate, useParams} from "react-router-dom";
 export default function EditSchedule() {
 	const {uuid} = useParams();
 
-	const [schedules, setSchedules] = useState([]);
 	const [vessels, setVessels] = useState([]);
 	const [ports, setPorts] = useState([]);
 	const [destinations, setDestinations] = useState([]);
@@ -29,8 +28,6 @@ export default function EditSchedule() {
 
 	const fetchSchedules = async () => {
 		try {
-			const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/`);
-			setSchedules(response.data);
 
 			const vesselData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`);
 			const vesselArray = Array.isArray(vesselData.data.data) ? vesselData.data.data : [];
