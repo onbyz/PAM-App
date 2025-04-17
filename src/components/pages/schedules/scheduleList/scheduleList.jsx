@@ -34,34 +34,34 @@ export default function ScheduleList() {
     // Initial fetch for vessel names or countries based on filter type
     useEffect(() => {
         if (filterBy === 'vessel') {
-        fetchVesselNames();
+            fetchVesselNames();
         } else {
-        fetchCountries();
+            fetchCountries();
         }
     }, [filterBy]);
 
     // Fetch vessel names
     const fetchVesselNames = async () => {
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setVesselOptions(data || []);
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
+            });
+            const { data } = await response.json();
+            setVesselOptions(data || []);
         } catch (error) {
-        console.error('Error fetching vessel names:', error);
+            console.error('Error fetching vessel names:', error);
         }
     };
 
     // Fetch countries for origin port filter
     const fetchCountries = async () => {
         try {
-        const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
-        setCountryOptions(countries.data?.data || []);
+            const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
+            setCountryOptions(countries.data?.data || []);
         } catch (error) {
-        console.error('Error fetching countries:', error);
+            console.error('Error fetching countries:', error);
         }
     };
 
@@ -70,17 +70,17 @@ export default function ScheduleList() {
         if (!country) return;
 
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port?countryID=${country}`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setPortOptions(data || []);
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port?countryID=${country}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
+            });
+            const { data } = await response.json();
+            setPortOptions(data || []);
         } catch (error) {
-        console.error('Error fetching ports:', error);
-        // Fallback data if API is not available
-        setPortOptions([{ uuid: 'CGP-DXB', name: 'BANGLADESH - CHITTAGONG VIA DUBAI' }]);
+            console.error('Error fetching ports:', error);
+            // Fallback data if API is not available
+            setPortOptions([{ uuid: 'CGP-DXB', name: 'BANGLADESH - CHITTAGONG VIA DUBAI' }]);
         }
 
         setSelectedPort('');
@@ -94,15 +94,15 @@ export default function ScheduleList() {
         if (!port) return;
 
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setOriginDestinationOptions(data || []);
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
+            });
+            const { data } = await response.json();
+            setOriginDestinationOptions(data || []);
         } catch (error) {
-        console.error('Error fetching origin destinations:', error);
+            console.error('Error fetching origin destinations:', error);
         }
 
         setSelectedOriginDestination('');
@@ -114,15 +114,15 @@ export default function ScheduleList() {
         if (!vessel) return;
 
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setVoyageOptions(data || []);
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
+            });
+            const { data } = await response.json();
+            setVoyageOptions(data || []);
         } catch (error) {
-        console.error('Error fetching voyage refs:', error);
+            console.error('Error fetching voyage refs:', error);
         }
 
         setSelectedVoyage('');
@@ -138,15 +138,15 @@ export default function ScheduleList() {
         if (!vessel || !voyage) return;
 
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/ports?voyageRef=${voyage}&vesselID=${selectedVessel}`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setTransitOptions(data || []);
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/ports?voyageRef=${voyage}&vesselID=${selectedVessel}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
+            });
+            const { data } = await response.json();
+            setTransitOptions(data || []);
         } catch (error) {
-        console.error('Error fetching transit hubs:', error);
+            console.error('Error fetching transit hubs:', error);
         }
 
         setSelectedTransit('');
@@ -160,15 +160,15 @@ export default function ScheduleList() {
         if (!vessel || !voyage || !transit) return;
 
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setDestinationOptions(data || []);
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
+            });
+            const { data } = await response.json();
+            setDestinationOptions(data || []);
         } catch (error) {
-        console.error('Error fetching destinations:', error);
+            console.error('Error fetching destinations:', error);
         }
 
         setSelectedDestination('');
@@ -180,17 +180,17 @@ export default function ScheduleList() {
         if (!selectedVessel || !selectedVoyage || !selectedTransit || !selectedDestination) return;
 
         try {
-        const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
             }
-        }
-        );
-        const { data } = await response.json();
-        setTableData(data || []);
+            );
+            const { data } = await response.json();
+            setTableData(data || []);
         } catch (error) {
-        console.error('Error fetching vessel table data:', error);
+            console.error('Error fetching vessel table data:', error);
         }
     };
 
@@ -199,17 +199,17 @@ export default function ScheduleList() {
         if (!selectedCountry || !selectedPort || !selectedOriginDestination) return;
 
         try {
-        const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`, {
+                headers: {
+                    "ngrok-skip-browser-warning": "true"
+                }
             }
-        }
-        );
-        const { data } = await response.json();
-        setTableData(data || []);
+            );
+            const { data } = await response.json();
+            setTableData(data || []);
         } catch (error) {
-        console.error('Error fetching origin table data:', error);
+            console.error('Error fetching origin table data:', error);
         }
     };
 
@@ -281,26 +281,26 @@ export default function ScheduleList() {
 
         // Clear all options except the ones needed for the selected filter
         if (method === 'vessel') {
-        setPortOptions([]);
-        setOriginDestinationOptions([]);
+            setPortOptions([]);
+            setOriginDestinationOptions([]);
         } else {
-        setVoyageOptions([]);
-        setTransitOptions([]);
-        setDestinationOptions([]);
+            setVoyageOptions([]);
+            setTransitOptions([]);
+            setDestinationOptions([]);
         }
     };
 
     // Fetch table data when all required selections are made
     useEffect(() => {
         if (filterBy === 'vessel' && selectedVessel && selectedVoyage && selectedTransit && selectedDestination) {
-        fetchVesselTableData();
+            fetchVesselTableData();
         }
     }, [filterBy, selectedVessel, selectedVoyage, selectedTransit, selectedDestination]);
 
     // Separate useEffect for origin filter to ensure it only runs when all selections are made
     useEffect(() => {
         if (filterBy === 'origin' && selectedCountry && selectedPort && selectedOriginDestination) {
-        fetchOriginTableData();
+            fetchOriginTableData();
         }
     }, [filterBy, selectedCountry, selectedPort, selectedOriginDestination]);
 
@@ -324,17 +324,17 @@ export default function ScheduleList() {
                 <div className='md:mr-[2.5%]'>
                     <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
                         <h4 className='leading-[56px]'>Schedule</h4>
-                        
+
                         <div className='flex flex-col md:flex-row gap-8 mb-8'>
                             <Link to="/schedule-list/bulk-edit">
-                                <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
+                                <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '>
                                     Bulk Edit
                                 </button>
                             </Link>
 
                             <Link to="/schedule-list/create-schedule">
-                                <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
-                                    <FaPlus className='mt-[2px]'/>
+                                <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '>
+                                    <FaPlus className='mt-[2px]' />
                                     Create Schedule
                                 </button>
                             </Link>
@@ -377,7 +377,7 @@ export default function ScheduleList() {
                                         value={selectedVessel}
                                         onChange={handleVesselChange}
                                         className="w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-                                        >
+                                    >
                                         <option value="">Select...</option>
                                         {vesselOptions.map((vessel, index) => (
                                             <option key={index} value={vessel.uuid}>{vessel.name}</option>
@@ -393,9 +393,8 @@ export default function ScheduleList() {
                                     <select
                                         value={selectedVoyage}
                                         onChange={handleVoyageChange}
-                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                                            !selectedVessel ? 'cursor-not-allowed' : 'cursor-pointer'
-                                        }`}
+                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedVessel ? 'cursor-not-allowed' : 'cursor-pointer'
+                                            }`}
                                         disabled={!selectedVessel}
                                     >
                                         <option value="">Select...</option>
@@ -414,11 +413,10 @@ export default function ScheduleList() {
                                     <select
                                         value={selectedTransit}
                                         onChange={handleTransitChange}
-                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                                            !selectedVoyage ? 'cursor-not-allowed' : 'cursor-pointer'
-                                        }`}
+                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedVoyage ? 'cursor-not-allowed' : 'cursor-pointer'
+                                            }`}
                                         disabled={!selectedVoyage}
-                                        >
+                                    >
                                         <option value="">Select...</option>
                                         {transitOptions.map((transit, index) => (
                                             <option key={index} value={transit.transit}>{transit.transit}</option>
@@ -434,15 +432,13 @@ export default function ScheduleList() {
                                     <select
                                         value={selectedDestination}
                                         onChange={handleDestinationChange}
-                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                                            !selectedTransit ? 'cursor-not-allowed' : 'cursor-pointer'
-                                        }`}
+                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedTransit ? 'cursor-not-allowed' : 'cursor-pointer'
+                                            }`}
                                         disabled={!selectedTransit}
-                                        >
+                                    >
                                         <option value="">Select...</option>
-                                        {destinationOptions.map((destination, index) => (
-                                            <option key={index} value={destination.uuid}>{destination.destination}</option>
-                                        ))}
+                                        <option value={"Europe"}>Europe</option>
+                                        <option value={"USA/Canada"}>USA/Canada</option>
                                     </select>
                                 </div>
                             </div>
@@ -474,11 +470,10 @@ export default function ScheduleList() {
                                     <select
                                         value={selectedPort}
                                         onChange={handlePortChange}
-                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                                            !selectedCountry ? 'cursor-not-allowed' : 'cursor-pointer'
-                                        }`}
+                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedCountry ? 'cursor-not-allowed' : 'cursor-pointer'
+                                            }`}
                                         disabled={!selectedCountry}
-                                        >
+                                    >
                                         <option value="">Select...</option>
                                         {portOptions.map((port, index) => (
                                             <option key={index} value={port.uuid}>{port.name}</option>
@@ -493,15 +488,13 @@ export default function ScheduleList() {
                                     <select
                                         value={selectedOriginDestination}
                                         onChange={handleOriginDestinationChange}
-                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                                            !selectedPort ? 'cursor-not-allowed' : 'cursor-pointer'
-                                        }`}
+                                        className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedPort ? 'cursor-not-allowed' : 'cursor-pointer'
+                                            }`}
                                         disabled={!selectedPort}
-                                        >
+                                    >
                                         <option value="">Select...</option>
-                                        {originDestinationOptions.map((destination, index) => (
-                                            <option key={index} value={destination.uuid}>{destination.destination}</option>
-                                        ))}
+                                        <option value={"Europe"}>Europe</option>
+                                        <option value={"USA/Canada"}>USA/Canada</option>
                                     </select>
                                 </div>
                             </div>
@@ -511,17 +504,17 @@ export default function ScheduleList() {
                             <table className="border-[#E6EDFF] border-[1px] w-full rounded-lg">
                                 <thead>
                                     <tr className='border-[1px] border-[#E6EDFF]'>
-                                    <th>No</th>
-                                    <th>Mother Vessel</th>
-                                    <th>Voyage Ref</th>
-                                    <th>CFS Closing</th>
-                                    <th>FCL Closing</th>
-                                    <th>Origin</th>
-                                    <th>ETD</th>
-                                    <th>ETA {selectedTransit || portOptions.find(val => val.uuid === selectedPort)?.transit }</th>
-                                    <th>ETA {selectedOriginDestination || selectedDestination }</th>
-                                    <th>Transit Time</th>
-                                    <th>Action</th>
+                                        <th>No</th>
+                                        <th>Mother Vessel</th>
+                                        <th>Voyage Ref</th>
+                                        <th>CFS Closing</th>
+                                        <th>FCL Closing</th>
+                                        <th>Origin</th>
+                                        <th>ETD</th>
+                                        <th>ETA {selectedTransit || portOptions.find(val => val.uuid === selectedPort)?.transit}</th>
+                                        <th>ETA {selectedOriginDestination || selectedDestination}</th>
+                                        <th>Transit Time</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -540,28 +533,28 @@ export default function ScheduleList() {
                                                 <td>{row.transit_time} Days</td>
                                                 {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
                                                 <td className="py-3 px-4 cursor-pointer flex gap-6">
-                                                  <div className="relative group inline-block">
-                                                    <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleEdit()}/>
-                                                    <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                                                      Edit
+                                                    <div className="relative group inline-block">
+                                                        <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleEdit()} />
+                                                        <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                                            Edit
+                                                        </div>
                                                     </div>
-                                                  </div>
 
-                                                  <div className="relative group inline-block">
-                                                    <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleDelete()}/>
-                                                    <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                                                      Delete
+                                                    <div className="relative group inline-block">
+                                                        <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleDelete()} />
+                                                        <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                                            Delete
+                                                        </div>
                                                     </div>
-                                                  </div>  
                                                 </td>
                                             </tr>
                                         ))
                                     ) : (
-                                    <tr>
-                                        <td colSpan="11" className={styles.noDataFound}>
-                                            No data available. Please select all filters.
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td colSpan="11" className={styles.noDataFound}>
+                                                No data available. Please select all filters.
+                                            </td>
+                                        </tr>
                                     )}
                                 </tbody>
                             </table>
