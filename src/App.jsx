@@ -17,6 +17,7 @@ import EditPort from '@components/pages/ports/editPort/editPort.jsx';
 import UserManangement from '@components/pages/users/userManagement.jsx';
 import AddUser from '@components/pages/users/addUser/addUser.jsx';
 import NotFound from '@components/pages/notFound/notFound.jsx';
+import EditSchedule from './components/pages/schedules/editSchedule/editSchedule.jsx';
 
 export default function App() {
     return (
@@ -34,6 +35,7 @@ export default function App() {
 						<Route path="/schedule-list" element={<ScheduleList />} />
 						<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
 						<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
+						<Route path="/schedule-list/edit-schedule/:uuid" element={<EditSchedule />} />
 						<Route path="/vessel-management" element={<VesselManangement />} />
 						<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
 						<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />

@@ -50,7 +50,6 @@ export default function EditPort() {
             const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}`);
             if (response.status === 200) {
                 const fetchedData = response.data?.data;
-                console.log({ fetchedData })
                 form.reset({
                     country_id: countries.find((country) => country.id === fetchedData?.country_id)?.uuid,
                     origin: fetchedData?.origin || "",
