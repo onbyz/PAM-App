@@ -52,7 +52,7 @@ export default function EditPort() {
                 const fetchedData = response.data?.data;
                 console.log({ fetchedData })
                 form.reset({
-                    // country_id: fetchedData?.country_id || "",
+                    country_id: countries.find((country) => country.id === fetchedData?.country_id)?.uuid,
                     origin: fetchedData?.origin || "",
                     transit: fetchedData?.transit || "",
                 });
@@ -65,15 +65,19 @@ export default function EditPort() {
 
     useEffect(() => {
         fetchPortData();
-    }, [uuid, form]);
+    }, [uuid, form, countries]);
 
     const handleGoBack = () => {
         navigate(-1);
     };
 
+    function toCapitalCase(str) {
+        return str?.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+    }
+
     const onSubmit = async (data) => {
         try {
-            const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/edit`, data);
+            const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/edit`, {...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim())});
             if (response.status === 200) {
                 setSuccessMessage("Port updated successfully");
                 form.reset();

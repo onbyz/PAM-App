@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 import styles from "./scheduleList.module.css";
+import axios from 'axios';
 
 export default function ScheduleList() {
 
@@ -57,13 +58,8 @@ export default function ScheduleList() {
     // Fetch countries for origin port filter
     const fetchCountries = async () => {
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/location/countries`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setCountryOptions(data || []);
+        const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
+        setCountryOptions(countries.data?.data || []);
         } catch (error) {
         console.error('Error fetching countries:', error);
         }
@@ -541,7 +537,7 @@ export default function ScheduleList() {
                                                 <td>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
                                                 <td>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
                                                 <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
-                                                <td>{row.transit_time}</td>
+                                                <td>{row.transit_time} Days</td>
                                                 {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
                                                 <td className="py-3 px-4 cursor-pointer flex gap-6">
                                                   <div className="relative group inline-block">

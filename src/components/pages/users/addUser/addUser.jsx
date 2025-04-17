@@ -61,7 +61,7 @@ export default function AddUser() {
                     name="first_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">
+                        <FormLabel className="text-[14px] text-black">
                           Enter first Name <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
@@ -82,7 +82,7 @@ export default function AddUser() {
                     name="last_name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">
+                        <FormLabel className="text-[14px] text-black">
                           Enter last Name <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
@@ -103,7 +103,7 @@ export default function AddUser() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">
+                        <FormLabel className="text-[14px] text-black">
                           Enter E-mail ID <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
@@ -122,7 +122,7 @@ export default function AddUser() {
               <div className="my-8">
                 <FormField name="role" control={form.control} render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[14px]">Select Role<span className="text-red-500">*</span></FormLabel>
+                    <FormLabel className="text-[14px] text-black">Select Role<span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Select value={field.value} onValueChange={field.onChange}>
                         <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
