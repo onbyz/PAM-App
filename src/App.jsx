@@ -39,7 +39,7 @@ export default function App() {
 						<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
 						<Route path="/port-management" element={<PortManangement />} />
 						<Route path="/port-management/add-port" element={<AddPort />} />
-						<Route path="/port-management/edit-port" element={<EditPort />} />
+						<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
 						<Route path="/user-management" element={<UserManangement />} />
 						<Route path="/user-management/invite-user" element={<AddUser />} />
 					</Route>
