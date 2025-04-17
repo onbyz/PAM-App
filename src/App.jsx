@@ -7,7 +7,15 @@ import RessetPassword from './components/pages/login/ressetPassword.jsx';
 import CreateSchedule from '@components/pages/schedules/createSchedule/createSchedule.jsx';
 import ScheduleList from '@components/pages/schedules/scheduleList/scheduleList';
 import Layout from '@components/layouts/Layout.jsx';
-import BulkScheduleUpload from './components/pages/bulkEdit/bulkEdit.jsx';
+import BulkEdit from '@components/pages/schedules/bulkEdit/bulkEdit.jsx';
+import VesselManangement from '@components/pages/vessels/vesselManagement.jsx'
+import AddVessel from '@components/pages/vessels/addVessel/addVessel.jsx'
+import EditVessel from '@components/pages/vessels/editVessel/editVessel.jsx';
+import PortManangement from '@components/pages/ports/portManagement.jsx'
+import AddPort from '@components/pages/ports/addPort/addPort.jsx'
+import EditPort from '@components/pages/ports/editPort/editPort.jsx';
+import UserManangement from '@components/pages/users/userManagement.jsx'
+import AddUser from '@components/pages/users/addUser/addUser.jsx'
 
 export default function App() {
     return (
@@ -22,9 +30,17 @@ export default function App() {
 
 					{/* Routes with the Layout (with sidebar) */}
 					<Route element={<Layout />}>
-						<Route path="/create-schedule" element={<CreateSchedule />} />
-						<Route path="/bulk-edit" element={<BulkScheduleUpload />} />
 						<Route path="/schedule-list" element={<ScheduleList />} />
+						<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
+						<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
+						<Route path="/vessel-management" element={<VesselManangement />} />
+						<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
+						<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
+						<Route path="/port-management" element={<PortManangement />} />
+						<Route path="/port-management/add-port" element={<AddPort />} />
+						<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
+						<Route path="/user-management" element={<UserManangement />} />
+						<Route path="/user-management/invite-user" element={<AddUser />} />
 					</Route>
 				</Routes>
 			</div>

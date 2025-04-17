@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FaXmark, FaEllipsis, FaPlus } from "react-icons/fa6";
+import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 import styles from "./scheduleList.module.css";
+import axios from 'axios';
 
 export default function ScheduleList() {
 
@@ -57,13 +58,8 @@ export default function ScheduleList() {
     // Fetch countries for origin port filter
     const fetchCountries = async () => {
         try {
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/location/countries`, {
-            headers: {
-            "ngrok-skip-browser-warning": "true"
-            }
-        });
-        const { data } = await response.json();
-        setCountryOptions(data || []);
+        const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
+        setCountryOptions(countries.data?.data || []);
         } catch (error) {
         console.error('Error fetching countries:', error);
         }
@@ -314,6 +310,14 @@ export default function ScheduleList() {
         return dateA - dateB;
     });
 
+    const handleEdit = () => {
+        console.log("Edit button clicked")
+    }
+
+    const handleDelete = () => {
+        console.log("Delete button clicked")
+    }
+
     return (
         <div>
             <div>
@@ -322,13 +326,13 @@ export default function ScheduleList() {
                         <h4 className='leading-[56px]'>Schedule</h4>
                         
                         <div className='flex flex-col md:flex-row gap-8 mb-8'>
-                            <Link to="/bulk-edit">
+                            <Link to="/schedule-list/bulk-edit">
                                 <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                                     Bulk Edit
                                 </button>
                             </Link>
 
-                            <Link to="/create-schedule">
+                            <Link to="/schedule-list/create-schedule">
                                 <button className='w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 '> 
                                     <FaPlus className='mt-[2px]'/>
                                     Create Schedule
@@ -522,24 +526,36 @@ export default function ScheduleList() {
                                 </thead>
                                 <tbody>
                                     {tableData.length > 0 ? (
-                                    sortedData.map((row, index) => (
-                                        <tr key={index} className='border-[1px] border-[#E6EDFF]'>
-                                        <td>{(index + 1)}</td>
-                                        <td>{row.vessel_name}</td>
-                                        <td>{row.voyage_no}</td>
-                                        <td>{new Date(row.cfs_closing).toLocaleDateString("en-GB")}</td>
-                                        <td>{new Date(row.fcl_closing).toLocaleDateString("en-GB")}</td>
-                                        <td>{row.origin}</td>
-                                        <td>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
-                                        <td>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
-                                        <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
-                                        <td>{row.transit_time}</td>
-                                        {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
-                                        <td className="py-3 px-4 cursor-pointer">
-                                            <FaEllipsis className='w-[24px] h-[24px]'/>
-                                        </td>
-                                        </tr>
-                                    ))
+                                        sortedData.map((row, index) => (
+                                            <tr key={index} className='border-[1px] border-[#E6EDFF]'>
+                                                <td>{(index + 1)}</td>
+                                                <td>{row.vessel_name}</td>
+                                                <td>{row.voyage_no}</td>
+                                                <td>{new Date(row.cfs_closing).toLocaleDateString("en-GB")}</td>
+                                                <td>{new Date(row.fcl_closing).toLocaleDateString("en-GB")}</td>
+                                                <td>{row.origin}</td>
+                                                <td>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
+                                                <td>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
+                                                <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
+                                                <td>{row.transit_time} Days</td>
+                                                {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
+                                                <td className="py-3 px-4 cursor-pointer flex gap-6">
+                                                  <div className="relative group inline-block">
+                                                    <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleEdit()}/>
+                                                    <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                                      Edit
+                                                    </div>
+                                                  </div>
+
+                                                  <div className="relative group inline-block">
+                                                    <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleDelete()}/>
+                                                    <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                                      Delete
+                                                    </div>
+                                                  </div>  
+                                                </td>
+                                            </tr>
+                                        ))
                                     ) : (
                                     <tr>
                                         <td colSpan="11" className={styles.noDataFound}>
