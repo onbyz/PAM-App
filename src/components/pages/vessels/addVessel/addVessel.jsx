@@ -71,7 +71,7 @@ export default function AddVessel() {
                   name="vessel_name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[14px]">
+                      <FormLabel className="text-[14px] text-black">
                         Vessel Name <span className="text-red-500">*</span>
                       </FormLabel>
                       <FormControl>
