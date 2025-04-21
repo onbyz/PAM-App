@@ -1,16 +1,16 @@
-import React, {useState, useEffect} from "react";
-import {FaXmark} from "react-icons/fa6";
-import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage} from "@components/ui/form";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {useForm} from "react-hook-form";
+import React, { useState, useEffect } from "react";
+import { FaXmark } from "react-icons/fa6";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useForm } from "react-hook-form";
 import axios from "axios";
-import {Input} from "@/components/ui/input";
-import {z} from "zod";
-import {zodResolver} from "@hookform/resolvers/zod";
-import {useNavigate, useParams} from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function EditSchedule() {
-	const {uuid} = useParams();
+	const { uuid } = useParams();
 
 	const [vessels, setVessels] = useState([]);
 	const [ports, setPorts] = useState([]);
@@ -26,9 +26,12 @@ export default function EditSchedule() {
 	const [countries, setCountries] = useState([]);
     const [scheduleData, setScheduleData] = useState({});
 
+	const [etaUsaCanada, setEtaUsaCanada] = useState("");
+	const [transitTimeUsaCanada, setTransitTimeUsaCanada] = useState("");
+    const [selectedCountryId, setSelectedCountryId] = useState(null);
+
 	const fetchSchedules = async () => {
 		try {
-
 			const vesselData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`);
 			const vesselArray = Array.isArray(vesselData.data.data) ? vesselData.data.data : [];
 			setVessels(vesselArray);
@@ -54,6 +57,7 @@ export default function EditSchedule() {
 
 	// Function to calculate day difference
 	const calculateDayDifference = (start, end) => {
+		if (!start || !end) return "";
 		const startDate = new Date(start);
 		const endDate = new Date(end);
 		return Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)); // Convert ms to days
@@ -74,6 +78,8 @@ export default function EditSchedule() {
 		destination: z.string().nonempty("Destination is required"),
 		dst_eta: z.string().nonempty("Destination ETA is required"),
 		transit_time: z.string().nonempty("Transit Time is required"),
+		eta_usa: z.string().nonempty("ETA USA/Canada is required"),
+		transit_time_usa: z.string().nonempty("Transit Time USA/Canada is required"),
 	});
 
 	const form = useForm({
@@ -91,85 +97,148 @@ export default function EditSchedule() {
 			eta_transit: "",
 			destination: "",
 			dst_eta: "",
-			transit_time: calculateDayDifference(etdDate, etaDate) || "",
+			transit_time: "",
+			eta_usa: "",
+			transit_time_usa: "",
 		},
 	});
 
-	const formatedDate = (date) => (date ? new Date(date).toISOString().split("T")[0] : "");
+	const formatedDate = (date) => {
+		if (!date) return "";
+		return date.split('T')[0];
+	};
 
 	const fetchScheduleData = async () => {
 		try {
 			const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}`);
 			if (response.status === 200) {
 				const fetchedData = response.data?.data[0];
-				console.log({fetchedData});
                 setScheduleData(fetchedData);
+				
+				if (fetchedData) {
+					if (fetchedData.etd) setEtdDate(formatedDate(fetchedData.etd));
+					if (fetchedData.eta_transit) setEtaDubaiDate(formatedDate(fetchedData.eta_transit));
+					if (fetchedData.dst_eta) setEtaDate(formatedDate(fetchedData.dst_eta));
+					if (fetchedData.eta_usa) setEtaUsaCanada(formatedDate(fetchedData.eta_usa));
+					if (fetchedData.transit_time_usa) setTransitTimeUsaCanada(fetchedData.transit_time_usa);
+					if (fetchedData.country_id) setSelectedCountryId(fetchedData.country_id);
+				}
 			}
 		} catch (error) {
-			setErrorMessage(error.response?.data?.message || "Error fetching vessel data");
-			console.error("Error fetching vessel data:", error);
+			setErrorMessage(error.response?.data?.message || "Error fetching schedule data");
+			console.error("Error fetching schedule data:", error);
 		}
 	};
 
-	const selectedCountryID = countries.find((country) => country.uuid === form.watch("country"));
-	const filteredPorts = ports.filter((port) => port.country_id === selectedCountryID?.id);
+	const calculateEtaUsaCanada = (etaDate) => {
+		if (!etaDate) return "";
+		const date = new Date(etaDate);
+		date.setDate(date.getDate() + 2);
+		return date.toISOString().split("T")[0];
+	};
+
+	const selectedCountry = form.watch("country");
+	const selectedCountryObject = countries.find((country) => country.uuid === selectedCountry);
+	
+	const filteredPorts = ports.filter((port) => {
+        return selectedCountryObject ? port.country_id === selectedCountryObject.id : 
+               selectedCountryId ? port.country_id === selectedCountryId : false;
+    });
 
 	useEffect(() => {
 		fetchScheduleData();
 	}, [uuid]);
 
-    useEffect(() => {
-        form.reset({
-            country: countries.find((country) => country.id === scheduleData?.country_id)?.uuid,
-            port_id: ports.find((port) => port.id === scheduleData?.port_id)?.uuid,
-            etd: formatedDate(scheduleData?.etd),
-            vessel_id: vessels.find((vessel) => vessel.id === scheduleData?.vessel_id)?.uuid,
-            voyage_no: scheduleData?.voyage_no,
-            cfs_closing: formatedDate(scheduleData?.cfs_closing),
-            fcl_closing: formatedDate(scheduleData?.fcl_closing),
-            eta_transit: formatedDate(scheduleData?.eta_transit),
-            destination: scheduleData?.destination,
-            dst_eta: formatedDate(scheduleData?.dst_eta),
-            transit_time: scheduleData?.transit_time,
-        });
-    }, [scheduleData, countries, ports, vessels, form, selectedCountryID]);
+	useEffect(() => {
+		if (!scheduleData || Object.keys(scheduleData).length === 0 || !countries.length || !ports.length || !vessels.length) return;
+		
+		const countryUuid = countries.find(country => country.id === scheduleData.country_id)?.uuid;
+		
+		const portUuid = ports.find(port => port.id === scheduleData.port_id)?.uuid;
+		
+		const vesselUuid = vessels.find(vessel => vessel.id === scheduleData.vessel_id)?.uuid;
+		
+        if (countryUuid && portUuid && vesselUuid) {
+            form.reset({
+                country: countryUuid,
+                port_id: portUuid,
+                etd: formatedDate(scheduleData.etd) || "",
+                vessel_id: vesselUuid,
+                voyage_no: scheduleData.voyage_no || "",
+                cfs_closing: formatedDate(scheduleData.cfs_closing) || "",
+                fcl_closing: formatedDate(scheduleData.fcl_closing) || "",
+                eta_transit: formatedDate(scheduleData.eta_transit) || "",
+                destination: scheduleData.destination || "",
+                dst_eta: formatedDate(scheduleData.dst_eta) || "",
+                transit_time: scheduleData.transit_time?.toString() || "",
+                eta_usa: formatedDate(scheduleData.eta_usa) || "",
+                transit_time_usa: scheduleData.transit_time_usa?.toString() || "",
+            });
+        }
+	}, [scheduleData, countries, ports, vessels, form]);
 
 	const onSubmit = async (data) => {
-        data = {...data, created_by: scheduleData?.created_by};
+		data = { ...data, created_by: scheduleData?.created_by };
 
 		try {
 			const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}/edit`, data);
 			console.log("Form data : ", response.data);
-			window.scrollTo({top: 0, behavior: "smooth"});
+			window.scrollTo({ top: 0, behavior: "smooth" });
 			setSuccessMessage("Schedule updated successfully");
 			setTimeout(() => setSuccessMessage(""), 8000);
 		} catch (error) {
 			if (error.response && error.response.data && error.response.data.message) {
 				setErrorMessage(error.response.data.data);
-				window.scrollTo({top: 0, behavior: "smooth"});
+				window.scrollTo({ top: 0, behavior: "smooth" });
 				setTimeout(() => setErrorMessage(""), 8000);
 			} else {
-				alert("Error occurred while creating the schedule.");
+				alert("Error occurred while updating the schedule.");
 			}
-			console.error("Error Creating Schedule : ", error);
+			console.error("Error Updating Schedule : ", error);
 		}
 	};
 
 	const getNextDay = (date) => {
+		if (!date) return new Date().toISOString().split("T")[0];
 		const nextDay = new Date(date);
 		nextDay.setDate(nextDay.getDate() + 1);
 		return nextDay.toISOString().split("T")[0];
 	};
 
-	const {setValue} = form;
+	const { setValue, watch } = form;
 
 	useEffect(() => {
 		if (etdDate && etaDate) {
 			const difference = calculateDayDifference(etdDate, etaDate);
-			const formattedDifference = `${difference}`;
-			setValue("transit_time", formattedDifference);
+			setValue("transit_time", difference.toString());
 		}
 	}, [etdDate, etaDate, setValue]);
+
+	useEffect(() => {
+		if (etaDate) {
+			const usaCanadaEta = calculateEtaUsaCanada(etaDate);
+			setEtaUsaCanada(usaCanadaEta);
+			setValue("eta_usa", usaCanadaEta);
+		}
+	}, [etaDate, setValue]);
+
+	useEffect(() => {
+		const transitTime = watch("transit_time");
+		if (transitTime) {
+			const numericValue = Number.parseInt(transitTime, 10);
+			if (!isNaN(numericValue)) {
+				const usaCanadaTransitTime = (numericValue + 2).toString();
+				setTransitTimeUsaCanada(usaCanadaTransitTime);
+				setValue("transit_time_usa", usaCanadaTransitTime);
+			}
+		}
+	}, [watch("transit_time"), setValue, watch]);
+
+	useEffect(() => {
+		if (selectedCountryObject) {
+			setSelectedCountryId(selectedCountryObject.id);
+		}
+	}, [selectedCountryObject]);
 
 	const navigate = useNavigate();
 
@@ -216,7 +285,7 @@ export default function EditSchedule() {
 										<FormField
 											name="country"
 											control={form.control}
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														Choose Country <span className="text-red-500">*</span>
@@ -245,10 +314,10 @@ export default function EditSchedule() {
 										<FormField
 											name="port_id"
 											control={form.control}
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
-														Choose Name of Origin Port <span className="text-red-500">*</span>
+														Choose Port <span className="text-red-500">*</span>
 													</FormLabel>
 													<FormControl>
 														<Select value={field.value} onValueChange={field.onChange}>
@@ -258,7 +327,7 @@ export default function EditSchedule() {
 															<SelectContent>
 																{filteredPorts.map((item) => (
 																	<SelectItem key={item.uuid} value={item.uuid} className="text-[16px]">
-																		{item.origin}
+																		{item.name}
 																	</SelectItem>
 																))}
 															</SelectContent>
@@ -274,7 +343,7 @@ export default function EditSchedule() {
 										<FormField
 											control={form.control}
 											name="etd"
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														Enter ETD <span className="text-red-500">*</span>
@@ -307,7 +376,7 @@ export default function EditSchedule() {
 										<FormField
 											name="vessel_id"
 											control={form.control}
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														Choose Vessel <span className="text-red-500">*</span>
@@ -336,7 +405,7 @@ export default function EditSchedule() {
 										<FormField
 											control={form.control}
 											name="voyage_no"
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														Voyage No <span className="text-red-500">*</span>
@@ -356,7 +425,7 @@ export default function EditSchedule() {
 										<FormField
 											control={form.control}
 											name="cfs_closing"
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														CFS Closing <span className="text-red-500">*</span>
@@ -365,7 +434,6 @@ export default function EditSchedule() {
 														<Input
 															type="date"
 															className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-															min={new Date().toISOString().split("T")[0]}
 															{...field}
 														/>
 													</FormControl>
@@ -379,7 +447,7 @@ export default function EditSchedule() {
 										<FormField
 											control={form.control}
 											name="fcl_closing"
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														FCL Closing <span className="text-red-500">*</span>
@@ -388,7 +456,6 @@ export default function EditSchedule() {
 														<Input
 															type="date"
 															className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
-															min={new Date().toISOString().split("T")[0]}
 															{...field}
 														/>
 													</FormControl>
@@ -407,7 +474,7 @@ export default function EditSchedule() {
 									<FormField
 										control={form.control}
 										name="eta_transit"
-										render={({field}) => (
+										render={({ field }) => (
 											<FormItem>
 												<FormLabel className="text-[14px] text-black">
 													Enter ETA Dubai <span className="text-red-500">*</span>
@@ -439,7 +506,7 @@ export default function EditSchedule() {
 										<FormField
 											name="destination"
 											control={form.control}
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														Choose Destination <span className="text-red-500">*</span>
@@ -468,7 +535,7 @@ export default function EditSchedule() {
 										<FormField
 											control={form.control}
 											name="dst_eta"
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														Enter ETA <span className="text-red-500">*</span>
@@ -495,10 +562,64 @@ export default function EditSchedule() {
 										<FormField
 											control={form.control}
 											name="transit_time"
-											render={({field}) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel className="text-[14px] text-black">
 														Transit Time <span className="text-red-500">*</span>
+													</FormLabel>
+													<FormControl>
+														<Input
+															className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
+															value={field.value ? `${field.value} Days` : ""}
+															onChange={(e) => {
+																const numericValue = e.target.value.replace(/\D/g, "");
+																field.onChange(numericValue);
+															}}
+														/>
+													</FormControl>
+													<FormMessage className="text-[14px]" />
+												</FormItem>
+											)}
+										/>
+									</div>
+								</div>
+
+								<div className="my-8">
+									<h6 className="text-[#16A34A] border-b-[1px] border-[#0000001A] pb-4">Additional data</h6>
+								</div>
+
+								<div className="flex flex-col md:flex-row gap-12">
+									<div className="flex flex-col">
+										<FormField
+											control={form.control}
+											name="eta_usa"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-[14px] text-black">
+														ETA USA/Canada <span className="text-red-500">*</span>
+													</FormLabel>
+													<FormControl>
+														<Input
+															type="date"
+															className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
+															min={etaDate ? calculateEtaUsaCanada(etaDate) : new Date().toISOString().split("T")[0]}
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage className="text-[14px]" />
+												</FormItem>
+											)}
+										/>
+									</div>
+
+									<div className="flex flex-col">
+										<FormField
+											control={form.control}
+											name="transit_time_usa"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel className="text-[14px] text-black">
+														Transit Time USA/Canada <span className="text-red-500">*</span>
 													</FormLabel>
 													<FormControl>
 														<Input
