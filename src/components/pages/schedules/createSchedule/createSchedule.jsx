@@ -23,6 +23,7 @@ export default function CreateSchedule() {
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [countries, setCountries] = useState([]);
 
   const fetchSchedules = async () => {
     try {
@@ -33,13 +34,16 @@ export default function CreateSchedule() {
       const vesselArray = Array.isArray(vesselData.data.data) ? vesselData.data.data : [];
       setVessels(vesselArray);
 
-      const portsData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/ports`);
+      const portsData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`);
       const portsArray = Array.isArray(portsData.data.data) ? portsData.data.data : [];
       setPorts(portsArray);
 
       const destinationData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations`);
       const destinationsArray = Array.isArray(destinationData.data.data) ? destinationData.data.data : [];
       setDestinations(destinationsArray);
+
+      const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
+      setCountries(countries.data?.data || []);
 
     } catch (error) {
       console.error("Error fetching schedules:", error);
@@ -63,8 +67,6 @@ export default function CreateSchedule() {
   //     setDayDifference(calculateDayDifference(etdDate, etaDate));
   //   }
   // }, [etdDate, etaDate]);
-
-  const countries = ['United States', 'Canada', 'United Kingdom', 'Australia', 'India'];
 
   const formSchema = z.object({
     country: z.string().nonempty("Country is required"),
@@ -98,6 +100,9 @@ export default function CreateSchedule() {
       transit_time: calculateDayDifference(etdDate, etaDate) || "",
     },
   });
+
+  const selectedCountryID = countries.find((country) => country.uuid === form.watch("country"));
+  const filteredPorts = ports.filter((port) => port.country_id === selectedCountryID?.id);
 
   const onSubmit = async (data) => {
     console.log("Submitting Data:", data);
@@ -183,7 +188,7 @@ export default function CreateSchedule() {
                   <div className='flex flex-col'>
                     <FormField name="country" control={form.control} render={({ field }) => (
                       <FormItem>
-                          <FormLabel className="text-[14px]">Choose Country <span className="text-red-500">*</span></FormLabel>
+                          <FormLabel className="text-[14px] text-black">Choose Country <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Select value={field.value} onValueChange={field.onChange}>
                                   <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
@@ -191,8 +196,8 @@ export default function CreateSchedule() {
                                   </SelectTrigger>
                                   <SelectContent>
                                       {countries.map((country) => (
-                                          <SelectItem key={country} value={country} className="text-[16px]">
-                                              {country}
+                                          <SelectItem key={country.id} value={country.uuid} className="text-[16px]">
+                                              {country.name}
                                           </SelectItem>
                                       ))}
                                   </SelectContent>
@@ -207,14 +212,14 @@ export default function CreateSchedule() {
                   <div className='flex flex-col'>
                     <FormField name="port_id" control={form.control} render={({ field }) => (
                       <FormItem>
-                          <FormLabel className="text-[14px]">Choose Name of Origin Port <span className="text-red-500">*</span></FormLabel>
+                          <FormLabel className="text-[14px] text-black">Choose Name of Origin Port <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Select value={field.value} onValueChange={field.onChange}>
                                   <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                                       <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent>
-                                      {ports.map((item) => (
+                                      {filteredPorts.map((item) => (
                                           <SelectItem key={item.uuid} value={item.uuid} className="text-[16px]">
                                               {item.origin}
                                           </SelectItem>
@@ -230,7 +235,7 @@ export default function CreateSchedule() {
                   <div className="flex flex-col">
                     <FormField control={form.control} name="etd" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">Enter ETD <span className="text-red-500">*</span></FormLabel>
+                        <FormLabel className="text-[14px] text-black">Enter ETD <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Input 
                                 type="date" 
@@ -259,7 +264,7 @@ export default function CreateSchedule() {
                   <div className='flex flex-col'>
                     <FormField name="vessel_id" control={form.control} render={({ field }) => (
                       <FormItem>
-                          <FormLabel className="text-[14px]">Choose Vessel <span className="text-red-500">*</span></FormLabel>
+                          <FormLabel className="text-[14px] text-black">Choose Vessel <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Select value={field.value} onValueChange={field.onChange}>
                                   <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
@@ -282,7 +287,7 @@ export default function CreateSchedule() {
                   <div className='flex flex-col'>
                     <FormField control={form.control} name="voyage_no" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">Voyage No <span className="text-red-500">*</span></FormLabel>
+                        <FormLabel className="text-[14px] text-black">Voyage No <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Input className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white" {...field} />
                           </FormControl>
@@ -297,7 +302,7 @@ export default function CreateSchedule() {
                   <div className="flex flex-col">
                     <FormField control={form.control} name="cfs_closing" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">CFS Closing <span className="text-red-500">*</span></FormLabel>
+                        <FormLabel className="text-[14px] text-black">CFS Closing <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Input 
                                 type="date" 
@@ -314,7 +319,7 @@ export default function CreateSchedule() {
                   <div className="flex flex-col">
                     <FormField control={form.control} name="fcl_closing" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">FCL Closing <span className="text-red-500">*</span></FormLabel>
+                        <FormLabel className="text-[14px] text-black">FCL Closing <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Input 
                                 type="date" 
@@ -339,7 +344,7 @@ export default function CreateSchedule() {
                 <div className="flex flex-col">
                   <FormField control={form.control} name="eta_transit" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[14px]">Enter ETA Dubai <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="text-[14px] text-black">Enter ETA Dubai <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                             <Input 
                               type="date" 
@@ -367,7 +372,7 @@ export default function CreateSchedule() {
                   <div className='flex flex-col'>
                     <FormField name="destination" control={form.control} render={({ field }) => (
                       <FormItem>
-                          <FormLabel className="text-[14px]">Choose Destination <span className="text-red-500">*</span></FormLabel>
+                          <FormLabel className="text-[14px] text-black">Choose Destination <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Select value={field.value} onValueChange={field.onChange}>
                                   <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
@@ -391,7 +396,7 @@ export default function CreateSchedule() {
                   <div className="flex flex-col">
                     <FormField control={form.control} name="dst_eta" render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[14px]">Enter ETA <span className="text-red-500">*</span></FormLabel>
+                        <FormLabel className="text-[14px] text-black">Enter ETA <span className="text-red-500">*</span></FormLabel>
                           <FormControl>
                               <Input 
                                 type="date" 
@@ -412,7 +417,7 @@ export default function CreateSchedule() {
                   <div className='flex flex-col'>
                     <FormField control={form.control} name="transit_time" render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-[14px]">
+                          <FormLabel className="text-[14px] text-black">
                             Transit Time <span className="text-red-500">*</span>
                           </FormLabel>
                           <FormControl>
