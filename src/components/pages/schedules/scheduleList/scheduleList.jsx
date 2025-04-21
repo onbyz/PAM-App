@@ -529,14 +529,14 @@ export default function ScheduleList() {
                                                 <td>{row.transit_time} Days</td>
                                                 {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
                                                 <td className="py-3 px-4 cursor-pointer flex gap-6">
-                                                  <div className="relative group inline-block">
-                                                    <Link to={`/schedule-list/edit-schedule/${row.uuid}`}>
-                                                        <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" />
-                                                        <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
-                                                        Edit
-                                                        </div>
-                                                    </Link>
-                                                  </div>
+                                                    <div className="relative group inline-block">
+                                                        <Link to={`/schedule-list/edit-schedule/${row.uuid}`}>
+                                                            <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" />
+                                                            <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">
+                                                                Edit
+                                                            </div>
+                                                        </Link>
+                                                    </div>
 
                                                     <div className="relative group inline-block">
                                                         <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleDelete()} />
@@ -550,7 +550,12 @@ export default function ScheduleList() {
                                     ) : (
                                         <tr>
                                             <td colSpan="11" className={styles.noDataFound}>
-                                                No data available. Please select all filters.
+                                                {
+                                                    filterBy === "vessel" ?
+                                                        (selectedCountry && selectedPort && selectedOriginDestination) ? "Available On Request" : "No data available. Please select all filters."
+                                                        :
+                                                        (selectedVessel && selectedVoyage && selectedTransit && selectedDestination) ? "Available On Request" : "No data available. Please select all filters."
+                                                }
                                             </td>
                                         </tr>
                                     )}
