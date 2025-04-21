@@ -14,7 +14,7 @@ export default function EditSchedule() {
 
 	const [vessels, setVessels] = useState([]);
 	const [ports, setPorts] = useState([]);
-	const [destinations, setDestinations] = useState([]);
+	const [destinations, setDestinations] = useState([{destination: 'Europe'}])
 
 	const [etdDate, setEtdDate] = useState("");
 	const [etaDubai, setEtaDubaiDate] = useState("");
@@ -42,7 +42,7 @@ export default function EditSchedule() {
 
 			const destinationData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations`);
 			const destinationsArray = Array.isArray(destinationData.data.data) ? destinationData.data.data : [];
-			setDestinations(destinationsArray);
+			// setDestinations(destinationsArray);
 
 			const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
 			setCountries(countries.data?.data || []);
