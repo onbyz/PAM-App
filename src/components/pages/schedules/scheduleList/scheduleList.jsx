@@ -414,9 +414,12 @@ export default function ScheduleList() {
                                         disabled={!selectedVoyage}
                                     >
                                         <option value="">Select...</option>
-                                        {transitOptions.map((transit, index) => (
+                                        {transitOptions.length > 0 ? transitOptions.map((transit, index) => (
                                             <option key={index} value={transit.transit}>{transit.transit}</option>
-                                        ))}
+                                        )) :
+                                            (
+                                                <option value="Dubai">Dubai</option>
+                                            )}
                                     </select>
                                 </div>
 
@@ -551,7 +554,7 @@ export default function ScheduleList() {
                                         <tr>
                                             <td colSpan="11" className={styles.noDataFound}>
                                                 {
-                                                    filterBy === "vessel" ?
+                                                    filterBy === "origin" ?
                                                         (selectedCountry && selectedPort && selectedOriginDestination) ? "Available On Request" : "No data available. Please select all filters."
                                                         :
                                                         (selectedVessel && selectedVoyage && selectedTransit && selectedDestination) ? "Available On Request" : "No data available. Please select all filters."
