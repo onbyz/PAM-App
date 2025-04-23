@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function ScheduleList() {
-  const [filterBy, setFilterBy] = useState("vessel") // 'vessel' or 'origin'
+  const [filterBy, setFilterBy] = useState("origin") // 'vessel' or 'origin'
 
   // For vessel filter
   const [selectedVessel, setSelectedVessel] = useState("")
@@ -409,19 +409,19 @@ export default function ScheduleList() {
                 <input
                   type="radio"
                   name="filterBy"
-                  checked={filterBy === "vessel"}
-                  onChange={() => handleFilterByChange("vessel")}
+                  checked={filterBy === "origin"}
+                  onChange={() => handleFilterByChange("origin")}
                 />{" "}
-                List by Vessel Name
+                List by Origin Port
               </label>
               <label>
                 <input
                   type="radio"
                   name="filterBy"
-                  checked={filterBy === "origin"}
-                  onChange={() => handleFilterByChange("origin")}
+                  checked={filterBy === "vessel"}
+                  onChange={() => handleFilterByChange("vessel")}
                 />{" "}
-                List by Origin Port
+                List by Vessel Name
               </label>
             </div>
 
@@ -451,9 +451,8 @@ export default function ScheduleList() {
                   <select
                     value={selectedVoyage}
                     onChange={handleVoyageChange}
-                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                      !selectedVessel ? "cursor-not-allowed" : "cursor-pointer"
-                    }`}
+                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedVessel ? "cursor-not-allowed" : "cursor-pointer"
+                      }`}
                     disabled={!selectedVessel}
                   >
                     <option value="">Select...</option>
@@ -472,9 +471,8 @@ export default function ScheduleList() {
                   <select
                     value={selectedTransit}
                     onChange={handleTransitChange}
-                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                      !selectedVoyage ? "cursor-not-allowed" : "cursor-pointer"
-                    }`}
+                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedVoyage ? "cursor-not-allowed" : "cursor-pointer"
+                      }`}
                     disabled={!selectedVoyage}
                   >
                     <option value="">Select...</option>
@@ -496,9 +494,8 @@ export default function ScheduleList() {
                   <select
                     value={selectedDestination}
                     onChange={handleDestinationChange}
-                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                      !selectedTransit ? "cursor-not-allowed" : "cursor-pointer"
-                    }`}
+                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedTransit ? "cursor-not-allowed" : "cursor-pointer"
+                      }`}
                     disabled={!selectedTransit}
                   >
                     <option value="">Select...</option>
@@ -533,9 +530,8 @@ export default function ScheduleList() {
                   <select
                     value={selectedPort}
                     onChange={handlePortChange}
-                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                      !selectedCountry ? "cursor-not-allowed" : "cursor-pointer"
-                    }`}
+                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedCountry ? "cursor-not-allowed" : "cursor-pointer"
+                      }`}
                     disabled={!selectedCountry}
                   >
                     <option value="">Select...</option>
@@ -552,9 +548,8 @@ export default function ScheduleList() {
                   <select
                     value={selectedOriginDestination}
                     onChange={handleOriginDestinationChange}
-                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${
-                      !selectedPort ? "cursor-not-allowed" : "cursor-pointer"
-                    }`}
+                    className={`w-[300px] md:w-[200px] LapL:w-[250px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white ${!selectedPort ? "cursor-not-allowed" : "cursor-pointer"
+                      }`}
                     disabled={!selectedPort}
                   >
                     <option value="">Select...</option>
