@@ -18,13 +18,13 @@ const formSchema = z.object({
 export default function AddPorts() {
   const [countries, setCountries] = React.useState([]);
   const [successMessage, setSuccessMessage] = React.useState("");
+  const [error, setError] = React.useState("");
   const navigate = useNavigate();
 
   const fetchCountries = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
       const data = response.data?.data || [];
-      console.log({ data })
       setCountries(data);
 
       // setCountryOptions(data || []);
@@ -63,6 +63,7 @@ export default function AddPorts() {
         setTimeout(() => navigate("/port-management"), 3000);
       }
     } catch (error) {
+      setError(error.response.data.message || "Error adding port");
       console.error("Error adding port:", error);
     }
   };
@@ -84,6 +85,13 @@ export default function AddPorts() {
           <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
             {successMessage}
             <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setSuccessMessage("")}/>
+          </div>
+        )}
+
+        {error && (
+          <div className="w-full bg-red-100 text-red-800 text-start p-3 rounded-md my-6 flex justify-between">
+            {error}
+            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setError("")}/>
           </div>
         )}
 
