@@ -243,6 +243,9 @@ export default function ScheduleList() {
     const vessel = e.target.value
     setSelectedVessel(vessel)
     fetchVoyageRefs(vessel)
+    setSelectedDestination(null)
+    setSelectedTransit(null)
+    setSelectedVoyage(null)
   }
 
   // Handle voyage selection
@@ -250,12 +253,15 @@ export default function ScheduleList() {
     const voyage = e.target.value
     setSelectedVoyage(voyage)
     fetchTransitHubs(selectedVessel, voyage)
+    setSelectedDestination(null)
+    setSelectedTransit(null)
   }
 
   // Handle transit selection
   const handleTransitChange = (e) => {
     const transit = e.target.value
     setSelectedTransit(transit)
+    setSelectedDestination(null)
     fetchDestinations(selectedVessel, selectedVoyage, transit)
   }
 
@@ -270,16 +276,17 @@ export default function ScheduleList() {
   const handleCountryChange = (e) => {
     const country = e.target.value
     setSelectedCountry(country)
+    setSelectedPort(null)
+    setOriginDestinationOptions(null)
     fetchPorts(country)
   }
 
   // Handle port selection for origin port filter
   const handlePortChange = (e) => {
     const port = e.target.value
-
     const selectedPort = portOptions.find((option) => option.uuid === port)
-
     setSelectedPort(port)
+    setOriginDestinationOptions(null)
     fetchOriginDestinations(selectedPort?.transit)
   }
 
@@ -569,11 +576,11 @@ export default function ScheduleList() {
                     <th>Voyage Ref</th>
                     <th>CFS Closing</th>
                     <th>FCL Closing</th>
-                    <th>Origin</th>
                     <th>ETD</th>
                     <th>ETA {selectedTransit || portOptions.find((val) => val.uuid === selectedPort)?.transit}</th>
                     <th>ETA {selectedOriginDestination || selectedDestination}</th>
                     <th>Transit Time</th>
+                    <th>Origin</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -586,11 +593,11 @@ export default function ScheduleList() {
                         <td>{row.voyage_no}</td>
                         <td>{new Date(row.cfs_closing).toLocaleDateString("en-GB")}</td>
                         <td>{new Date(row.fcl_closing).toLocaleDateString("en-GB")}</td>
-                        <td>{row.origin}</td>
                         <td>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
                         <td>{new Date(row.eta_transit).toLocaleDateString("en-GB")}</td>
                         <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
                         <td>{row.transit_time} Days</td>
+                        <td>{row.origin}</td>
                         {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
                         <td className="py-3 px-4 cursor-pointer flex gap-6">
                           <div className="relative group inline-block">
