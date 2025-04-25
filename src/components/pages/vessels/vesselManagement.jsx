@@ -9,6 +9,7 @@ export default function VesselManangement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
   
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -44,6 +45,8 @@ export default function VesselManangement() {
     
     // Reset to first page when search changes
     setCurrentPage(1);
+    // Clear selections when filtering
+    setSelectedItems([]);
   }, [searchQuery, tableData]);
 
   useEffect(() => {
@@ -62,6 +65,8 @@ export default function VesselManangement() {
         if (response.status === 200) {
           setSuccessMessage("Vessel deleted successfully");
           setTableData((prevData) => prevData.filter((item) => item.uuid !== uuid));
+          // Clear the deleted item from selection if it was selected
+          setSelectedItems(prev => prev.filter(id => id !== uuid));
           setTimeout(() => {
             setSuccessMessage("");
           }, 5000);
@@ -72,6 +77,49 @@ export default function VesselManangement() {
           setErrorMessage("");
         }, 5000);
         console.error("Error deleting vessel:", error);
+      }
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedItems.length === 0) return;
+    
+    if (confirm(`Are you sure you want to delete ${selectedItems.length} selected vessel(s)?`)) {
+      // Track successful deletions to update the table
+      const successfulDeletions = [];
+      const failedDeletions = [];
+      
+      // Delete each selected item
+      for (const uuid of selectedItems) {
+        try {
+          const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/delete`);
+          if (response.status === 200) {
+            successfulDeletions.push(uuid);
+          }
+        } catch (error) {
+          failedDeletions.push(uuid);
+          console.error(`Error deleting vessel ${uuid}:`, error);
+        }
+      }
+      
+      if (successfulDeletions.length > 0) {
+        // Update table data by removing successfully deleted items
+        setTableData(prevData => prevData.filter(item => !successfulDeletions.includes(item.uuid)));
+        
+        // Clear selected items
+        setSelectedItems([]);
+        
+        setSuccessMessage(`Successfully deleted ${successfulDeletions.length} vessel(s)`);
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 5000);
+      }
+      
+      if (failedDeletions.length > 0) {
+        setErrorMessage(`Failed to delete ${failedDeletions.length} vessel(s)`);
+        setTimeout(() => {
+          setErrorMessage("");
+        }, 5000);
       }
     }
   };
@@ -89,10 +137,34 @@ export default function VesselManangement() {
     setSearchQuery(e.target.value);
   };
 
+  const toggleSelectItem = (uuid) => {
+    setSelectedItems(prev => {
+      if (prev.includes(uuid)) {
+        return prev.filter(id => id !== uuid);
+      } else {
+        return [...prev, uuid];
+      }
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedItems.length === currentItems.length) {
+      setSelectedItems([]);
+    } else {
+      const currentItemIds = currentItems.map(item => item.uuid);
+      setSelectedItems(currentItemIds);
+    }
+  };
+
   // Get current items
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Check if all current items are selected
+  const allCurrentItemsSelected = 
+    currentItems.length > 0 && 
+    currentItems.every(item => selectedItems.includes(item.uuid));
 
   // Display a limited number of page buttons
   const getPageRange = () => {
@@ -153,7 +225,18 @@ export default function VesselManangement() {
                   </select>
                   <span className="text-sm text-gray-700">entries</span>
                 </div>
-                <div className="">
+
+                <div className="flex items-center space-x-2">
+                  {selectedItems.length > 0 && (
+                    <button
+                      onClick={handleDeleteSelected}
+                      className="px-4 py-1 border border-red-600 text-red-600 rounded-md text-sm flex items-center gap-2 whitespace-nowrap"
+                    >
+                      <FaTrash className="w-[12px] h-[12px]" />
+                      <span>Delete Selected</span>
+                    </button>
+                  )}
+
                   <input
                     type="text"
                     placeholder="Search..."
@@ -167,6 +250,14 @@ export default function VesselManangement() {
               <table className="border-[#E6EDFF] border-[1px] w-full rounded-lg mt-6">
                 <thead>
                   <tr className="border-[1px] border-[#E6EDFF]">
+                    <th className="w-12">
+                      <input
+                        type="checkbox"
+                        checked={allCurrentItemsSelected && currentItems.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4"
+                      />
+                    </th>
                     <th>No</th>
                     <th>Mother Vessel</th>
                     <th>Added On</th>
@@ -177,6 +268,14 @@ export default function VesselManangement() {
                   {currentItems.length > 0 ? (
                     currentItems.map((row, index) => (
                       <tr key={row.uuid} className="border-[1px] border-[#E6EDFF]">
+                        <td className="">
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.includes(row.uuid)}
+                            onChange={() => toggleSelectItem(row.uuid)}
+                            className="w-4 h-4" 
+                          />
+                        </td>
                         <td>{indexOfFirstItem + index + 1}</td>
                         <td>{row.name}</td>
                         <td>{new Date(row.created_at).toLocaleDateString()}</td>
@@ -197,7 +296,7 @@ export default function VesselManangement() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="4" className="text-center py-4">
+                      <td colSpan="5" className="text-center py-4">
                         {searchQuery ? "No matching vessels found" : "No vessels available"}
                       </td>
                     </tr>
