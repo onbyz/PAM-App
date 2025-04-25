@@ -41,18 +41,52 @@ export default function ScheduleList() {
 
   // Table data
   const [tableData, setTableData] = useState([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [filteredData, setFilteredData] = useState([])
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+
+  // Selection state
+  const [selectedItems, setSelectedItems] = useState([])
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [scheduleToDelete, setScheduleToDelete] = useState(null)
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false)
 
   // Initial fetch for vessel names or countries based on filter type
   useEffect(() => {
     if (filterBy === "vessel") {
       fetchVesselNames()
+      fetchInitialTable()
     } else {
       fetchCountries()
+      fetchInitialTable()
     }
   }, [filterBy])
+
+  // Update filtered data when table data or search query changes
+  useEffect(() => {
+    let filtered = [...tableData]
+
+    if (searchQuery) {
+      filtered = filtered.filter(
+        (item) =>
+          (item.vessel_name && item.vessel_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (item.voyage_no && item.voyage_no.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (item.origin && item.origin.toLowerCase().includes(searchQuery.toLowerCase())),
+      )
+    }
+
+    setFilteredData(filtered)
+    setTotalPages(Math.ceil(filtered.length / itemsPerPage))
+
+    // Reset to first page when filtering
+    setCurrentPage(1)
+    // Clear selections when filtering
+    setSelectedItems([])
+  }, [tableData, searchQuery, itemsPerPage])
 
   // Fetch vessel names
   const fetchVesselNames = async () => {
@@ -110,11 +144,6 @@ export default function ScheduleList() {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        },
       )
       const { data } = await response.json()
       setOriginDestinationOptions(data || [])
@@ -157,11 +186,6 @@ export default function ScheduleList() {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/ports?voyageRef=${voyage}&vesselID=${selectedVessel}`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        },
       )
       const { data } = await response.json()
       setTransitOptions(data || [])
@@ -182,11 +206,6 @@ export default function ScheduleList() {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        },
       )
       const { data } = await response.json()
       setDestinationOptions(data || [])
@@ -198,6 +217,19 @@ export default function ScheduleList() {
     setTableData([]) // Clear table data when transit changes
   }
 
+  //Fetch Initial Table Data
+  const fetchInitialTable = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`)
+      const { data } = await response.json()
+      setTableData(data || [])
+      setFilteredData(data || [])
+      setTotalPages(Math.ceil((data || []).length / itemsPerPage))
+    } catch (error) {
+      console.error("Error fetching origin table data:", error)
+    }
+  }
+
   // Fetch table data based on vessel filter
   const fetchVesselTableData = async () => {
     if (!selectedVessel || !selectedVoyage || !selectedTransit || !selectedDestination) return
@@ -205,14 +237,13 @@ export default function ScheduleList() {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        },
       )
       const { data } = await response.json()
       setTableData(data || [])
+      setFilteredData(data || [])
+      setTotalPages(Math.ceil((data || []).length / itemsPerPage))
+      setCurrentPage(1)
+      setSelectedItems([])
     } catch (error) {
       console.error("Error fetching vessel table data:", error)
     }
@@ -225,14 +256,13 @@ export default function ScheduleList() {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`,
-        {
-          headers: {
-            "ngrok-skip-browser-warning": "true",
-          },
-        },
       )
       const { data } = await response.json()
       setTableData(data || [])
+      setFilteredData(data || [])
+      setTotalPages(Math.ceil((data || []).length / itemsPerPage))
+      setCurrentPage(1)
+      setSelectedItems([])
     } catch (error) {
       console.error("Error fetching origin table data:", error)
     }
@@ -310,6 +340,8 @@ export default function ScheduleList() {
     setSelectedPort("")
     setSelectedOriginDestination("")
     setTableData([])
+    setFilteredData([])
+    setSelectedItems([])
 
     // Clear all options except the ones needed for the selected filter
     if (method === "vessel") {
@@ -336,11 +368,78 @@ export default function ScheduleList() {
     }
   }, [filterBy, selectedCountry, selectedPort, selectedOriginDestination])
 
-  const sortedData = [...tableData].sort((a, b) => {
-    const dateA = new Date(a.etd.split("/").reverse().join("-"))
-    const dateB = new Date(b.etd.split("/").reverse().join("-"))
+  // Pagination handlers
+  const handlePageChange = (page) => {
+    setCurrentPage(page)
+  }
+
+  const handleItemsPerPageChange = (e) => {
+    setItemsPerPage(Number(e.target.value))
+    setCurrentPage(1) // Reset to first page when changing items per page
+  }
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value)
+  }
+
+  // Selection handlers
+  const toggleSelectItem = (uuid) => {
+    setSelectedItems((prev) => {
+      if (prev.includes(uuid)) {
+        return prev.filter((id) => id !== uuid)
+      } else {
+        return [...prev, uuid]
+      }
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedItems.length === currentItems.length) {
+      setSelectedItems([])
+    } else {
+      const currentItemIds = currentItems.map((item) => item.uuid)
+      setSelectedItems(currentItemIds)
+    }
+  }
+
+  // Get current items for pagination
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem)
+
+  // Check if all current items are selected
+  const allCurrentItemsSelected =
+    currentItems.length > 0 && currentItems.every((item) => selectedItems.includes(item.uuid))
+
+  // Sort data by ETD
+  const sortedData = [...currentItems].sort((a, b) => {
+    const getDate = (dateStr) => {
+      if (!dateStr) return new Date(0)
+
+      if (typeof dateStr === "string" && dateStr.includes("/")) {
+        return new Date(dateStr.split("/").reverse().join("-"))
+      }
+
+      return new Date(dateStr)
+    }
+
+    const dateA = getDate(a.etd)
+    const dateB = getDate(b.etd)
     return dateA - dateB
   })
+
+  // Display a limited number of page buttons
+  const getPageRange = () => {
+    let startPage = Math.max(1, currentPage - 2)
+    const endPage = Math.min(totalPages, startPage + 4)
+
+    // Adjust if we're at the end
+    if (endPage - startPage < 4) {
+      startPage = Math.max(1, endPage - 4)
+    }
+
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
+  }
 
   const [successMessage, setSuccessMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
@@ -350,11 +449,11 @@ export default function ScheduleList() {
       const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}/delete`)
       if (response.status === 200) {
         setSuccessMessage("Schedule deleted successfully")
-        if (filterBy === "vessel") {
-          fetchVesselTableData()
-        } else {
-          fetchOriginTableData()
-        }
+        setTableData((prevData) => prevData.filter((item) => item.uuid !== uuid))
+        setSelectedItems((prev) => prev.filter((id) => id !== uuid))
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 5000);
       } else {
         setErrorMessage(response?.data?.message || "Error deleting schedule data")
       }
@@ -363,14 +462,74 @@ export default function ScheduleList() {
       console.error("Error deleting schedule data:", error)
     }
 
+    setTimeout(() => {
+      setErrorMessage("");
+    }, 5000);
+
     // Close the dialog after deletion
     setIsDeleteDialogOpen(false)
     setScheduleToDelete(null)
   }
 
+  const handleBulkDelete = async () => {
+    if (selectedItems.length === 0) return
+
+    try {
+      // Track successful deletions to update the table
+      const successfulDeletions = []
+      const failedDeletions = []
+
+      // Delete each selected item
+      for (const uuid of selectedItems) {
+        try {
+          const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}/delete`)
+          if (response.status === 200) {
+            successfulDeletions.push(uuid)
+          }
+        } catch (error) {
+          failedDeletions.push(uuid)
+          console.error(`Error deleting schedule ${uuid}:`, error)
+        }
+      }
+
+      if (successfulDeletions.length > 0) {
+        // Update table data by removing successfully deleted items
+        setTableData((prevData) => prevData.filter((item) => !successfulDeletions.includes(item.uuid)))
+
+        // Clear selected items
+        setSelectedItems([])
+
+        setSuccessMessage(`Successfully deleted ${successfulDeletions.length} schedule(s)`)
+
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 5000);
+      }
+
+      if (failedDeletions.length > 0) {
+        setErrorMessage(`Failed to delete ${failedDeletions.length} schedule(s)`)
+      }
+    } catch (error) {
+      setErrorMessage("Error performing bulk delete operation")
+      console.error("Error in bulk delete:", error)
+    } 
+
+    setTimeout(() => {
+      setErrorMessage("");
+    }, 5000);
+    // Close the dialog
+    setIsBulkDeleteDialogOpen(false)
+  }
+
   const openDeleteDialog = (uuid) => {
     setScheduleToDelete(uuid)
     setIsDeleteDialogOpen(true)
+  }
+
+  const openBulkDeleteDialog = () => {
+    if (selectedItems.length > 0) {
+      setIsBulkDeleteDialogOpen(true)
+    }
   }
 
   return (
@@ -566,31 +725,88 @@ export default function ScheduleList() {
                 </div>
               </div>
             )}
+
+            {/* Pagination and Search Controls */}
+            <div className="mt-4 flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">Show</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={handleItemsPerPageChange}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={25}>25</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-sm text-gray-700">entries</span>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                {selectedItems.length > 0 && (
+                  <button
+                    onClick={openBulkDeleteDialog}
+                    className="px-4 py-1 border border-red-600 text-red-600 rounded-md text-sm flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <FaTrash className="w-[12px] h-[12px]" />
+                    <span>Delete Selected ({selectedItems.length})</span>
+                  </button>
+                )}
+
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="border border-gray-300 px-2 py-1 text-sm w-full focus:outline-none"
+                />
+              </div>
+            </div>
+
             {/* Table */}
-            <div className="overflow-auto">
+            <div className="overflow-auto mt-4">
               <table className="border-[#E6EDFF] border-[1px] w-full rounded-lg">
                 <thead>
                   <tr className="border-[1px] border-[#E6EDFF]">
+                    <th className="w-12">
+                      <input
+                        type="checkbox"
+                        checked={allCurrentItemsSelected && currentItems.length > 0}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4"
+                      />
+                    </th>
                     <th>No</th>
                     <th>Mother Vessel</th>
                     <th>Voyage Ref</th>
                     <th>CFS Closing</th>
                     <th>FCL Closing</th>
                     <th>ETD</th>
-                    <th>ETA {selectedTransit || portOptions.find((val) => val.uuid === selectedPort)?.transit}</th>
-                    <th>ETA {selectedOriginDestination || selectedDestination}</th>
+                    <th>
+                      ETA {selectedTransit || portOptions.find((val) => val.uuid === selectedPort)?.transit || "Origin"}
+                    </th>
+                    <th>ETA {selectedOriginDestination || selectedDestination || "Destination"}</th>
                     <th>Transit Time</th>
                     <th>Origin</th>
                     <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {tableData.length > 0 ? (
+                  {sortedData.length > 0 ? (
                     sortedData.map((row, index) => (
-                      <tr key={index} className="border-[1px] border-[#E6EDFF]">
-                        <td>{index + 1}</td>
+                      <tr key={row.uuid} className="border-[1px] border-[#E6EDFF]">
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedItems.includes(row.uuid)}
+                            onChange={() => toggleSelectItem(row.uuid)}
+                            className="w-4 h-4"
+                          />
+                        </td>
+                        <td>{indexOfFirstItem + index + 1}</td>
                         <td>{row.vessel_name}</td>
-                        <td>{row.voyage_no}</td>
+                        <td className="w-24">{row.voyage_no}</td>
                         <td>{new Date(row.cfs_closing).toLocaleDateString("en-GB")}</td>
                         <td>{new Date(row.fcl_closing).toLocaleDateString("en-GB")}</td>
                         <td>{new Date(row.etd).toLocaleDateString("en-GB") || "N/A"}</td>
@@ -598,7 +814,6 @@ export default function ScheduleList() {
                         <td>{new Date(row.dst_eta).toLocaleDateString("en-GB")}</td>
                         <td>{row.transit_time} Days</td>
                         <td>{row.origin}</td>
-                        {/* <td><Link to={`/edit/${row.uuid}`}> Edit</Link></td> */}
                         <td className="py-3 px-4 cursor-pointer flex gap-6">
                           <div className="relative group inline-block">
                             <Link to={`/schedule-list/edit-schedule/${row.uuid}`}>
@@ -623,23 +838,62 @@ export default function ScheduleList() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="11" className={styles.noDataFound}>
-                        {filterBy === "origin"
-                          ? selectedCountry && selectedPort && selectedOriginDestination
-                            ? "Available On Request"
-                            : "No data available. Please select all filters."
-                          : selectedVessel && selectedVoyage && selectedTransit && selectedDestination
-                            ? "Available On Request"
-                            : "No data available. Please select all filters."}
+                      <td colSpan="12" className={styles.noDataFound}>
+                        {searchQuery
+                          ? "No matching schedules found"
+                          : filterBy === "origin"
+                            ? selectedCountry && selectedPort && selectedOriginDestination
+                              ? "Available On Request"
+                              : "No data available. Please select all filters."
+                            : selectedVessel && selectedVoyage && selectedTransit && selectedDestination
+                              ? "Available On Request"
+                              : "No data available. Please select all filters."}
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination controls */}
+            <div className="flex items-center justify-between mt-4 pb-4">
+              <div className="text-sm text-gray-700">
+                Showing {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} to{" "}
+                {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
+              </div>
+
+              <div className="flex items-center space-x-1">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded ${currentPage === 1 ? "text-gray-400 cursor-not-allowed" : "text-black"}`}
+                >
+                  Prev
+                </button>
+
+                {getPageRange().map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => handlePageChange(number)}
+                    className={`px-3 py-1 rounded ${currentPage === number ? "text-black border" : "bg-gray-200 hover:bg-gray-300 text-gray-700"}`}
+                  >
+                    {number}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className={`px-3 py-1 rounded ${currentPage === totalPages || totalPages === 0 ? "text-gray-400 cursor-not-allowed" : "text-black"}`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
@@ -656,6 +910,24 @@ export default function ScheduleList() {
               className="bg-red-600 hover:bg-red-700"
             >
               Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Multiple Schedules</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedItems.length} selected schedule(s)? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkDelete} className="bg-red-600 hover:bg-red-700">
+              Delete Selected
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
