@@ -4,14 +4,14 @@ import { useNavigate, Link } from "react-router-dom";
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
-export default function UserManagement() {
+export default function RegisteredUsers() {
   const navigate = useNavigate();
 
   // Initial static data - would be replaced with API data in production
   const initialData = [
-    { id: "1", name: "Joel Sebastian", email: "joel@pamcargo.com", role: "Data Management", added_on: "04-03-2025", status: "Active" },
-    { id: "2", name: "Yadhu Lal", email: "yadhu@pamcargo.com", role: "Data Management", added_on: "05-03-2025", status: "Invited" },
-    { id: "3", name: "Vivek Gopal", email: "vivek@pamcargo.com", role: "Administrator", added_on: "11-03-2025", status: "Active" },
+    { id: "1", name: "Joel Sebastian", email: "joel@pamcargo.com", role: "Data Management", added_on: "04-03-2025", lastAccess: new Date() },
+    { id: "2", name: "Yadhu Lal", email: "yadhu@pamcargo.com", role: "Data Management", added_on: "05-03-2025", lastAccess: new Date() },
+    { id: "3", name: "Vivek Gopal", email: "vivek@pamcargo.com", role: "Administrator", added_on: "11-03-2025", lastAccess: new Date() },
   ];
 
   const [tableData, setTableData] = useState(initialData);
@@ -176,6 +176,15 @@ export default function UserManagement() {
     });
   };
 
+  const formattedDate = (date) => date.toLocaleString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+
   const toggleSelectAll = () => {
     if (selectedItems.length === currentItems.length) {
       setSelectedItems([]);
@@ -213,12 +222,12 @@ export default function UserManagement() {
       <div>
         <div className="md:mr-[2.5%]">
           <div className="mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2">
-            <h4 className="leading-[56px]">User Management</h4>
+            <h4 className="leading-[56px]">Registered Users</h4>
 
-            <Link to="/user-management/invite-user">
+            <Link to="/registered-users/add">
               <button className="w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2">
                 <FaPlus className="mt-[2px]" />
-                Invite User
+                Add Users
               </button>
             </Link>
           </div>
@@ -290,9 +299,9 @@ export default function UserManagement() {
                     <th>No</th>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Role</th>
-                    <th>Added On</th>
-                    <th>Action</th>
+                    <th>Date Added</th>
+                    <th>Last accessed</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -310,8 +319,8 @@ export default function UserManagement() {
                         <td>{indexOfFirstItem + index + 1}</td>
                         <td>{row.name}</td>
                         <td>{row.email}</td>
-                        <td>{row.role}</td>
                         <td>{row.added_on}</td>
+                        <td>{formattedDate(new Date())}</td>
                         <td className="py-3 px-4 cursor-pointer flex gap-6">
                           <div className="relative group inline-block">
                             <Link to={`/user-management/edit-user/${row.id}`}>

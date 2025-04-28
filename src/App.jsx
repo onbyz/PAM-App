@@ -21,6 +21,8 @@ import EditSchedule from './components/pages/schedules/editSchedule/editSchedule
 import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/layouts/ProtectedRoute.jsx';
 import UnProtectedRoute from './components/layouts/UnProtectedRoute.jsx';
+import RegisteredUsers from '@components/pages/users/RegisteredUsers.jsx';
+import AddRegisteredUser from '@components/pages/users/addUser/AddRegisteredUser.jsx';
 
 export default function App() {
 	return (
@@ -53,6 +55,8 @@ export default function App() {
 								<Route path="/user-management" element={<UserManangement />} />
 								<Route path="/user-management/invite-user" element={<AddUser />} />
 							</Route>
+							<Route path="/registered-users" element={<RegisteredUsers />} />
+							<Route path="/registered-users/add" element={<AddRegisteredUser />} />
 						</Route>
 
 						{/* Not Found page */}
