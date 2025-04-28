@@ -292,7 +292,6 @@ export default function UserManagement() {
                     <th>Email</th>
                     <th>Role</th>
                     <th>Added On</th>
-                    <th>Status</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -313,13 +312,6 @@ export default function UserManagement() {
                         <td>{row.email}</td>
                         <td>{row.role}</td>
                         <td>{row.added_on}</td>
-                        <td>
-                          <span
-                            className={`h-2.5 w-2.5 rounded-full ${row.status === "Active" ? "bg-green-500" : row.status === "Invited" ? "bg-yellow-400" : "bg-gray-400"
-                              }`}
-                          ></span>
-                          <span>{row.status}</span>
-                        </td>
                         <td className="py-3 px-4 cursor-pointer flex gap-6">
                           <div className="relative group inline-block">
                             <Link to={`/user-management/edit-user/${row.id}`}>
