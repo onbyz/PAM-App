@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from 'axios';
+import api from '@/lib/api';
 
 const formSchema = z.object({
     vessel_name: z.string().min(3, "Vessel Name is required!"),
@@ -27,7 +27,7 @@ export default function EditVessel(props) {
 
     const fetchVesselData = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}`);
+            const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}`);
             if (response.status === 200) {
                 const fetchedData = response.data?.data;
                 form.reset({
@@ -52,7 +52,7 @@ export default function EditVessel(props) {
 
     const onSubmit = async (data) => {
         try {
-            const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/edit`, {
+            const response = await api.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/edit`, {
                 name: data.vessel_name,
             });
             if (response.status === 200) {

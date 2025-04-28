@@ -5,11 +5,11 @@ import { FaXmark } from "react-icons/fa6"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useForm } from "react-hook-form"
-import axios from "axios"
 import { Input } from "@/components/ui/input"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "react-router-dom"
+import api from "@/lib/api"
 
 export default function CreateSchedule() {
   const [schedules, setSchedules] = useState([])
@@ -31,22 +31,22 @@ export default function CreateSchedule() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/`)
+      const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/`)
       setSchedules(response.data)
 
-      const vesselData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`)
+      const vesselData = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`)
       const vesselArray = Array.isArray(vesselData.data.data) ? vesselData.data.data : []
       setVessels(vesselArray)
 
-      const portsData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`)
+      const portsData = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`)
       const portsArray = Array.isArray(portsData.data.data) ? portsData.data.data : []
       setPorts(portsArray)
 
-      const destinationData = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations`)
+      const destinationData = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations`)
       const destinationsArray = Array.isArray(destinationData.data.data) ? destinationData.data.data : []
       // setDestinations(destinationsArray)
 
-      const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
+      const countries = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
       setCountries(countries.data?.data || [])
     } catch (error) {
       console.error("Error fetching schedules:", error)
@@ -117,7 +117,7 @@ export default function CreateSchedule() {
   const onSubmit = async (data) => {
     console.log("Submitting Data:", data)
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`, data)
+      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`, data)
       console.log("Form data : ", response.data)
       window.scrollTo({ top: 0, behavior: "smooth" })
       setSuccessMessage("Schedule created successfully")

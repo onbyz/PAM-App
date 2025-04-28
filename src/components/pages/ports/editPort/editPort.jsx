@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from 'axios';
+import api from '@/lib/api';
 
 const formSchema = z.object({
     country_id: z.string().min(1, "Country is required!"),
@@ -24,7 +24,7 @@ export default function EditPort() {
 
     const fetchCountries = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
+            const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
             const data = response.data?.data || [];
             setCountries(data);
         } catch (error) {
@@ -47,7 +47,7 @@ export default function EditPort() {
 
     const fetchPortData = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}`);
+            const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}`);
             if (response.status === 200) {
                 const fetchedData = response.data?.data;
                 form.reset({
@@ -76,7 +76,7 @@ export default function EditPort() {
 
     const onSubmit = async (data) => {
         try {
-            const response = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/edit`, {...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim())});
+            const response = await api.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/edit`, {...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim())});
             if (response.status === 200) {
                 setSuccessMessage("Port updated successfully");
                 form.reset();

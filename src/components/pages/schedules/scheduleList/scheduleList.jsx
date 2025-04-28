@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6"
 import { Link } from "react-router-dom"
 import styles from "./scheduleList.module.css"
-import axios from "axios"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import api from "@/lib/api"
 
 export default function ScheduleList() {
   const [filterBy, setFilterBy] = useState("origin") // 'vessel' or 'origin'
@@ -55,7 +55,7 @@ export default function ScheduleList() {
   const [scheduleToDelete, setScheduleToDelete] = useState(null)
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false)
 
-  // Initial fetch for vessel names or countries based on filter type
+  // Initial api for vessel names or countries based on filter type
   useEffect(() => {
     if (filterBy === "vessel") {
       fetchVesselNames()
@@ -91,12 +91,12 @@ export default function ScheduleList() {
   // Fetch vessel names
   const fetchVesselNames = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
       })
-      const { data } = await response.json()
+      const { data } = response.data
       setVesselOptions(data || [])
     } catch (error) {
       console.error("Error fetching vessel names:", error)
@@ -106,7 +106,7 @@ export default function ScheduleList() {
   // Fetch countries for origin port filter
   const fetchCountries = async () => {
     try {
-      const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
+      const countries = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
       setCountryOptions(countries.data?.data || [])
     } catch (error) {
       console.error("Error fetching countries:", error)
@@ -118,12 +118,12 @@ export default function ScheduleList() {
     if (!country) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port?countryID=${country}`, {
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port?countryID=${country}`, {
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
       })
-      const { data } = await response.json()
+      const { data } = response.data
       setPortOptions(data || [])
     } catch (error) {
       console.error("Error fetching ports:", error)
@@ -142,10 +142,10 @@ export default function ScheduleList() {
     if (!port) return
 
     try {
-      const response = await fetch(
+      const response = await api(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?transitHub=${port}&counrty=${selectedCountry}`,
       )
-      const { data } = await response.json()
+      const { data } = response.data
       setOriginDestinationOptions(data || [])
     } catch (error) {
       console.error("Error fetching origin destinations:", error)
@@ -160,12 +160,12 @@ export default function ScheduleList() {
     if (!vessel) return
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`, {
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`, {
         headers: {
           "ngrok-skip-browser-warning": "true",
         },
       })
-      const { data } = await response.json()
+      const { data } = response.data
       setVoyageOptions(data || [])
     } catch (error) {
       console.error("Error fetching voyage refs:", error)
@@ -184,10 +184,10 @@ export default function ScheduleList() {
     if (!vessel || !voyage) return
 
     try {
-      const response = await fetch(
+      const response = await api(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/ports?voyageRef=${voyage}&vesselID=${selectedVessel}`,
       )
-      const { data } = await response.json()
+      const { data } = response.data
       setTransitOptions(data || [])
     } catch (error) {
       console.error("Error fetching transit hubs:", error)
@@ -204,10 +204,10 @@ export default function ScheduleList() {
     if (!vessel || !voyage || !transit) return
 
     try {
-      const response = await fetch(
+      const response = await api(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/destinations?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`,
       )
-      const { data } = await response.json()
+      const { data } = response.data
       setDestinationOptions(data || [])
     } catch (error) {
       console.error("Error fetching destinations:", error)
@@ -220,8 +220,8 @@ export default function ScheduleList() {
   //Fetch Initial Table Data
   const fetchInitialTable = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`)
-      const { data } = await response.json()
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`)
+      const { data } = response.data
       setTableData(data || [])
       setFilteredData(data || [])
       setTotalPages(Math.ceil((data || []).length / itemsPerPage))
@@ -235,10 +235,10 @@ export default function ScheduleList() {
     if (!selectedVessel || !selectedVoyage || !selectedTransit || !selectedDestination) return
 
     try {
-      const response = await fetch(
+      const response = await api(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${selectedVessel}&voyageRef=${selectedVoyage}&transitHub=${selectedTransit}&destination=${selectedDestination}`,
       )
-      const { data } = await response.json()
+      const { data } = response.data
       setTableData(data || [])
       setFilteredData(data || [])
       setTotalPages(Math.ceil((data || []).length / itemsPerPage))
@@ -254,10 +254,10 @@ export default function ScheduleList() {
     if (!selectedCountry || !selectedPort || !selectedOriginDestination) return
 
     try {
-      const response = await fetch(
+      const response = await api(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`,
       )
-      const { data } = await response.json()
+      const { data } = response.data
       setTableData(data || [])
       setFilteredData(data || [])
       setTotalPages(Math.ceil((data || []).length / itemsPerPage))
@@ -446,7 +446,7 @@ export default function ScheduleList() {
 
   const handleDelete = async (uuid) => {
     try {
-      const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}/delete`)
+      const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}/delete`)
       if (response.status === 200) {
         setSuccessMessage("Schedule deleted successfully")
         setTableData((prevData) => prevData.filter((item) => item.uuid !== uuid))
@@ -482,7 +482,7 @@ export default function ScheduleList() {
       // Delete each selected item
       for (const uuid of selectedItems) {
         try {
-          const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}/delete`)
+          const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}/delete`)
           if (response.status === 200) {
             successfulDeletions.push(uuid)
           }

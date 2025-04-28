@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import api from '@/lib/api';
 
 const formSchema = z.object({
   vessel_name: z.string().min(3, "Vessel Name is required!"),
@@ -29,7 +29,7 @@ export default function AddVessel() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
+      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
         name: data.vessel_name,
       });
       if (response.status === 200) {
