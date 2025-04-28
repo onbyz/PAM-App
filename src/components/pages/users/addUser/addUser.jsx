@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FaXmark } from "react-icons/fa6";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,15 +7,20 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import axios from "axios";
 
 const formSchema = z.object({
   first_name: z.string().min(2, "First Name is required!"),
   last_name: z.string().min(2, "Last Name is required!"),
   email: z.string().email("Invalid email address").nonempty("Email is required"),
-  role: z.string().min(1, "Role is required!")
+  role: z.string().min(1, "Role is required!"),
+  password: z.string().min(6, "Password must be at least 6 characters long")
 });
 
 export default function AddUser() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const form = useForm({
@@ -25,15 +30,30 @@ export default function AddUser() {
       last_name: "",
       email: "",
       role: "",
+      password: "", //
     },
   });
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   const handleGoBack = () => {
     navigate(-1); 
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log("Form submitted:", data);
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/invite`, data);
+      if (response.status === 200) {
+        setSuccessMessage("Vessel created successfully");
+        form.reset();
+        setTimeout(() => navigate("/vessel-management"), 3000);
+      }
+    } catch (error) {
+      console.error("Error adding vessel:", error);
+    }
   };
 
   const roles = ['Data Management', 'Administrator', 'Logistics management'];
@@ -119,28 +139,64 @@ export default function AddUser() {
                 </div>
               </div>
 
-              <div className="my-8">
-                <FormField name="role" control={form.control} render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[14px] text-black">Select Role<span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
-                          <SelectValue/>
-                        </SelectTrigger>
-                        
-                        <SelectContent>
-                          {roles.map((role) => (
-                            <SelectItem key={role} value={role} className="text-[16px]">
-                              {role}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage className='text-[14px]'/>
-                  </FormItem>
-                )} />
+              <div className="flex flex-col md:flex-row gap-12 my-8">
+                <div className="">
+                  <FormField name="role" control={form.control} render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[14px] text-black">Select Role<span className="text-red-500">*</span></FormLabel>
+                      <FormControl>
+                        <Select value={field.value} onValueChange={field.onChange}>
+                          <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                            <SelectValue/>
+                          </SelectTrigger>
+                          
+                          <SelectContent>
+                            {roles.map((role) => (
+                              <SelectItem key={role} value={role} className="text-[16px]">
+                                {role}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage className='text-[14px]'/>
+                    </FormItem>
+                  )} />
+                </div>
+
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[14px] text-black">
+                          Enter Password <span className="text-red-500">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <div className="relative w-[300px]">
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-10 focus:outline-none appearance-none bg-white"
+                              {...field}
+                            />
+                            <span
+                              className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+                              onClick={togglePasswordVisibility}
+                            >
+                              {showPassword ? (
+                                <EyeOff size={20} className="text-gray-500" />
+                              ) : (
+                                <Eye size={20} className="text-gray-500" />
+                              )}
+                            </span>
+                          </div>
+                        </FormControl>
+                        <FormMessage className="text-[14px]" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <div className='flex gap-6 mt-8'>
