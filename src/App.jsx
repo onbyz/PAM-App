@@ -18,6 +18,8 @@ import UserManangement from '@components/pages/users/userManagement.jsx';
 import AddUser from '@components/pages/users/addUser/addUser.jsx';
 import NotFound from '@components/pages/notFound/notFound.jsx';
 import EditSchedule from './components/pages/schedules/editSchedule/editSchedule.jsx';
+import RegisteredUsers from '@components/pages/users/RegisteredUsers.jsx';
+import AddRegisteredUser from '@components/pages/users/addUser/AddRegisteredUser.jsx';
 
 export default function App() {
     return (
@@ -44,6 +46,8 @@ export default function App() {
 						<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
 						<Route path="/user-management" element={<UserManangement />} />
 						<Route path="/user-management/invite-user" element={<AddUser />} />
+						<Route path="/registered-users" element={<RegisteredUsers />} />
+						<Route path="/registered-users/add" element={<AddRegisteredUser />} />
 					</Route>
 
 					{/* Not Found page */}

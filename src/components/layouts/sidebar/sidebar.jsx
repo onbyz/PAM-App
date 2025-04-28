@@ -5,12 +5,14 @@ import ClockIcon from "@assets/icons/clock.svg";
 import VesselIcon from "@assets/icons/box.svg";
 import PortIcon from "@assets/icons/AnchorSimple.svg";
 import UserIcon from "@assets/icons/user-octagon.svg";
+import RegisterdUserIcon from "@assets/icons/registered-users.svg";
 import SettingsIcon from "@assets/icons/setting.svg";
 import LogoutIcon from "@assets/icons/logout.svg";
 import GreenClockIcon from "@assets/greenIcons/clock.svg";
 import GreenVesselIcon from "@assets/greenIcons/box.svg";
 import GreenPortIcon from "@assets/greenIcons/AnchorSimple.svg";
 import GreenUserIcon from "@assets/greenIcons/user-octagon.svg";
+import GreenRegisterdUserIcon from "@assets/greenIcons/registered-users.svg";
 
 export default function Sidebar() {
   const location = useLocation(); 
@@ -20,6 +22,7 @@ export default function Sidebar() {
     { id: "2", icon: VesselIcon, title: "Vessel Management", link: "/vessel-management", activeIcon: GreenVesselIcon },
     { id: "3", icon: PortIcon, title: "Port Management", link: "/port-management", activeIcon: GreenPortIcon },
     { id: "4", icon: UserIcon, title: "User Management", link: "/user-management", activeIcon: GreenUserIcon },
+    // { id: "5", icon: RegisterdUserIcon, title: "Registered Users", link: "/registered-users", activeIcon: GreenRegisterdUserIcon },
   ];
 
   return (
