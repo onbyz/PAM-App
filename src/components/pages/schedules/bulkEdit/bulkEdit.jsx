@@ -318,7 +318,7 @@ export default function BulkScheduleUpload() {
         )}
       </div>
       <div className="w-1/3 p-4 mt-auto">
-        <Export />
+        <Export setError={setError}/>
       </div>
     </div>
   )
