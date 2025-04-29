@@ -35,7 +35,7 @@ export default function Sidebar() {
     : allSidebarItems.filter(item => item.title !== "Registered Users");
 
   return (
-    <div className='w-[270px] h-[1100px] bg-[#FCFCFC] px-6 flex flex-col justify-between'>
+    <div className='w-[270px] h-screen bg-[#FCFCFC] px-6 flex flex-col justify-between'>
       <div>
         <Link to="/">
           <img src={Logo} alt='Logo' className='h-[65px] w-[170px] mt-10' />
@@ -61,17 +61,12 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className='pb-24'>
-        <div className='flex gap-2 mt-4'>
-          <img src={SettingsIcon} alt='Settings' className='w-[24px] h-[24px]' />
-          <h5>Settings</h5>
-        </div>
-
+      <button className='pb-4'>
         <div className='flex gap-2 mt-4'>
           <img src={LogoutIcon} alt='Logout' className='w-[24px] h-[24px]' />
           <h5 className='text-[#FF3B30]'>Logout</h5>
         </div>
-      </div>
+      </button>
     </div>
   );
 }
