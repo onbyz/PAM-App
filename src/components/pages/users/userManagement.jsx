@@ -7,15 +7,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function UserManagement() {
   const navigate = useNavigate();
 
-  // Initial static data - would be replaced with API data in production
-  const initialData = [
-    { id: "1", name: "Joel Sebastian", email: "joel@pamcargo.com", role: "Data Management", added_on: "04-03-2025", status: "Active" },
-    { id: "2", name: "Yadhu Lal", email: "yadhu@pamcargo.com", role: "Data Management", added_on: "05-03-2025", status: "Invited" },
-    { id: "3", name: "Vivek Gopal", email: "vivek@pamcargo.com", role: "Administrator", added_on: "11-03-2025", status: "Active" },
-  ];
-
-  const [tableData, setTableData] = useState(initialData);
-  const [filteredData, setFilteredData] = useState(initialData);
+  const [tableData, setTableData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");

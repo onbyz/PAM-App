@@ -13,8 +13,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import Plus from "@assets/icons/plus.svg";
+import api from "@/lib/api";
 
 const formSchema = z.object({
     users: z.array(z.object({
@@ -24,8 +24,9 @@ const formSchema = z.object({
 });
 
 export default function AddRegisteredUser() {
-    const [showPassword, setShowPassword] = useState(false);
     const [users, setUsers] = useState([{ id: 1 }]);
+    const [successMessage, setSuccessMessage] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
 
     const navigate = useNavigate();
 
@@ -35,10 +36,6 @@ export default function AddRegisteredUser() {
             users: [{ name: "", email: "" }]
         },
     });
-
-    const togglePasswordVisibility = () => {
-        setShowPassword((prev) => !prev);
-    };
 
     const handleGoBack = () => {
         navigate(-1);
@@ -68,18 +65,20 @@ export default function AddRegisteredUser() {
     };
 
     const onSubmit = async (data) => {
-        console.log("Form submitted:", data);
-        // try {
-        //   const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/invite`, data.users);
-        //   if (response.status === 200) {
-        //     setSuccessMessage("Users invited successfully");
-        //     form.reset();
-        //     setUsers([{ id: 1 }]);
-        //     setTimeout(() => navigate("/user-management"), 3000);
-        //   }
-        // } catch (error) {
-        //   console.error("Error inviting users:", error);
-        // }
+        setSuccessMessage("");
+        setErrorMessage("");
+        try {
+          const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/subscribers`, data);
+          if (response.status === 200) {
+            setSuccessMessage("Users invited successfully");
+            form.reset();
+            setUsers([{ id: 1 }]);
+            setTimeout(() => navigate("/registered-users"), 3000);
+          }
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || "Failed to invite users. Please try again.");
+          console.error("Error inviting users:", error);
+        }
     };
 
     const roles = ["Data Management", "Administrator", "Logistics management"];
@@ -97,6 +96,20 @@ export default function AddRegisteredUser() {
                         Close
                     </button>
                 </div>
+
+                {successMessage && (
+                    <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
+                    {successMessage}
+                    <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setSuccessMessage("")} />
+                    </div>
+                )}
+        
+                {errorMessage && (
+                    <div className="w-full bg-red-100 text-red-600 text-start p-3 rounded-md my-6 flex justify-between">
+                    {errorMessage}
+                    <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setErrorMessage("")} />
+                    </div>
+                )}
 
                 <div>
                     <Form {...form}>
