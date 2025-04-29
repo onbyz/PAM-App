@@ -101,7 +101,7 @@ export default function Export({ setError }) {
                 ETA_Europe: item.dst_eta ? formatDate(item.dst_eta) : '',
                 Transit_time_Europe: item.transit_time || '',
                 ETA_USA_Canada: item.dst_eta ? formatDate(addDaysToDate(item.dst_eta, 2)) : '',
-                Transit_time_USA_Canada: item.transit_time ? formatDate(addDaysToDate(item.transit_time, 2)) : '',
+                Transit_time_USA_Canada: item.transit_time ? item.transit_time + 2  : '',
             };
 
             if (!isSingle) {
