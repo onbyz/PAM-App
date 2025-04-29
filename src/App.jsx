@@ -26,9 +26,12 @@ import RegisteredUsers from '@components/pages/users/registeredUsers.jsx';
 import AddRegisteredUser from '@components/pages/users/addUser/AddRegisteredUser.jsx';
 
 export default function App() {
+	const user = JSON.parse(localStorage.getItem('user'));
+	const role = user?.role;
+	const isDataManager = role === 'data_management';
+
 	return (
 		<AuthProvider>
-
 			<Router>
 				<div>
 					<Routes>
@@ -43,21 +46,29 @@ export default function App() {
 						{/* Routes with the Layout (with sidebar) */}
 						<Route element={<ProtectedRoute />}>
 							<Route element={<Layout />}>
-								<Route path="/schedule-list" element={<ScheduleList />} />
-								<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
-								<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
-								<Route path="/schedule-list/edit-schedule/:uuid" element={<EditSchedule />} />
-								<Route path="/vessel-management" element={<VesselManangement />} />
-								<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
-								<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
-								<Route path="/port-management" element={<PortManangement />} />
-								<Route path="/port-management/add-port" element={<AddPort />} />
-								<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
-								<Route path="/user-management" element={<UserManangement />} />
-								<Route path="/user-management/invite-user" element={<AddUser />} />
-								<Route path="/user-management/edit-user/:id" element={<EditUser />} />
-								<Route path="/registered-users" element={<RegisteredUsers />} />
-								<Route path="/registered-users/add" element={<AddRegisteredUser />} />
+								{/* Data Manager only routes */}
+								{isDataManager ? (
+									<>
+										<Route path="/registered-users" element={<RegisteredUsers />} />
+										<Route path="/registered-users/add" element={<AddRegisteredUser />} />
+									</>
+								) : (
+									<>
+										<Route path="/schedule-list" element={<ScheduleList />} />
+										<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
+										<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
+										<Route path="/schedule-list/edit-schedule/:uuid" element={<EditSchedule />} />
+										<Route path="/vessel-management" element={<VesselManangement />} />
+										<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
+										<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
+										<Route path="/port-management" element={<PortManangement />} />
+										<Route path="/port-management/add-port" element={<AddPort />} />
+										<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
+										<Route path="/user-management" element={<UserManangement />} />
+										<Route path="/user-management/invite-user" element={<AddUser />} />
+										<Route path="/user-management/edit-user/:id" element={<EditUser />} />
+									</>
+								)}
 							</Route>
 						</Route>
 
@@ -67,5 +78,5 @@ export default function App() {
 				</div>
 			</Router>
 		</AuthProvider>
-	)
+	);
 }

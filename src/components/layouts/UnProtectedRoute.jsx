@@ -5,11 +5,16 @@ import { Navigate, Outlet } from 'react-router-dom';
 const UnProtectedRoute = () => {
   const { isAuthenticated, loading } = useAuth();
 
+  const user = JSON.parse(localStorage.getItem('user'));
+	const role = user?.role;
+	const isDataManager = role === 'data_management';
+  const navigateTo = isDataManager ? '/registered-users' : '/schedule-list';
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  return isAuthenticated ? <Navigate to="/schedule-list" /> : <Outlet />;
+  return isAuthenticated ? <Navigate to={navigateTo} /> : <Outlet />;
 };
 
 export default UnProtectedRoute;

@@ -17,13 +17,22 @@ import GreenRegisterdUserIcon from "@assets/greenIcons/registered-users.svg";
 export default function Sidebar() {
   const location = useLocation(); 
 
-  const sidebarTitles = [
+  const user = JSON.parse(localStorage.getItem('user'));
+  const role = user?.role;
+  const isDataManager = role === 'data_management';
+
+  const allSidebarItems = [
     { id: "1", icon: ClockIcon, title: "Schedule Management", link: '/schedule-list', activeIcon: GreenClockIcon },
     { id: "2", icon: VesselIcon, title: "Vessel Management", link: "/vessel-management", activeIcon: GreenVesselIcon },
     { id: "3", icon: PortIcon, title: "Port Management", link: "/port-management", activeIcon: GreenPortIcon },
     { id: "4", icon: UserIcon, title: "User Management", link: "/user-management", activeIcon: GreenUserIcon },
-    // { id: "5", icon: RegisterdUserIcon, title: "Registered Users", link: "/registered-users", activeIcon: GreenRegisterdUserIcon },
+    { id: "5", icon: RegisterdUserIcon, title: "Registered Users", link: "/registered-users", activeIcon: GreenRegisterdUserIcon },
   ];
+  
+  // Filter sidebar items based on user role
+  const sidebarItems = isDataManager 
+    ? allSidebarItems.filter(item => item.title === "Registered Users")
+    : allSidebarItems;
 
   return (
     <div className='w-[270px] h-[1100px] bg-[#FCFCFC] px-6 flex flex-col justify-between'>
@@ -33,7 +42,7 @@ export default function Sidebar() {
         </Link>
 
         <div className='mt-24'>
-          {sidebarTitles.map((item, index) => {
+          {sidebarItems.map((item) => {
             const isActive = location.pathname.startsWith(item.link);
 
             return (
