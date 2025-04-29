@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
+import api from '@/lib/api';
 
 const formSchema = z.object({
   country_id: z.string().min(1, "Country is required!"),
@@ -23,7 +23,7 @@ export default function AddPorts() {
 
   const fetchCountries = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
+      const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
       const data = response.data?.data || [];
       setCountries(data);
 
@@ -56,7 +56,7 @@ export default function AddPorts() {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`, {...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim())});
+      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`, {...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim())});
       if (response.status === 200) {
         setSuccessMessage("Port created successfully");
         form.reset();

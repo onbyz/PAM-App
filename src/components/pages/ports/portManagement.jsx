@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
+import api from "@/lib/api";
 
 export default function PortManagement() {
   const [tableData, setTableData] = useState([]);
@@ -18,7 +18,7 @@ export default function PortManagement() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`);
+      const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`);
       const data = response.data?.data || [];
       setTableData(data);
       setFilteredData(data);
@@ -59,7 +59,7 @@ export default function PortManagement() {
   const handleDelete = async (uuid) => {
     if (confirm("Are you sure you want to delete this port?")) {
       try {
-        const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
+        const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
         if (response.status === 200) {
           setSuccessMessage("Port deleted successfully");
           setTableData((prevData) => prevData.filter((item) => item.uuid !== uuid));
@@ -90,7 +90,7 @@ export default function PortManagement() {
       // Delete each selected item
       for (const uuid of selectedItems) {
         try {
-          const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
+          const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
           if (response.status === 200) {
             successfulDeletions.push(uuid);
           }

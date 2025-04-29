@@ -18,42 +18,52 @@ import UserManangement from '@components/pages/users/userManagement.jsx';
 import AddUser from '@components/pages/users/addUser/addUser.jsx';
 import NotFound from '@components/pages/notFound/notFound.jsx';
 import EditSchedule from './components/pages/schedules/editSchedule/editSchedule.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
+import ProtectedRoute from './components/layouts/ProtectedRoute.jsx';
+import UnProtectedRoute from './components/layouts/UnProtectedRoute.jsx';
 import RegisteredUsers from '@components/pages/users/RegisteredUsers.jsx';
 import AddRegisteredUser from '@components/pages/users/addUser/AddRegisteredUser.jsx';
 
 export default function App() {
-    return (
-        <Router>
-			<div>
-				<Routes>
-					{/* Routes without the Layout (no sidebar) */}
-					<Route path="/login" element={<Login />} />
-					<Route path="/" element={<Homepage />} />
-					<Route path="/forgot-password" element={<ForgotPassowrd />} />
-					<Route path="/resset-password" element={<RessetPassword />} />
+	return (
+		<AuthProvider>
 
-					{/* Routes with the Layout (with sidebar) */}
-					<Route element={<Layout />}>
-						<Route path="/schedule-list" element={<ScheduleList />} />
-						<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
-						<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
-						<Route path="/schedule-list/edit-schedule/:uuid" element={<EditSchedule />} />
-						<Route path="/vessel-management" element={<VesselManangement />} />
-						<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
-						<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
-						<Route path="/port-management" element={<PortManangement />} />
-						<Route path="/port-management/add-port" element={<AddPort />} />
-						<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
-						<Route path="/user-management" element={<UserManangement />} />
-						<Route path="/user-management/invite-user" element={<AddUser />} />
-						<Route path="/registered-users" element={<RegisteredUsers />} />
-						<Route path="/registered-users/add" element={<AddRegisteredUser />} />
-					</Route>
+			<Router>
+				<div>
+					<Routes>
+						{/* Routes without the Layout (no sidebar) */}
+						<Route element={<UnProtectedRoute />}>
+							<Route path="/login" element={<Login />} />
+							<Route path="/" element={<Homepage />} />
+							<Route path="/forgot-password" element={<ForgotPassowrd />} />
+							<Route path="/resset-password" element={<RessetPassword />} />
+						</Route>
 
-					{/* Not Found page */}
-					<Route path="*" element={<NotFound />} />
-				</Routes>
-			</div>
-	    </Router>
-    )
+						{/* Routes with the Layout (with sidebar) */}
+						<Route element={<ProtectedRoute />}>
+							<Route element={<Layout />}>
+								<Route path="/schedule-list" element={<ScheduleList />} />
+								<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
+								<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
+								<Route path="/schedule-list/edit-schedule/:uuid" element={<EditSchedule />} />
+								<Route path="/vessel-management" element={<VesselManangement />} />
+								<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
+								<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
+								<Route path="/port-management" element={<PortManangement />} />
+								<Route path="/port-management/add-port" element={<AddPort />} />
+								<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
+								<Route path="/user-management" element={<UserManangement />} />
+								<Route path="/user-management/invite-user" element={<AddUser />} />
+							</Route>
+							<Route path="/registered-users" element={<RegisteredUsers />} />
+							<Route path="/registered-users/add" element={<AddRegisteredUser />} />
+						</Route>
+
+						{/* Not Found page */}
+						<Route path="*" element={<NotFound />} />
+					</Routes>
+				</div>
+			</Router>
+		</AuthProvider>
+	)
 }

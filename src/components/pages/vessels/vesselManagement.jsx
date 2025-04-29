@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link } from "react-router-dom";
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import api from "@/lib/api";
 
 export default function VesselManangement() {
   const [tableData, setTableData] = useState([]);
@@ -23,7 +23,7 @@ export default function VesselManangement() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`);
+      const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`);
       const data = response.data?.data || [];
       setTableData(data);
       setFilteredData(data);
@@ -65,7 +65,7 @@ export default function VesselManangement() {
 
   const handleDelete = async (uuid) => {
     try {
-      const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/delete`);
+      const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/delete`);
       if (response.status === 200) {
         setSuccessMessage("Vessel deleted successfully");
         setTableData((prevData) => prevData.filter((item) => item.uuid !== uuid));
@@ -106,7 +106,7 @@ export default function VesselManangement() {
     // Delete each selected item
     for (const uuid of selectedItems) {
       try {
-        const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/delete`);
+        const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/delete`);
         if (response.status === 200) {
           successfulDeletions.push(uuid);
         }
