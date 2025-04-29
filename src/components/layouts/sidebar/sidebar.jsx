@@ -17,23 +17,32 @@ import GreenRegisterdUserIcon from "@assets/greenIcons/registered-users.svg";
 export default function Sidebar() {
   const location = useLocation(); 
 
-  const sidebarTitles = [
+  const user = JSON.parse(localStorage.getItem('user'));
+  const role = user?.role;
+  const isDataManager = role === 'data_management';
+
+  const allSidebarItems = [
     { id: "1", icon: ClockIcon, title: "Schedule Management", link: '/schedule-list', activeIcon: GreenClockIcon },
     { id: "2", icon: VesselIcon, title: "Vessel Management", link: "/vessel-management", activeIcon: GreenVesselIcon },
     { id: "3", icon: PortIcon, title: "Port Management", link: "/port-management", activeIcon: GreenPortIcon },
     { id: "4", icon: UserIcon, title: "User Management", link: "/user-management", activeIcon: GreenUserIcon },
-    // { id: "5", icon: RegisterdUserIcon, title: "Registered Users", link: "/registered-users", activeIcon: GreenRegisterdUserIcon },
+    { id: "5", icon: RegisterdUserIcon, title: "Registered Users", link: "/registered-users", activeIcon: GreenRegisterdUserIcon },
   ];
+  
+  // Filter sidebar items based on user role
+  const sidebarItems = isDataManager 
+    ? allSidebarItems.filter(item => item.title === "Registered Users")
+    : allSidebarItems.filter(item => item.title !== "Registered Users");
 
   return (
-    <div className='w-[270px] h-[1100px] bg-[#FCFCFC] px-6 flex flex-col justify-between'>
+    <div className='w-[270px] h-screen bg-[#FCFCFC] px-6 flex flex-col justify-between'>
       <div>
         <Link to="/">
           <img src={Logo} alt='Logo' className='h-[65px] w-[170px] mt-10' />
         </Link>
 
         <div className='mt-24'>
-          {sidebarTitles.map((item, index) => {
+          {sidebarItems.map((item) => {
             const isActive = location.pathname.startsWith(item.link);
 
             return (
@@ -52,17 +61,12 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <div className='pb-24'>
-        <div className='flex gap-2 mt-4'>
-          <img src={SettingsIcon} alt='Settings' className='w-[24px] h-[24px]' />
-          <h5>Settings</h5>
-        </div>
-
+      <button className='pb-4'>
         <div className='flex gap-2 mt-4'>
           <img src={LogoutIcon} alt='Logout' className='w-[24px] h-[24px]' />
           <h5 className='text-[#FF3B30]'>Logout</h5>
         </div>
-      </div>
+      </button>
     </div>
   );
 }

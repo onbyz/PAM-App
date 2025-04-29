@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import api from '@/lib/api';
 
 export default function RegisteredUsers() {
   const navigate = useNavigate();
 
-  // Initial static data - would be replaced with API data in production
-  const initialData = [
-    { id: "1", name: "Joel Sebastian", email: "joel@pamcargo.com", role: "Data Management", added_on: "04-03-2025", lastAccess: new Date() },
-    { id: "2", name: "Yadhu Lal", email: "yadhu@pamcargo.com", role: "Data Management", added_on: "05-03-2025", lastAccess: new Date() },
-    { id: "3", name: "Vivek Gopal", email: "vivek@pamcargo.com", role: "Administrator", added_on: "11-03-2025", lastAccess: new Date() },
-  ];
-
-  const [tableData, setTableData] = useState(initialData);
-  const [filteredData, setFilteredData] = useState(initialData);
+  const [tableData, setTableData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,12 +24,9 @@ export default function RegisteredUsers() {
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchData = async () => {
-    // In a real implementation, replace this with an API call
     try {
-      // Simulating API call with static data for now
-      // const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users`);
-      // const data = response.data?.data || [];
-      const data = initialData;
+      const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/subscribers`);
+      const data = response.data?.data || [];
       setTableData(data);
       setFilteredData(data);
       setTotalPages(Math.ceil(data.length / itemsPerPage));
@@ -61,16 +51,12 @@ export default function RegisteredUsers() {
     );
     setFilteredData(filtered);
 
-    // Reset to first page when search changes
     setCurrentPage(1);
-    // Clear selections when filtering
     setSelectedItems([]);
   }, [searchQuery, tableData]);
 
   useEffect(() => {
-    // Recalculate total pages when items per page changes or filtered data changes
     setTotalPages(Math.ceil(filteredData.length / itemsPerPage));
-    // Reset to first page when changing items per page
     if (currentPage > Math.ceil(filteredData.length / itemsPerPage)) {
       setCurrentPage(1);
     }
@@ -79,16 +65,16 @@ export default function RegisteredUsers() {
   const handleDelete = async (id) => {
     try {
       // In a real implementation, replace with API call
-      // const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${id}/delete`);
-      // if (response.status === 200) {
-      setSuccessMessage("User deleted successfully");
-      setTableData((prevData) => prevData.filter((item) => item.id !== id));
-      // Clear the deleted item from selection if it was selected
-      setSelectedItems(prev => prev.filter(itemId => itemId !== id));
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 5000);
-      // }
+      const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/subscribers/${id}/delete`);
+      if (response.status === 200) {
+        setSuccessMessage("User deleted successfully");
+        setTableData((prevData) => prevData.filter((item) => item.id !== id));
+        // Clear the deleted item from selection if it was selected
+        setSelectedItems(prev => prev.filter(itemId => itemId !== id));
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 5000);
+      }
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Error deleting user");
       setTimeout(() => {
@@ -121,10 +107,10 @@ export default function RegisteredUsers() {
     // In a real implementation, use API calls for each deletion
     for (const id of selectedItems) {
       try {
-        // const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${id}/delete`);
-        // if (response.status === 200) {
-        successfulDeletions.push(id);
-        // }
+        const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/subscribers/${id}/delete`);
+        if (response.status === 200) {
+          successfulDeletions.push(id);
+        }
       } catch (error) {
         failedDeletions.push(id);
         console.error(`Error deleting user ${id}:`, error);
@@ -319,8 +305,8 @@ export default function RegisteredUsers() {
                         <td>{indexOfFirstItem + index + 1}</td>
                         <td>{row.name}</td>
                         <td>{row.email}</td>
-                        <td>{row.added_on}</td>
-                        <td>{formattedDate(new Date())}</td>
+                        <td>{new Date(row.created_at)?.toLocaleDateString()}</td>
+                        <td>{formattedDate(new Date(row.last_access))}</td>
                         <td className="py-3 px-4 cursor-pointer flex gap-6">
                           <div className="relative group inline-block">
                             <Link to={`/user-management/edit-user/${row.id}`}>

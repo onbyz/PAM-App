@@ -1,23 +1,24 @@
 import React from 'react';
-import BellIcon from "@assets/icons/bell.svg";
-import SearchIcon from "@assets/icons/search.svg";
+// import BellIcon from "@assets/icons/bell.svg";
+// import SearchIcon from "@assets/icons/search.svg";
 import Avatar from "@assets/icons/avatar.png";
 import { FaChevronDown } from "react-icons/fa6";
 
 export default function Header() {
+    const user = JSON.parse(localStorage.getItem('user'));
     return (
         <div className='flex justify-between md:mr-[5%]'>
-            <h3 className='leading-[150%]'>Welcome, Joel</h3>
+            <h3 className='leading-[150%]'>Welcome, {user?.firstName}</h3>
 
             <div className='flex gap-6'>
-                <img src={SearchIcon} alt="Icon" className='w-[24px] h-[24px]' />
-                <img src={BellIcon} alt="Icon" className='w-[24px] h-[24px]' />
+                {/* <img src={SearchIcon} alt="Icon" className='w-[24px] h-[24px]' /> */}
+                {/* <img src={BellIcon} alt="Icon" className='w-[24px] h-[24px]' /> */}
 
                 <div className='flex gap-2'>
                     <img src={Avatar} alt="Icon" className='w-[24px] h-[24px]' />
                 
                     <p className='text-[16px] leading-[24px] flex gap-3'>
-                        Joel Sebastian
+                        {user?.firstName} {user?.lastName}
                         <FaChevronDown className='w-[12px] h-[24px]' />
                     </p>
                 </div>
