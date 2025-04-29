@@ -7,7 +7,7 @@ import { FaChevronDown } from "react-icons/fa6";
 export default function Header() {
     const user = JSON.parse(localStorage.getItem('user'));
     return (
-        <div className='flex justify-between md:mr-[5%]'>
+        <div className='flex justify-between mt-4'>
             <h3 className='leading-[150%]'>Welcome, {user?.firstName}</h3>
 
             <div className='flex gap-6'>

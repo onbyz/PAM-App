@@ -4,12 +4,12 @@ import { Outlet } from "react-router-dom";
 
 const Layout = () => (
   <div className="w-full">
-    <div className="md:flex md:gap-8">
-        <div className="hidden md:block md:w-[270px] md:h-[1100px]">
+    <div className="flex">
+        <div className="hidden md:block md:w-[270px] md:h-screen">
             <Sidebar />
         </div>
 
-        <div className="w-[100%] md:w-[80%] h-full my-10 mx-6 md:mx-0">
+        <div className="w-full h-screen px-6">
             <Header />
             <Outlet />
         </div>
