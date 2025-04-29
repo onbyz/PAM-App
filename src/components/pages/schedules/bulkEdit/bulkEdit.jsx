@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { XCircle } from "lucide-react"
 import Export from "./Export"
+import api from "@/lib/api"
 
 export default function BulkScheduleUpload() {
   const [file, setFile] = useState(null)
@@ -98,16 +99,14 @@ export default function BulkScheduleUpload() {
     }
 
     try {
-      // Using import.meta.env for environment variables
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        body: formData,
+      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       })
+      const  data  = response.data
 
-      const data = await response.json()
-
-      if (!response.ok) {
+      if (data.error) {
         throw new Error(data.message || "Failed to upload schedules")
       }
 

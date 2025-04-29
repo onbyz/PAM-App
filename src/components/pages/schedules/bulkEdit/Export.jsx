@@ -20,7 +20,6 @@ export default function Export({ setError }) {
     useEffect(() => {
         fetchCountries();
     }, []);
-    console.log(countries)
     
     const exportOptions = [
         { id: "bulk", label: "Bulk Schedule Edit.xls" },
