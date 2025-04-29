@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from "axios";
+import api from "@/lib/api"
 import { useNavigate, Link } from "react-router-dom";
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -31,12 +31,9 @@ export default function UserManagement() {
   const [totalPages, setTotalPages] = useState(1);
 
   const fetchData = async () => {
-    // In a real implementation, replace this with an API call
     try {
-      // Simulating API call with static data for now
-      // const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users`);
-      // const data = response.data?.data || [];
-      const data = initialData;
+      const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users`)
+      const data = response.data?.data || [];
       setTableData(data);
       setFilteredData(data);
       setTotalPages(Math.ceil(data.length / itemsPerPage));
@@ -78,17 +75,16 @@ export default function UserManagement() {
 
   const handleDelete = async (id) => {
     try {
-      // In a real implementation, replace with API call
-      // const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${id}/delete`);
-      // if (response.status === 200) {
-      setSuccessMessage("User deleted successfully");
-      setTableData((prevData) => prevData.filter((item) => item.id !== id));
-      // Clear the deleted item from selection if it was selected
-      setSelectedItems(prev => prev.filter(itemId => itemId !== id));
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 5000);
-      // }
+      const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${id}/delete`);
+      if (response.status === 200) {
+        setSuccessMessage("User deleted successfully");
+        setTableData((prevData) => prevData.filter((item) => item.id !== id));
+        // Clear the deleted item from selection if it was selected
+        setSelectedItems(prev => prev.filter(itemId => itemId !== id));
+        setTimeout(() => {
+          setSuccessMessage("");
+        }, 5000);
+      }
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Error deleting user");
       setTimeout(() => {
@@ -121,10 +117,10 @@ export default function UserManagement() {
     // In a real implementation, use API calls for each deletion
     for (const id of selectedItems) {
       try {
-        // const response = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${id}/delete`);
-        // if (response.status === 200) {
-        successfulDeletions.push(id);
-        // }
+        const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${id}/delete`);
+        if (response.status === 200) {
+          successfulDeletions.push(id);
+        }
       } catch (error) {
         failedDeletions.push(id);
         console.error(`Error deleting user ${id}:`, error);
@@ -311,7 +307,7 @@ export default function UserManagement() {
                         <td>{row.name}</td>
                         <td>{row.email}</td>
                         <td>{row.role}</td>
-                        <td>{row.added_on}</td>
+                        <td>{new Date(row.created_at)?.toLocaleDateString()}</td>
                         <td className="py-3 px-4 cursor-pointer flex gap-6">
                           <div className="relative group inline-block">
                             <Link to={`/user-management/edit-user/${row.id}`}>

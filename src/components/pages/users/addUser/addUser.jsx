@@ -8,7 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import axios from "axios";
+import api from '@/lib/api';
 
 const formSchema = z.object({
   first_name: z.string().min(2, "First Name is required!"),
@@ -18,8 +18,21 @@ const formSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters long")
 });
 
+const ROLES = {
+  "admin": "Administrator",
+  "data_management": "Data Management",
+  "logistics_management": "Logistics management"
+};
+
+const roleOptions = Object.entries(ROLES).map(([value, label]) => ({
+  value,
+  label
+}));
+
 export default function AddUser() {
   const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -43,16 +56,16 @@ export default function AddUser() {
   };
 
   const onSubmit = async (data) => {
-    console.log("Form submitted:", data);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/invite`, data);
+      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/invite`, data);
       if (response.status === 200) {
-        setSuccessMessage("Vessel created successfully");
+        setSuccessMessage("User created successfully");
         form.reset();
-        setTimeout(() => navigate("/vessel-management"), 3000);
+        setTimeout(() => navigate("/user-management"), 3000);
       }
     } catch (error) {
-      console.error("Error adding vessel:", error);
+      setErrorMessage(error.response?.data?.message || "Failed to invite user. Please try again.");
+      console.error("Error adding user:", error);
     }
   };
 
@@ -70,6 +83,20 @@ export default function AddUser() {
             Close
           </button>
         </div>
+
+        {successMessage && (
+          <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
+            {successMessage}
+            <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setSuccessMessage("")} />
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="w-full bg-red-100 text-red-600 text-start p-3 rounded-md my-6 flex justify-between">
+            {errorMessage}
+            <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setErrorMessage("")} />
+          </div>
+        )}
 
         <div>
           <Form {...form}>
@@ -151,11 +178,11 @@ export default function AddUser() {
                           </SelectTrigger>
                           
                           <SelectContent>
-                            {roles.map((role) => (
-                              <SelectItem key={role} value={role} className="text-[16px]">
-                                {role}
-                              </SelectItem>
-                            ))}
+                              {roleOptions.map((role) => (
+                                  <SelectItem key={role.value} value={role.value} className="text-[16px]">
+                                      {role.label}
+                                  </SelectItem>
+                              ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
