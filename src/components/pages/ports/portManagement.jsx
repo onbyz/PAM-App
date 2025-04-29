@@ -231,7 +231,7 @@ export default function PortManagement() {
                       className="px-4 py-1 border border-red-600 text-red-600 rounded-md text-sm flex items-center gap-2 whitespace-nowrap"
                     >
                       <FaTrash className="w-[12px] h-[12px]" />
-                      <span>Delete Selected</span>
+                      <span>Delete Selected ({selectedItems.length})</span>
                     </button>
                   )}
                   
