@@ -3,6 +3,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import ExportIcon from "@assets/icons/export.svg";
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import api from '@/lib/api';
 
 export default function Export({ setError }) {
     const [selectedOption, setSelectedOption] = useState(null);
@@ -32,59 +33,105 @@ export default function Export({ setError }) {
     
     const handleDownload = () => {
         setError(null);
-        if (selectedOption) {
-            const selectedLabel = exportOptions.find(option => option.id === selectedOption).label;
-
-            if (selectedOption === "bulk") {
-                axios.get('/api/admin/schedule')
-                    .then(response => {
-                        const data = response.data?.data || [];
-
-                        const formattedData = data.map(item => ({
-                            Vessel_Name: item.vessel_name,
-                            Voyage: item.voyage_no,
-                            cfs_closing: new Date(item.cfs_closing).toLocaleDateString(),
-                            fcl_closing: new Date(item.fcl_closing).toLocaleDateString(),
-                            Etd_Origin: new Date(item.etd).toLocaleDateString(),
-                            ETA_Transit_Hub: new Date(item.eta_transit).toLocaleDateString(),
-                            ETA_Europe: item.dst_eta ? new Date(item.dst_eta).toLocaleDateString() : '',
-                            Transit_time_Europe: item.transit_time || '',
-                            Origin: item.origin,
-                            Destination: item.destination
-                        }));
-
-                        const headers = [
-                            "Vessel_Name",
-                            "Voyage",
-                            "cfs_closing",
-                            "fcl_closing",
-                            "Etd_Origin",
-                            "ETA_Transit_Hub",
-                            "ETA_Europe",
-                            "Transit_time_Europe",
-                            "Origin",
-                            "Destination"
-                        ];
-
-                        const worksheet = XLSX.utils.json_to_sheet(formattedData, { header: headers });
-                        
-                        const workbook = XLSX.utils.book_new();
-                        XLSX.utils.book_append_sheet(workbook, worksheet, 'Bulk_Schedule');
-
-                        const excelFile = XLSX.write(workbook, { type: 'binary', bookType: 'xlsx' });
-                        const blob = new Blob([s2ab(excelFile)], { type: 'application/octet-stream' });
-
-                        const link = document.createElement('a');
-                        link.href = URL.createObjectURL(blob);
-                        link.download = selectedLabel;
-                        link.click();
-                    })
-                    .catch(error => {
-                        setError(error?.response?.data?.message || "Error downloading bulk schedule edit file");
-                        console.error("Error downloading bulk schedule edit file:", error);
-                    });
-            }
+        
+        if (!selectedOption) return;
+        
+        const selectedItem = exportOptions.find(option => option.id === selectedOption);
+        if (!selectedItem) return;
+        
+        const selectedLabel = selectedItem.label;
+        
+        if (selectedOption === "bulk") {
+            downloadBulkSchedule(selectedLabel);
         }
+    };
+    
+    const downloadBulkSchedule = () => {
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`;
+        
+        api(apiUrl)
+            .then(response => {
+                const data = response.data?.data || [];
+                const formattedData = formatScheduleData(data);
+                generateAndDownloadExcel(formattedData);
+            })
+            .catch(error => {
+                const errorMessage = error?.response?.data?.message || "Error downloading bulk schedule edit file";
+                setError(errorMessage);
+                console.error("Error downloading bulk schedule edit file:", error);
+            });
+    };
+    
+    const formatScheduleData = (data) => {
+        return data.map(item => ({
+            Vessel_Name: item.vessel_name,
+            Voyage: item.voyage_no,
+            cfs_closing: formatDate(item.cfs_closing),
+            fcl_closing: formatDate(item.fcl_closing),
+            Etd_Origin: formatDate(item.etd),
+            ETA_Transit_Hub: formatDate(item.eta_transit),
+            ETA_Europe: item.dst_eta ? formatDate(item.dst_eta) : '',
+            Transit_time_Europe: item.transit_time || '',
+            ETA_USA_Canada: item.dst_eta ? formatDate(addDaysToDate(item.dst_eta, 2)) : '',
+            Transit_time_USA_Canada: item.transit_time ? formatDate(addDaysToDate(item.transit_time, 2)) : '',
+            Origin: item.origin,
+            Transit: item.transit || ''
+        }));
+    };
+    
+    const generateAndDownloadExcel = (formattedData) => {
+        const headers = [
+            "Vessel_Name",
+            "Voyage",
+            "cfs_closing",
+            "fcl_closing",
+            "Etd_Origin",
+            "ETA_Transit_Hub",
+            "ETA_Europe",
+            "Transit_time_Europe",
+            "ETA_USA_Canada",
+            "Transit_time_USA_Canada",
+            "Origin",
+            "Transit"
+        ];
+    
+        const worksheet = XLSX.utils.json_to_sheet(formattedData, { header: headers });
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Bulk_Schedule');
+    
+        const excelFile = XLSX.write(workbook, { type: 'binary', bookType: 'xlsx' });
+        const blob = new Blob([s2ab(excelFile)], { type: 'application/octet-stream' });
+    
+        const timestamp = getCurrentTimestamp();
+        const filename = `Bulk_upload_${timestamp}.xlsx`;
+    
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    };
+    
+    const formatDate = (dateString) => {
+        return dateString ? new Date(dateString).toLocaleDateString() : '';
+    };
+    
+    const addDaysToDate = (dateString, daysToAdd) => {
+        const date = new Date(dateString);
+        return new Date(date.setDate(date.getDate() + daysToAdd));
+    };
+    
+    const getCurrentTimestamp = () => {
+        const now = new Date();
+        
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
     };
 
     function s2ab(s) {

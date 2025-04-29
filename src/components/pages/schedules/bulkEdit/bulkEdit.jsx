@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { XCircle } from "lucide-react"
 import Export from "./Export"
 import api from "@/lib/api"
+import { useNavigate } from "react-router-dom";
 
 export default function BulkScheduleUpload() {
   const [file, setFile] = useState(null)
@@ -14,6 +15,8 @@ export default function BulkScheduleUpload() {
   const [deleteOldData, setDeleteOldData] = useState(true)
   const [selectedPort, setSelectedPort] = useState("")
   const [portOptions, setPortOptions] = useState([])
+
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0]
@@ -117,6 +120,13 @@ export default function BulkScheduleUpload() {
     } finally {
       setIsLoading(false)
     }
+  }
+  const handleGoBack = () => {
+    setFile(null)
+    setError(null)
+    setResponse(null)
+    setSuccessMessage(null)
+    navigate(-1);
   }
 
   return (
@@ -280,12 +290,7 @@ export default function BulkScheduleUpload() {
 
             <button
               type="button"
-              onClick={() => {
-                setFile(null)
-                setError(null)
-                setResponse(null)
-                setSuccessMessage(null)
-              }}
+              onClick={handleGoBack}
               className="w-[80px] h-[40px] text-[14px] flex justify-center items-center border border-[#E2E8F0] rounded-md focus:outline-none appearance-none bg-white"
             >
               Cancel
