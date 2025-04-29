@@ -1,25 +1,35 @@
 import React, { useEffect, useState } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import ExportIcon from "@assets/icons/export.svg";
-import axios from 'axios';
 import * as XLSX from 'xlsx';
 import api from '@/lib/api';
 
 export default function Export({ setError }) {
     const [selectedOption, setSelectedOption] = useState(null);
     const [countries, setCountries] = useState([]);
+    const [ports, setPorts] = useState([]);
 
     const fetchCountries = async () => {
         try {
-          const countries = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
+          const countries = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
           setCountries(countries.data?.data || [])
         } catch (error) {
           console.error("Error fetching countries:", error)
         }
     }
 
+    const fetchPorts = async () => {
+        try {
+          const ports = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`)
+          setPorts(ports.data?.data || [])
+        } catch (error) {
+          console.error("Error fetching ports:", error)
+        }
+    }
+
     useEffect(() => {
         fetchCountries();
+        fetchPorts();
     }, []);
     
     const exportOptions = [
@@ -39,10 +49,10 @@ export default function Export({ setError }) {
         const selectedItem = exportOptions.find(option => option.id === selectedOption);
         if (!selectedItem) return;
         
-        const selectedLabel = selectedItem.label;
-        
         if (selectedOption === "bulk") {
-            downloadBulkSchedule(selectedLabel);
+            downloadBulkSchedule();
+        } else if (selectedOption === "single") {
+            downloadSingleSchedule();
         }
     };
     
@@ -52,8 +62,8 @@ export default function Export({ setError }) {
         api(apiUrl)
             .then(response => {
                 const data = response.data?.data || [];
-                const formattedData = formatScheduleData(data);
-                generateAndDownloadExcel(formattedData);
+                const formattedData = formatScheduleData(data, false);
+                generateAndDownloadExcel(formattedData, "Bulk_upload_", false);
             })
             .catch(error => {
                 const errorMessage = error?.response?.data?.message || "Error downloading bulk schedule edit file";
@@ -61,25 +71,49 @@ export default function Export({ setError }) {
                 console.error("Error downloading bulk schedule edit file:", error);
             });
     };
-    
-    const formatScheduleData = (data) => {
-        return data.map(item => ({
-            Vessel_Name: item.vessel_name,
-            Voyage: item.voyage_no,
-            cfs_closing: formatDate(item.cfs_closing),
-            fcl_closing: formatDate(item.fcl_closing),
-            Etd_Origin: formatDate(item.etd),
-            ETA_Transit_Hub: formatDate(item.eta_transit),
-            ETA_Europe: item.dst_eta ? formatDate(item.dst_eta) : '',
-            Transit_time_Europe: item.transit_time || '',
-            ETA_USA_Canada: item.dst_eta ? formatDate(addDaysToDate(item.dst_eta, 2)) : '',
-            Transit_time_USA_Canada: item.transit_time ? formatDate(addDaysToDate(item.transit_time, 2)) : '',
-            Origin: item.origin,
-            Transit: item.transit || ''
-        }));
+
+    const downloadSingleSchedule = () => {
+        ports.forEach(port => {
+            const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/port/${port.id}`;
+            api(apiUrl)
+                .then(response => {
+                    const data = response.data?.data || [];
+                    const formattedData = formatScheduleData(data, true);
+                    generateAndDownloadExcel(formattedData, `${port.country}_${port.origin}`, true);
+                })
+                .catch(error => {
+                    const errorMessage = error?.response?.data?.message || "Error downloading single schedule edit file";
+                    setError(errorMessage);
+                    console.error("Error downloading single schedule edit file:", error);
+                });
+        });
     };
     
-    const generateAndDownloadExcel = (formattedData) => {
+    const formatScheduleData = (data, isSingle) => {
+        return data.map(item => {
+            const formattedItem = {
+                Vessel_Name: item?.vessel_name || '',
+                Voyage: item?.voyage_no || '',
+                cfs_closing: formatDate(item?.cfs_closing) || '',
+                fcl_closing: formatDate(item?.fcl_closing) || '',
+                Etd_Origin: formatDate(item?.etd) || '',
+                ETA_Transit_Hub: formatDate(item?.eta_transit) || '',
+                ETA_Europe: item.dst_eta ? formatDate(item.dst_eta) : '',
+                Transit_time_Europe: item.transit_time || '',
+                ETA_USA_Canada: item.dst_eta ? formatDate(addDaysToDate(item.dst_eta, 2)) : '',
+                Transit_time_USA_Canada: item.transit_time ? formatDate(addDaysToDate(item.transit_time, 2)) : '',
+            };
+
+            if (!isSingle) {
+                formattedItem.Origin = item?.origin || '';
+                formattedItem.Transit = item.transit || '';
+            }
+
+            return formattedItem;
+        });
+    };
+    
+    const generateAndDownloadExcel = (formattedData, filenamePrefix, isSingle) => {
         const headers = [
             "Vessel_Name",
             "Voyage",
@@ -90,24 +124,25 @@ export default function Export({ setError }) {
             "ETA_Europe",
             "Transit_time_Europe",
             "ETA_USA_Canada",
-            "Transit_time_USA_Canada",
-            "Origin",
-            "Transit"
+            "Transit_time_USA_Canada"
         ];
+        
+        if (!isSingle) {
+            headers.push("Origin", "Transit");
+        }
     
         const worksheet = XLSX.utils.json_to_sheet(formattedData, { header: headers });
         const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Bulk_Schedule');
+        XLSX.utils.book_append_sheet(workbook, worksheet, isSingle ? 'Single_Schedule' : 'Bulk_Schedule');
     
         const excelFile = XLSX.write(workbook, { type: 'binary', bookType: 'xlsx' });
         const blob = new Blob([s2ab(excelFile)], { type: 'application/octet-stream' });
     
         const timestamp = getCurrentTimestamp();
-        const filename = `Bulk_upload_${timestamp}.xlsx`;
     
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = filename;
+        link.download = `${filenamePrefix}_${timestamp}.xlsx`;
         link.click();
     };
     
