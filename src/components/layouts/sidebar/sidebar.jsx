@@ -32,7 +32,7 @@ export default function Sidebar() {
   // Filter sidebar items based on user role
   const sidebarItems = isDataManager 
     ? allSidebarItems.filter(item => item.title === "Registered Users")
-    : allSidebarItems;
+    : allSidebarItems.filter(item => item.title !== "Registered Users");
 
   return (
     <div className='w-[270px] h-[1100px] bg-[#FCFCFC] px-6 flex flex-col justify-between'>
