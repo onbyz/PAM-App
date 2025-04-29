@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { FaXmark } from "react-icons/fa6";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
+import React, { useState, useEffect } from 'react';
+import { FaXmark, FaCopy } from "react-icons/fa6";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, RefreshCw } from "lucide-react";
 import api from '@/lib/api';
 
 const formSchema = z.object({
@@ -15,7 +15,7 @@ const formSchema = z.object({
   last_name: z.string().min(2, "Last Name is required!"),
   email: z.string().email("Invalid email address").nonempty("Email is required"),
   role: z.string().min(1, "Role is required!"),
-  password: z.string().min(6, "Password must be at least 6 characters long")
+  password: z.string().min(8, "Password must be at least 8 characters long")
 });
 
 const ROLES = {
@@ -33,6 +33,7 @@ export default function AddUser() {
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [passwordCopied, setPasswordCopied] = useState(false);
 
   const navigate = useNavigate();
 
@@ -43,33 +44,86 @@ export default function AddUser() {
       last_name: "",
       email: "",
       role: "",
-      password: "", //
+      password: "",
     },
   });
+
+  useEffect(() => {
+    generatePassword();
+  }, []);
+
+  const generatePassword = () => {
+    const length = 12;
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
+    let password = "";
+    
+    password += getRandomChar("ABCDEFGHIJKLMNOPQRSTUVWXYZ"); 
+    password += getRandomChar("abcdefghijklmnopqrstuvwxyz"); 
+    password += getRandomChar("0123456789"); 
+    password += getRandomChar("!@#$%^&*()-_=+"); 
+    
+    for (let i = password.length; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+    
+    password = shuffleString(password);
+    
+    form.setValue("password", password);
+    return password;
+  };
+
+  const getRandomChar = (characters) => {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    return characters[randomIndex];
+  };
+
+  const shuffleString = (str) => {
+    const array = str.split('');
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array.join('');
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
   const handleGoBack = () => {
-    navigate(-1); 
+    navigate(-1);
+  };
+
+  const copyPasswordToClipboard = () => {
+    const password = form.getValues("password");
+    navigator.clipboard.writeText(password)
+      .then(() => {
+        setPasswordCopied(true);
+        setTimeout(() => setPasswordCopied(false), 2000);
+      })
+      .catch(err => {
+        console.error("Failed to copy password: ", err);
+      });
+  };
+
+  const handleRegeneratePassword = () => {
+    generatePassword();
   };
 
   const onSubmit = async (data) => {
     try {
       const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/invite`, data);
       if (response.status === 200) {
-        setSuccessMessage("User created successfully");
+        setSuccessMessage("User invited successfully");
         form.reset();
         setTimeout(() => navigate("/user-management"), 3000);
       }
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Failed to invite user. Please try again.");
-      console.error("Error adding user:", error);
+      console.error("Error inviting user:", error);
     }
   };
-
-  const roles = ['Data Management', 'Administrator', 'Logistics management'];
 
   return (
     <div>
@@ -109,7 +163,7 @@ export default function AddUser() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[14px] text-black">
-                          Enter first Name <span className="text-red-500">*</span>
+                          First Name <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -130,7 +184,7 @@ export default function AddUser() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[14px] text-black">
-                          Enter last Name <span className="text-red-500">*</span>
+                          Last Name <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -151,7 +205,7 @@ export default function AddUser() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[14px] text-black">
-                          Enter E-mail ID <span className="text-red-500">*</span>
+                          Email Address <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <Input
@@ -170,19 +224,19 @@ export default function AddUser() {
                 <div className="">
                   <FormField name="role" control={form.control} render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-[14px] text-black">Select Role<span className="text-red-500">*</span></FormLabel>
+                      <FormLabel className="text-[14px] text-black">Role <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Select value={field.value} onValueChange={field.onChange}>
                           <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
-                            <SelectValue/>
+                            <SelectValue placeholder="Select a role" />
                           </SelectTrigger>
                           
                           <SelectContent>
-                              {roleOptions.map((role) => (
-                                  <SelectItem key={role.value} value={role.value} className="text-[16px]">
-                                      {role.label}
-                                  </SelectItem>
-                              ))}
+                            {roleOptions.map((role) => (
+                              <SelectItem key={role.value} value={role.value} className="text-[16px]">
+                                {role.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -198,27 +252,47 @@ export default function AddUser() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-[14px] text-black">
-                          Enter Password <span className="text-red-500">*</span>
+                          Password <span className="text-red-500">*</span>
                         </FormLabel>
                         <FormControl>
                           <div className="relative w-[300px]">
                             <Input
                               type={showPassword ? "text" : "password"}
-                              className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-10 focus:outline-none appearance-none bg-white"
+                              className="w-full h-[40px] border border-[#E2E8F0] rounded-md px-3 pr-20 focus:outline-none appearance-none bg-white"
                               {...field}
+                              readOnly
                             />
-                            <span
-                              className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
-                              onClick={togglePasswordVisibility}
-                            >
-                              {showPassword ? (
-                                <EyeOff size={20} className="text-gray-500" />
-                              ) : (
-                                <Eye size={20} className="text-gray-500" />
-                              )}
-                            </span>
+                            <div className="absolute inset-y-0 right-0 flex items-center">
+                              <button
+                                type="button"
+                                onClick={copyPasswordToClipboard}
+                                className="h-full px-2 text-gray-500 hover:text-gray-700"
+                                title="Copy password"
+                              >
+                                <FaCopy size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleRegeneratePassword}
+                                className="h-full px-2 text-gray-500 hover:text-gray-700"
+                                title="Generate new password"
+                              >
+                                <RefreshCw size={16} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={togglePasswordVisibility}
+                                className="h-full px-2 text-gray-500 hover:text-gray-700"
+                                title={showPassword ? "Hide password" : "Show password"}
+                              >
+                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                              </button>
+                            </div>
                           </div>
                         </FormControl>
+                        {passwordCopied && (
+                          <p className="text-green-600 text-xs mt-1">Password copied to clipboard!</p>
+                        )}
                         <FormMessage className="text-[14px]" />
                       </FormItem>
                     )}
