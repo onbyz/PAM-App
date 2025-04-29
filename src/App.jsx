@@ -21,7 +21,7 @@ import EditSchedule from './components/pages/schedules/editSchedule/editSchedule
 import { AuthProvider } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/layouts/ProtectedRoute.jsx';
 import UnProtectedRoute from './components/layouts/UnProtectedRoute.jsx';
-import RegisteredUsers from '@components/pages/users/RegisteredUsers.jsx';
+import RegisteredUsers from '@components/pages/users/registeredUsers.jsx';
 import AddRegisteredUser from '@components/pages/users/addUser/AddRegisteredUser.jsx';
 
 export default function App() {
