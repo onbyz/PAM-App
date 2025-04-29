@@ -34,6 +34,11 @@ export default function Sidebar() {
     ? allSidebarItems.filter(item => item.title === "Registered Users")
     : allSidebarItems.filter(item => item.title !== "Registered Users");
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = '/login';
+  }
+
   return (
     <div className='w-[270px] h-screen bg-[#FCFCFC] px-6 flex flex-col justify-between'>
       <div>
@@ -61,7 +66,7 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <button className='pb-4'>
+      <button className='pb-4' onClick={handleLogout}>
         <div className='flex gap-2 mt-4'>
           <img src={LogoutIcon} alt='Logout' className='w-[24px] h-[24px]' />
           <h5 className='text-[#FF3B30]'>Logout</h5>
