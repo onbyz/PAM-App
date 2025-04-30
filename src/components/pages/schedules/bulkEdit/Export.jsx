@@ -179,8 +179,7 @@ export default function Export({ setError }) {
       "ETA_USA_Canada",
       "Transit_time_USA_Canada",
       "Origin",
-      "Transit",
-      "Country"
+      "Transit"
     ]
 
     // Create workbook and worksheet
@@ -244,7 +243,6 @@ export default function Export({ setError }) {
       { wch: 18 }, // Transit_time_USA_Canada
       { wch: 15 }, // Origin
       { wch: 15 }, // Transit
-      { wch: 15 }  // Country
     ]
 
     // Set date format for date columns
