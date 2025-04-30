@@ -27,16 +27,16 @@ export default function Sidebar() {
     { id: "2", icon: VesselIcon, title: "Vessel Management", link: "/vessel-management", activeIcon: GreenVesselIcon },
     { id: "3", icon: PortIcon, title: "Port Management", link: "/port-management", activeIcon: GreenPortIcon },
     { id: "4", icon: UserIcon, title: "User Management", link: "/user-management", activeIcon: GreenUserIcon },
-    { id: "5", icon: RegisterdUserIcon, title: "Registered Users", link: "/registered-users", activeIcon: GreenRegisterdUserIcon },
+    { id: "5", icon: RegisterdUserIcon, title: "EC Management", link: "/registered-users", activeIcon: GreenRegisterdUserIcon },
   ];
   
   // Filter sidebar items based on user role
   const sidebarItems = 
   isEcManager 
-    ? allSidebarItems.filter(item => item.title === "Registered Users")
+    ? allSidebarItems.filter(item => item.title === "EC Management")
     : isScheduleManager 
       ? allSidebarItems.filter(item => 
-          item.title !== "Registered Users" && item.title !== "User Management")
+          item.title !== "EC Management" && item.title !== "User Management")
       : allSidebarItems;
 
   const handleLogout = () => {
