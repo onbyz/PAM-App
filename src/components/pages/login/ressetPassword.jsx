@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import LoginFormImg from "@/assets/login/resset-password.png";
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams(); 
@@ -176,7 +177,7 @@ export default function ResetPassword() {
       {/* Right Section - Image */}
       <div className="w-1/2 hidden md:flex items-center justify-center bg-gray-100">
         <img
-          src="/cargo-container.png"
+          src={LoginFormImg}
           alt="Cargo Container"
           className="max-w-full max-h-full object-contain p-4"
         />

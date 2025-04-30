@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import LoginFormImg from "@/assets/login/forgot-password.png";
 
 export default function ForgotPassword() {
   const [successMessage, setSuccessMessage] = useState("");
@@ -92,7 +93,7 @@ export default function ForgotPassword() {
       {/* Right Section - Image */}
       <div className="w-1/2 hidden md:flex items-center justify-center bg-gray-100">
         <img
-          src="/cargo-container.png"
+          src={LoginFormImg}
           alt="Form Img"
           className="max-w-md"
         />
