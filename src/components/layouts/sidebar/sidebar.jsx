@@ -19,8 +19,8 @@ export default function Sidebar() {
 
   const user = JSON.parse(localStorage.getItem('user'));
   const role = user?.role;
-	const isEcManager = role === 'ec_management';
-	const isScheduleManager = role === 'schedule_management';
+  const isEcManager = role === 'ec_management';
+  const isScheduleManager = role === 'schedule_management';
 
   const allSidebarItems = [
     { id: "1", icon: ClockIcon, title: "Schedule Management", link: '/schedule-list', activeIcon: GreenClockIcon },
@@ -45,7 +45,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className='w-[270px] h-screen bg-[#FCFCFC] px-6 flex flex-col justify-between'>
+    <div className="fixed h-screen w-1/5 bg-[#FCFCFC] px-6 flex flex-col justify-between overflow-y-auto">
       <div>
         <Link to="/">
           <img src={Logo} alt='Logo' className='h-[65px] w-[170px] mt-10' />

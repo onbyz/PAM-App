@@ -3,19 +3,15 @@ import Header from "@components/layouts/header/header.jsx";
 import { Outlet } from "react-router-dom";
 
 const Layout = () => (
-  <div className="w-full">
-    <div className="flex">
-        <div className="hidden md:block md:w-[270px] md:h-screen">
-            <Sidebar />
-        </div>
-
-        <div className="w-full h-screen px-6">
-            <Header />
-            <Outlet />
-        </div>
-        
+  <div className="flex w-full">
+    <Sidebar />
+    
+    <div className="ml-[20%] w-4/5 min-h-screen">
+      <div className="px-6">
+        <Header />
+        <Outlet />
+      </div>
     </div>
-        
   </div>
 );
 
