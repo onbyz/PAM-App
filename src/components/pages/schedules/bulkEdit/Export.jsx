@@ -120,7 +120,7 @@ export default function Export({ setError }) {
       // Calculate USA/Canada ETA by adding 2 days to Europe ETA
       let etaUsaCanada = null
       if (etaEurope !== null) {
-        etaUsaCanada = etaEurope + 2
+        etaUsaCanada = etaEurope ? new Date(etaEurope.getTime() + 2 * 24 * 60 * 60 * 1000) : null
       }
 
       const formattedItem = {
@@ -207,7 +207,8 @@ export default function Export({ setError }) {
 
         if (cell && cell.v !== null && cell.v !== undefined) {
           cell.t = "n" // Set type to number
-          cell.z = "yyyy-mm-dd" // Set format to date only
+          cell.z = "dd-mm-yyyy" // Set format to date only
+          // cell.z = "yyyy-mm-dd"
         }
       }
     }

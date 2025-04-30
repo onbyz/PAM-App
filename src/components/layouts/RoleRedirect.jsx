@@ -11,7 +11,7 @@ const RoleRedirect = () => {
   const { role } = user;
   
   const dashboardRoutes = {
-    'admin': '/user-management',
+    'admin': '/schedule-list',
     'ec_management': '/registered-users',
     'schedule_management': '/schedule-list'
   };
