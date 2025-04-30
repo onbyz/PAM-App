@@ -29,7 +29,9 @@ import EditRegisteredUser from '@components/pages/users/edit/editRegisteredUser.
 export default function App() {
 	const user = JSON.parse(localStorage.getItem('user'));
 	const role = user?.role;
-	const isDataManager = role === 'data_management';
+	const isAdmin = role === 'admin';
+	const isEcManager = role === 'ec_management';
+	const isScheduleManager = role === 'schedule_management';
 
 	return (
 		<AuthProvider>
@@ -47,14 +49,26 @@ export default function App() {
 						{/* Routes with the Layout (with sidebar) */}
 						<Route element={<ProtectedRoute />}>
 							<Route element={<Layout />}>
-								{/* Data Manager only routes */}
-								{isDataManager ? (
+								{/* Registered Users Pages - Only Admin and EC Management */}
+								{(isAdmin || isEcManager) && (
 									<>
 										<Route path="/registered-users" element={<RegisteredUsers />} />
 										<Route path="/registered-users/add" element={<AddRegisteredUser />} />
 										<Route path="/registered-users/edit/:id" element={<EditRegisteredUser />} />
 									</>
-								) : (
+								)}
+
+								{/* User Management Pages - Only Admin */}
+								{isAdmin && (
+									<>
+										<Route path="/user-management" element={<UserManangement />} />
+										<Route path="/user-management/invite-user" element={<AddUser />} />
+										<Route path="/user-management/edit-user/:id" element={<EditUser />} />
+									</>
+								)}
+
+								{/* Schedule, Vessel, and Port Pages - Admin and Schedule Management */}
+								{(isAdmin || isScheduleManager) && (
 									<>
 										<Route path="/schedule-list" element={<ScheduleList />} />
 										<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
@@ -66,9 +80,6 @@ export default function App() {
 										<Route path="/port-management" element={<PortManangement />} />
 										<Route path="/port-management/add-port" element={<AddPort />} />
 										<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
-										<Route path="/user-management" element={<UserManangement />} />
-										<Route path="/user-management/invite-user" element={<AddUser />} />
-										<Route path="/user-management/edit-user/:id" element={<EditUser />} />
 									</>
 								)}
 							</Route>

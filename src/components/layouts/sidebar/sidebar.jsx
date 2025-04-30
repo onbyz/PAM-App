@@ -19,7 +19,8 @@ export default function Sidebar() {
 
   const user = JSON.parse(localStorage.getItem('user'));
   const role = user?.role;
-  const isDataManager = role === 'data_management';
+	const isEcManager = role === 'ec_management';
+	const isScheduleManager = role === 'schedule_management';
 
   const allSidebarItems = [
     { id: "1", icon: ClockIcon, title: "Schedule Management", link: '/schedule-list', activeIcon: GreenClockIcon },
@@ -30,9 +31,13 @@ export default function Sidebar() {
   ];
   
   // Filter sidebar items based on user role
-  const sidebarItems = isDataManager 
+  const sidebarItems = 
+  isEcManager 
     ? allSidebarItems.filter(item => item.title === "Registered Users")
-    : allSidebarItems.filter(item => item.title !== "Registered Users");
+    : isScheduleManager 
+      ? allSidebarItems.filter(item => 
+          item.title !== "Registered Users" && item.title !== "User Management")
+      : allSidebarItems;
 
   const handleLogout = () => {
     localStorage.clear();

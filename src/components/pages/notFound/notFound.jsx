@@ -11,7 +11,7 @@ export default function NotFound() {
 
             <div>
                 <Link to={'/'}>
-                    <button class="bg-blue-900 text-white font-bold uppercase px-6 py-2 rounded-full">
+                    <button className="bg-blue-900 text-white font-bold uppercase px-6 py-2 rounded-full">
                         Go Home
                     </button>
                 </Link>

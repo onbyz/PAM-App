@@ -7,7 +7,7 @@ const UnProtectedRoute = () => {
 
   const user = JSON.parse(localStorage.getItem('user'));
 	const role = user?.role;
-	const isDataManager = role === 'data_management';
+	const isDataManager = role === 'ec_management';
   const navigateTo = isDataManager ? '/registered-users' : '/schedule-list';
 
   if (loading) {

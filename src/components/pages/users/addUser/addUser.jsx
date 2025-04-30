@@ -20,8 +20,8 @@ const formSchema = z.object({
 
 const ROLES = {
   "admin": "Administrator",
-  "data_management": "Data Management",
-  "logistics_management": "Logistics management"
+  "schedule_management": "Schedule Management",
+  "ec_management": "EC Management"
 };
 
 const roleOptions = Object.entries(ROLES).map(([value, label]) => ({
