@@ -58,12 +58,8 @@ export default function BulkScheduleUpload() {
   const fetchPorts = async () => {
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`, {
-        headers: {
-          "ngrok-skip-browser-warning": "true"
-        }
-      });
-      const { data } = await response.json();
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`);
+      const { data } = await response.data
       setPortOptions(data || []);
     } catch (error) {
       console.error('Error fetching ports:', error);
@@ -102,16 +98,11 @@ export default function BulkScheduleUpload() {
     }
 
     try {
-      const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      const  data  = response.data
+      // Using import.meta.env for environment variables
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`
+      const response = await api.post(apiUrl, formData)
 
-      if (data.error) {
-        throw new Error(data.message || "Failed to upload schedules")
-      }
+      const {data} = response
 
       setResponse(data)
       setSuccessMessage("File processed successfully!")
@@ -322,7 +313,7 @@ export default function BulkScheduleUpload() {
         )}
       </div>
       <div className="w-1/3 p-4 mt-auto">
-        <Export setError={setError}/>
+        <Export setError={setError} />
       </div>
     </div>
   )
