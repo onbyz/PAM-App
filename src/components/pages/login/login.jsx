@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash, FaXmark } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/context/AuthContext';
+import LoginFormImg from "@/assets/login/login-img.png";
 
 export default function Login() {
 
@@ -122,7 +123,7 @@ export default function Login() {
       {/* Right Section - Image */}
       <div className="w-1/2 hidden md:flex items-center justify-center bg-gray-100">
         <img
-          src="/cargo-container.png"
+          src={LoginFormImg}
           alt="Form Img"
           className="max-w-md"
         />
