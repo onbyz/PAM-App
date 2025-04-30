@@ -34,6 +34,7 @@ export default function AddUser() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [passwordCopied, setPasswordCopied] = useState(false);
+  const [allFieldsFilled, setAllFieldsFilled] = useState(false);
 
   const navigate = useNavigate();
 
@@ -46,11 +47,28 @@ export default function AddUser() {
       role: "",
       password: "",
     },
+    mode: "onChange"
   });
 
+  const { watch, formState } = form;
+  const formValues = watch();
+
   useEffect(() => {
-    generatePassword();
-  }, []);
+    const { first_name, last_name, email, role } = formValues;
+    const requiredFieldsFilled = 
+      first_name.length >= 2 && 
+      last_name.length >= 2 && 
+      email.match(/^\S+@\S+\.\S+$/) && 
+      role.length >= 1;
+    
+    if (requiredFieldsFilled && !allFieldsFilled) {
+      setAllFieldsFilled(true);
+      generatePassword();
+    } else if (!requiredFieldsFilled && allFieldsFilled) {
+      setAllFieldsFilled(false);
+      form.setValue("password", "");
+    }
+  }, [formValues.first_name, formValues.last_name, formValues.email, formValues.role]);
 
   const generatePassword = () => {
     const length = 12;
@@ -97,6 +115,8 @@ export default function AddUser() {
 
   const copyPasswordToClipboard = () => {
     const password = form.getValues("password");
+    if (!password) return;
+    
     navigator.clipboard.writeText(password)
       .then(() => {
         setPasswordCopied(true);
@@ -108,7 +128,9 @@ export default function AddUser() {
   };
 
   const handleRegeneratePassword = () => {
-    generatePassword();
+    if (allFieldsFilled) {
+      generatePassword();
+    }
   };
 
   const onSubmit = async (data) => {
@@ -117,6 +139,7 @@ export default function AddUser() {
       if (response.status === 200) {
         setSuccessMessage("User invited successfully");
         form.reset();
+        setAllFieldsFilled(false);
         setTimeout(() => navigate("/user-management"), 3000);
       }
     } catch (error) {
@@ -262,36 +285,44 @@ export default function AddUser() {
                               {...field}
                               readOnly
                             />
-                            <div className="absolute inset-y-0 right-0 flex items-center">
-                              <button
-                                type="button"
-                                onClick={copyPasswordToClipboard}
-                                className="h-full px-2 text-gray-500 hover:text-gray-700"
-                                title="Copy password"
-                              >
-                                <FaCopy size={16} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleRegeneratePassword}
-                                className="h-full px-2 text-gray-500 hover:text-gray-700"
-                                title="Generate new password"
-                              >
-                                <RefreshCw size={16} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={togglePasswordVisibility}
-                                className="h-full px-2 text-gray-500 hover:text-gray-700"
-                                title={showPassword ? "Hide password" : "Show password"}
-                              >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                              </button>
-                            </div>
+                            {allFieldsFilled && (
+                              <div className="absolute inset-y-0 right-0 flex items-center">
+                                <button
+                                  type="button"
+                                  onClick={copyPasswordToClipboard}
+                                  className="h-full px-2 text-gray-500 hover:text-gray-700"
+                                  title="Copy password"
+                                  disabled={!allFieldsFilled}
+                                >
+                                  <FaCopy size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleRegeneratePassword}
+                                  className="h-full px-2 text-gray-500 hover:text-gray-700"
+                                  title="Generate new password"
+                                  disabled={!allFieldsFilled}
+                                >
+                                  <RefreshCw size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={togglePasswordVisibility}
+                                  className="h-full px-2 text-gray-500 hover:text-gray-700"
+                                  title={showPassword ? "Hide password" : "Show password"}
+                                  disabled={!allFieldsFilled}
+                                >
+                                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                              </div>
+                            )}
                           </div>
                         </FormControl>
                         {passwordCopied && (
                           <p className="text-green-600 text-xs mt-1">Password copied to clipboard!</p>
+                        )}
+                        {!allFieldsFilled && (
+                          <p className="text-gray-500 text-xs mt-1">Fill in all required fields to generate a password</p>
                         )}
                         <FormMessage className="text-[14px]" />
                       </FormItem>
@@ -303,7 +334,11 @@ export default function AddUser() {
               <div className='flex gap-6 mt-8'>
                 <button
                   type='submit'
-                  className='w-[108px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'>
+                  disabled={!allFieldsFilled}
+                  className={`w-[108px] h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${
+                    allFieldsFilled ? 'bg-[#16A34A]' : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
                   Invite User
                 </button>
 
