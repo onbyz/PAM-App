@@ -1,4 +1,5 @@
 
+import api from "@/lib/api"
 import { useState } from "react"
 
 const BulkScheduleUpload = () => {
@@ -51,12 +52,12 @@ const BulkScheduleUpload = () => {
         formData.append("uploadType", uploadType)
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`, {
+            const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`, {
                 method: "POST",
                 body: formData,
             })
 
-            const data = await response.json()
+            const {data} = await response.data;
 
             if (!response.ok) {
                 throw new Error(data.message || "Failed to upload schedules")
