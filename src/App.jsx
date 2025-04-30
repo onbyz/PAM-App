@@ -25,14 +25,9 @@ import UnProtectedRoute from './components/layouts/UnProtectedRoute.jsx';
 import RegisteredUsers from '@components/pages/users/registeredUsers.jsx';
 import AddRegisteredUser from '@components/pages/users/addUser/AddRegisteredUser.jsx';
 import EditRegisteredUser from '@components/pages/users/edit/editRegisteredUser.jsx';
+import RoleRedirect from './components/layouts/RoleRedirect.jsx';
 
 export default function App() {
-	const user = JSON.parse(localStorage.getItem('user'));
-	const role = user?.role;
-	const isAdmin = role === 'admin';
-	const isEcManager = role === 'ec_management';
-	const isScheduleManager = role === 'schedule_management';
-
 	return (
 		<AuthProvider>
 			<Router>
@@ -41,47 +36,41 @@ export default function App() {
 						{/* Routes without the Layout (no sidebar) */}
 						<Route element={<UnProtectedRoute />}>
 							<Route path="/login" element={<Login />} />
-							<Route path="/" element={<Homepage />} />
 							<Route path="/forgot-password" element={<ForgotPassowrd />} />
 							<Route path="/resset-password" element={<RessetPassword />} />
 						</Route>
 
+						<Route path="/" element={<RoleRedirect />} />
+
 						{/* Routes with the Layout (with sidebar) */}
 						<Route element={<ProtectedRoute />}>
 							<Route element={<Layout />}>
-								{/* Registered Users Pages - Only Admin and EC Management */}
-								{(isAdmin || isEcManager) && (
-									<>
-										<Route path="/registered-users" element={<RegisteredUsers />} />
-										<Route path="/registered-users/add" element={<AddRegisteredUser />} />
-										<Route path="/registered-users/edit/:id" element={<EditRegisteredUser />} />
-									</>
-								)}
+								
+								{/* Registered Users Pages */}
+								<Route path="/registered-users" element={<RegisteredUsers />} />
+								<Route path="/registered-users/add" element={<AddRegisteredUser />} />
+								<Route path="/registered-users/edit/:id" element={<EditRegisteredUser />} />
 
-								{/* User Management Pages - Only Admin */}
-								{isAdmin && (
-									<>
-										<Route path="/user-management" element={<UserManangement />} />
-										<Route path="/user-management/invite-user" element={<AddUser />} />
-										<Route path="/user-management/edit-user/:id" element={<EditUser />} />
-									</>
-								)}
+								{/* User Management Pages */}
+								<Route path="/user-management" element={<UserManangement />} />
+								<Route path="/user-management/invite-user" element={<AddUser />} />
+								<Route path="/user-management/edit-user/:id" element={<EditUser />} />
 
-								{/* Schedule, Vessel, and Port Pages - Admin and Schedule Management */}
-								{(isAdmin || isScheduleManager) && (
-									<>
-										<Route path="/schedule-list" element={<ScheduleList />} />
-										<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
-										<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
-										<Route path="/schedule-list/edit-schedule/:uuid" element={<EditSchedule />} />
-										<Route path="/vessel-management" element={<VesselManangement />} />
-										<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
-										<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
-										<Route path="/port-management" element={<PortManangement />} />
-										<Route path="/port-management/add-port" element={<AddPort />} />
-										<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
-									</>
-								)}
+								{/* Schedule Pages */}
+								<Route path="/schedule-list" element={<ScheduleList />} />
+								<Route path="/schedule-list/create-schedule" element={<CreateSchedule />} />
+								<Route path="/schedule-list/bulk-edit" element={<BulkEdit />} />
+								<Route path="/schedule-list/edit-schedule/:uuid" element={<EditSchedule />} />
+
+								{/* Vessel Pages */}
+								<Route path="/vessel-management" element={<VesselManangement />} />
+								<Route path="/vessel-management/add-vessel" element={<AddVessel />} />
+								<Route path="/vessel-management/edit-vessel/:uuid" element={<EditVessel />} />
+
+								{/* Port Pages */}
+								<Route path="/port-management" element={<PortManangement />} />
+								<Route path="/port-management/add-port" element={<AddPort />} />
+								<Route path="/port-management/edit-port/:uuid" element={<EditPort />} />
 							</Route>
 						</Route>
 
