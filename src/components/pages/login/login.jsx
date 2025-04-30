@@ -73,7 +73,7 @@ export default function Login() {
                   <FormItem>
                     <FormLabel className="text-[16px]">Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="Joelsebastian@pamcargo.com" type="email" className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
+                      <Input type="email" className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
                     </FormControl>
                     <FormMessage className='text-[14px]' />
                   </FormItem>
@@ -86,7 +86,7 @@ export default function Login() {
                     <FormLabel className="text-[16px]">Password</FormLabel>
                     <FormControl>
                       <div className='relative'>
-                        <Input placeholder="********************" type={showPassword ? 'text' : 'password'} className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
+                        <Input type={showPassword ? 'text' : 'password'} className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
 
                         <button
                           type="button"

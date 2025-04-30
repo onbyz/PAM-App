@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Homepage from '@components/pages/home/homepage.jsx';
 import Login from "@components/pages/login/login.jsx";
 import ForgotPassowrd from './components/pages/login/forgotPassowrd.jsx';
 import RessetPassword from './components/pages/login/ressetPassword.jsx';
@@ -37,7 +36,7 @@ export default function App() {
 						<Route element={<UnProtectedRoute />}>
 							<Route path="/login" element={<Login />} />
 							<Route path="/forgot-password" element={<ForgotPassowrd />} />
-							<Route path="/resset-password" element={<RessetPassword />} />
+							<Route path="/reset-password" element={<RessetPassword />} />
 						</Route>
 
 						<Route path="/" element={<RoleRedirect />} />

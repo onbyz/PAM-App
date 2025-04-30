@@ -1,4 +1,4 @@
-import React,{ useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Logo from "@assets/login/PAM Logo.png";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -7,15 +7,33 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
-export default function RessetPassword() {
+export default function ResetPassword() {
+  const [searchParams] = useSearchParams(); 
+  const token = searchParams.get('token');
+  const navigate = useNavigate();
 
-  const [ showPassword, setShowPassword ] = useState(false);
+  if (!token) {
+    setTimeout(() => navigate('/login'));
+  }
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formSchema = z.object({
-    password: z.string().nonempty("Password is required"),
-    confirm_password : z.string().nonempty("Confirm Password is required")
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number")
+      .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+    confirm_password: z.string()
+  })
+  .refine(data => data.password === data.confirm_password, {
+    message: "Passwords don't match",
+    path: ["confirm_password"]
   });
 
   const form = useForm({
@@ -23,29 +41,38 @@ export default function RessetPassword() {
     mode: "onChange",
     reValidateMode: "onChange",
     defaultValues: {
-      email : "",
-      password : "",
+      password: "",
+      confirm_password: "",
     },
   });
 
   const onSubmit = async (data) => {
-    console.log("Submitting Data:", data);
+
+    setIsSubmitting(true);
 
     try {
-      // const response = await axios.post("/api/admin/schedule", data);
-      console.log("Form data : ", response.data);
-      // alert("Login successfully!");
+      const payload = {
+        token: token,
+        password: data.password
+      };
+      
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/auth/reset-password`, payload);
+      console.log("Password reset successful:", response.data);
+      const result = response.data;
       form.reset();
+      
+      if (!result.error) {
+        navigate('/login');
+      }
     } catch (error) {
-      // if (error.response && error.response.data && error.response.data.message) {
-      //   alert(error.response.data.data);
-      // } else {
-      //   alert("Error occurred while login.");
-      // }
-      console.error("Error occurred while login : ", error);
+      const errorMessage = error.response?.data?.message || "Error occurred while resetting password";
+      console.error("Error resetting password:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const togglePasswordVisibility = () => setShowPassword(prev => !prev);
 
   return (
     <div className="flex h-full w-[90%] md:w-[70%] my-[25%] md:my-[10%] mx-[5%] md:mx-[15%] bg-[#F1F5F6]">
@@ -55,61 +82,92 @@ export default function RessetPassword() {
           <img src={Logo} alt="Pam Cargo Logo" className="w-full md:w-40 mb-8" />
         </Link>
 
-        <h2 className="mb-12 md:ml-[10%] xl:ml-[13%]">Hello, Welcome</h2>
+        <h2 className="mb-12 md:ml-[10%] xl:ml-[13%] text-2xl font-semibold">Reset Password</h2>
 
         <div className='flex flex-col justify-center items-center md:ml-[10%] xl:ml-0'>
           <Form {...form}>
             <form className="w-full max-w-md" onSubmit={form.handleSubmit(onSubmit)}>
-                <div className='mb-8'>
-                    <FormField control={form.control} name="password" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-[16px]">Create Password</FormLabel>
-                            <FormControl>
-                                <div className='relative'>
-                                    <Input placeholder="********************" type={ showPassword ? 'text' : 'password' } className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
+              <div className='mb-6'>
+                <FormField 
+                  control={form.control} 
+                  name="password" 
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[16px] font-medium">Create Password</FormLabel>
+                      <FormControl>
+                        <div className='relative'>
+                          <Input 
+                            type={showPassword ? 'text' : 'password'} 
+                            className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" 
+                            {...field} 
+                          />
+                          <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage className='text-[14px] text-red-500'/>
+                        <div className="mt-2 text-xs text-gray-500">
+                          Password must contain at least 8 characters, one uppercase letter, 
+                          one lowercase letter, one number, and one special character.
+                        </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword((prev) => !prev)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                                    >
-                                        {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-                                    </button>
-                                </div>
-                            </FormControl>
-                            <FormMessage className='text-[14px]'/>
-                        </FormItem>
-                    )}/>
-                </div>
-
-                <div className='mb-8'>
-                    <FormField control={form.control} name="confirm_password" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="text-[16px]">Confirm Password</FormLabel>
-                            <FormControl>
-                                <div className='relative'>
-                                    <Input placeholder="********************" type={ showPassword ? 'text' : 'password' } className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
-
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword((prev) => !prev)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                                    >
-                                        {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-                                    </button>
-                                </div>
-                            </FormControl>
-                            <FormMessage className='text-[14px]'/>
-                        </FormItem>
-                    )}/>
-                </div>
-        
+              <div className='mb-8'>
+                <FormField 
+                  control={form.control} 
+                  name="confirm_password" 
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-[16px] font-medium">Confirm Password</FormLabel>
+                      <FormControl>
+                        <div className='relative'>
+                          <Input 
+                            type={showPassword ? 'text' : 'password'} 
+                            className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" 
+                            {...field} 
+                          />
+                          <button
+                            type="button"
+                            onClick={togglePasswordVisibility}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                            aria-label={showPassword ? "Hide password" : "Show password"}
+                          >
+                            {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <FormMessage className='text-[14px] text-red-500'/>
+                    </FormItem>
+                  )}
+                />
+              </div>
+      
               <button
                 type="submit"
-                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+                disabled={isSubmitting}
+                className={`w-full bg-green-600 text-white py-3 rounded-lg transition ${
+                  isSubmitting 
+                    ? "opacity-70 cursor-not-allowed" 
+                    : "hover:bg-green-700"
+                }`}
               >
-                Next
+                {isSubmitting ? "Processing..." : "Reset Password"}
               </button>
+              
+              <div className="mt-4 text-center">
+                <Link to="/login" className="text-green-600 hover:underline">
+                  Back to Login
+                </Link>
+              </div>
             </form>
           </Form>
         </div>
@@ -119,10 +177,10 @@ export default function RessetPassword() {
       <div className="w-1/2 hidden md:flex items-center justify-center bg-gray-100">
         <img
           src="/cargo-container.png"
-          alt="Form Img"
-          className="max-w-md"
+          alt="Cargo Container"
+          className="max-w-full max-h-full object-contain p-4"
         />
       </div>
     </div>
   );
-} 
+}

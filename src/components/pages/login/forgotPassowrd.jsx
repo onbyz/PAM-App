@@ -1,4 +1,4 @@
-import React,{ useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Logo from "@assets/login/PAM Logo.png";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -6,41 +6,38 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import ScheduleList from '../schedules/scheduleList/scheduleList';
 import { Link } from "react-router-dom";
 
-export default function forgotPassowrd() {
+export default function ForgotPassword() {
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const formSchema = z.object({
+  const emailFormSchema = z.object({
     email: z.string().email("Invalid email address").nonempty("Email is required"),
-    password: z.string().nonempty("Password is required"),
   });
 
   const form = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(emailFormSchema),
     mode: "onChange",
     reValidateMode: "onChange",
     defaultValues: {
-      email : "",
-      password : "",
+      email: "",
     },
   });
 
   const onSubmit = async (data) => {
-    console.log("Submitting Data:", data);
-
     try {
-      // const response = await axios.post("/api/admin/schedule", data);
-      console.log("Form data : ", response.data);
-      // alert("Login successfully!");
-      form.reset();
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/auth/forgot-password`, { email: data.email });
+      const result = response.data;
+
+      if (!result.error) {
+        setSuccessMessage("A verification link has been sent to your email address.");
+        setErrorMessage("");
+        form.reset();
+      }
+
     } catch (error) {
-      // if (error.response && error.response.data && error.response.data.message) {
-      //   alert(error.response.data.data);
-      // } else {
-      //   alert("Error occurred while login.");
-      // }
-      console.error("Error occurred while login : ", error);
+      console.error("Error occurred while verifying email: ", error);
     }
   };
 
@@ -53,34 +50,43 @@ export default function forgotPassowrd() {
           <img src={Logo} alt="Pam Cargo Logo" className="w-full md:w-40 mb-8" />
         </Link>
 
-        <h2 className="mb-12 md:ml-[10%] xl:ml-[13%]">Hello, Welcome</h2>
+        {successMessage ? (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <p>
+              <strong className="font-bold">Success!</strong>
+            </p>
+            <span className="block sm:inline">{successMessage}</span>
+          </div>
+        ) : (
+          <>
+            <h2 className="mb-12 md:ml-[10%] xl:ml-[13%]">Hello, Welcome</h2>
 
-        <div className='flex flex-col justify-center items-center md:ml-[10%] xl:ml-0'>
-          <Form {...form}>
-            <form className="w-full max-w-md" onSubmit={form.handleSubmit(onSubmit)}>
-              <div className='mb-6'>
-                <FormField control={form.control} name="email" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[16px]">Enter Email Address</FormLabel>
-                      <FormControl>
-                          <Input placeholder="force@adresseemail.com" type="email" className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
-                      </FormControl>
-                      <FormMessage className='text-[14px]'/>
-                  </FormItem>
-                )}/>
-              </div>
-              
-              <Link to='/resset-password'>
-                <button
-                  type="submit"
-                  className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
-                >
-                  Next
-                </button>
-              </Link>
-            </form>
-          </Form>
-        </div>
+            <div className='flex flex-col justify-center items-center md:ml-[10%] xl:ml-0'>
+              <Form {...form}>
+                <form className="w-full max-w-md" onSubmit={form.handleSubmit(onSubmit)}>
+                  <div className='mb-6'>
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[16px]">Enter Email Address</FormLabel>
+                        <FormControl>
+                          <Input type="email" className="w-full h-[49px] p-3 border-[#328533] bg-white rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500" {...field} />
+                        </FormControl>
+                        <FormMessage className='text-[14px]' />
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+                  >
+                    Next
+                  </button>
+                </form>
+              </Form>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Right Section - Image */}
