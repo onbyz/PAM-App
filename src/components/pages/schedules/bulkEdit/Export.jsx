@@ -6,17 +6,7 @@ import api from "@/lib/api"
 
 export default function Export({ setError }) {
   const [selectedOption, setSelectedOption] = useState(null)
-  const [countries, setCountries] = useState([])
   const [ports, setPorts] = useState([])
-
-  const fetchCountries = async () => {
-    try {
-      const countries = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
-      setCountries(countries.data?.data || [])
-    } catch (error) {
-      console.error("Error fetching countries:", error)
-    }
-  }
 
   const fetchPorts = async () => {
     try {
@@ -28,7 +18,6 @@ export default function Export({ setError }) {
   }
 
   useEffect(() => {
-    fetchCountries()
     fetchPorts()
   }, [])
 
