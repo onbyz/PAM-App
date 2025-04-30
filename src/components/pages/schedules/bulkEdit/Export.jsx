@@ -64,14 +64,35 @@ export default function Export({ setError }) {
       .get(apiUrl)
       .then((response) => {
         const data = response.data?.data || []
-        const formattedData = formatScheduleData(data, false)
-        generateAndDownloadExcel(formattedData, "Bulk_upload_", false)
+        const groupedData = groupDataByCountry(data)
+        generateAndDownloadBulkExcel(groupedData)
       })
       .catch((error) => {
         const errorMessage = error?.response?.data?.message || "Error downloading bulk schedule edit file"
         setError(errorMessage)
         console.error("Error downloading bulk schedule edit file:", error)
       })
+  }
+
+  const groupDataByCountry = (data) => {
+    const groupedByCountry = {}
+    
+    data.forEach((item) => {
+      const countryName = item.country_name || "Unknown"
+      if (!groupedByCountry[countryName]) {
+        groupedByCountry[countryName] = []
+      }
+      groupedByCountry[countryName].push(item)
+    })
+    
+    const sortedCountries = Object.keys(groupedByCountry).sort()
+    
+    const result = {}
+    sortedCountries.forEach(country => {
+      result[country] = groupedByCountry[country]
+    })
+    
+    return result
   }
 
   const downloadSingleSchedule = () => {
@@ -145,6 +166,118 @@ export default function Export({ setError }) {
     })
   }
 
+  const generateAndDownloadBulkExcel = (groupedData) => {
+    const headers = [
+      "Vessel_Name",
+      "Voyage",
+      "cfs_closing",
+      "fcl_closing",
+      "Etd_Origin",
+      "ETA_Transit_Hub",
+      "ETA_Europe",
+      "Transit_time_Europe",
+      "ETA_USA_Canada",
+      "Transit_time_USA_Canada",
+      "Origin",
+      "Transit",
+      "Country"
+    ]
+
+    // Create workbook and worksheet
+    const workbook = XLSX.utils.book_new()
+    const worksheet = XLSX.utils.aoa_to_sheet([headers])
+
+    // Track the current row index
+    let rowIndex = 1 // Start from row 1 (after header)
+    
+    // Process each country's data
+    const countries = Object.keys(groupedData)
+    
+    countries.forEach((country, countryIndex) => {
+      const countryData = groupedData[country]
+      
+      // Group by origin within each country
+      const originGroups = {}
+      countryData.forEach(item => {
+        const origin = item.origin || "Unknown"
+        if (!originGroups[origin]) {
+          originGroups[origin] = []
+        }
+        originGroups[origin].push(item)
+      })
+      
+      // Sort origins
+      const sortedOrigins = Object.keys(originGroups).sort()
+      
+      // Process each origin's data
+      sortedOrigins.forEach((origin, originIndex) => {
+        const originData = originGroups[origin]
+        const formattedData = formatScheduleData(originData, false)
+        
+        // Add this origin's data
+        const rows = formattedData.map(item => {
+          return headers.map(header => item[header])
+        })
+        
+        XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: `A${rowIndex + 1}` })
+        rowIndex += rows.length
+        
+        // Add three empty rows after each origin (except the last origin in the last country)
+        if (!(countryIndex === countries.length - 1 && originIndex === sortedOrigins.length - 1)) {
+          XLSX.utils.sheet_add_aoa(worksheet, [[], [], []], { origin: `A${rowIndex + 1}` })
+          rowIndex += 3
+        }
+      })
+    })
+
+    // Set column widths
+    worksheet["!cols"] = [
+      { wch: 15 }, // Vessel_Name
+      { wch: 10 }, // Voyage
+      { wch: 12 }, // cfs_closing
+      { wch: 12 }, // fcl_closing
+      { wch: 12 }, // Etd_Origin
+      { wch: 15 }, // ETA_Transit_Hub
+      { wch: 12 }, // ETA_Europe
+      { wch: 18 }, // Transit_time_Europe
+      { wch: 15 }, // ETA_USA_Canada
+      { wch: 18 }, // Transit_time_USA_Canada
+      { wch: 15 }, // Origin
+      { wch: 15 }, // Transit
+      { wch: 15 }  // Country
+    ]
+
+    // Set date format for date columns
+    const dateColumns = [2, 3, 4, 5, 6, 8] // Indexes of date columns (0-based)
+    
+    // Find all cell references that contain data
+    const range = XLSX.utils.decode_range(worksheet['!ref'])
+    
+    for (let r = range.s.r + 1; r <= range.e.r; r++) { // Start from row 1 (after header)
+      for (const colIndex of dateColumns) {
+        const cellRef = XLSX.utils.encode_cell({ r, c: colIndex })
+        const cell = worksheet[cellRef]
+
+        if (cell && cell.v !== null && cell.v !== undefined) {
+          cell.t = "n" // Set type to number
+          cell.z = "dd-mm-yyyy" // Set format to date only
+        }
+      }
+    }
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Bulk_Schedule")
+
+    const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" })
+    const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" })
+
+    const timestamp = getCurrentTimestamp()
+
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = `Bulk_upload_${timestamp}.xlsx`
+    link.click()
+  }
+
   const generateAndDownloadExcel = (formattedData, filenamePrefix, isSingle) => {
     const headers = [
       "Vessel_Name",
@@ -208,7 +341,6 @@ export default function Export({ setError }) {
         if (cell && cell.v !== null && cell.v !== undefined) {
           cell.t = "n" // Set type to number
           cell.z = "dd-mm-yyyy" // Set format to date only
-          // cell.z = "yyyy-mm-dd"
         }
       }
     }
