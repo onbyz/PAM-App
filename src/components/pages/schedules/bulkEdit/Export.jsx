@@ -9,6 +9,7 @@ import api from "@/lib/api"
 export default function Export({ setError }) {
   const [selectedOption, setSelectedOption] = useState(null)
   const [countries, setCountries] = useState([])
+  const [ports, setPorts] = useState([])
 
   const fetchCountries = async () => {
     try {
@@ -19,8 +20,18 @@ export default function Export({ setError }) {
     }
   }
 
+  const fetchPorts = async () => {
+    try {
+      const ports = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port`)
+      setPorts(ports.data?.data || [])
+    } catch (error) {
+      console.error("Error fetching ports:", error)
+    }
+  }
+
   useEffect(() => {
     fetchCountries()
+    fetchPorts()
   }, [])
 
   const exportOptions = [
@@ -34,100 +45,211 @@ export default function Export({ setError }) {
 
   const handleDownload = () => {
     setError(null)
-    if (selectedOption) {
-      const selectedLabel = exportOptions.find((option) => option.id === selectedOption).label
 
-      if (selectedOption === "bulk") {
-        api
-          .get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`)
-          .then((response) => {
-            const data = response.data?.data || []
+    if (!selectedOption) return
 
-            const headers = [
-              "Vessel_Name",
-              "Voyage",
-              "cfs_closing",
-              "fcl_closing",
-              "Etd_Origin",
-              "ETA_Transit_Hub",
-              "ETA_Europe",
-              "Transit_time_Europe",
-              "Origin",
-              "Transit",
-            ]
+    const selectedItem = exportOptions.find((option) => option.id === selectedOption)
+    if (!selectedItem) return
 
-            const rows = data.map((item) => {
-              const parseDate = (dateStr) => {
-                if (!dateStr) return null
+    if (selectedOption === "bulk") {
+      downloadBulkSchedule()
+    } else if (selectedOption === "single") {
+      downloadSingleSchedule()
+    }
+    setSelectedOption(null)
+  }
 
-                try {
-                  const date = new Date(dateStr)
+  const downloadBulkSchedule = () => {
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`
 
-                  if (isNaN(date.getTime())) return null
+    api
+      .get(apiUrl)
+      .then((response) => {
+        const data = response.data?.data || []
+        const formattedData = formatScheduleData(data, false)
+        generateAndDownloadExcel(formattedData, "Bulk_upload_", false)
+      })
+      .catch((error) => {
+        const errorMessage = error?.response?.data?.message || "Error downloading bulk schedule edit file"
+        setError(errorMessage)
+        console.error("Error downloading bulk schedule edit file:", error)
+      })
+  }
 
-                  return date
-                } catch (e) {
-                  console.error("Error parsing date:", dateStr, e)
-                  return null
-                }
-              }
+  const downloadSingleSchedule = () => {
+    ports.forEach((port) => {
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/port/${port.id}`
+      api
+        .get(apiUrl)
+        .then((response) => {
+          const data = response.data?.data || []
+          const formattedData = formatScheduleData(data, true)
+          generateAndDownloadExcel(formattedData, `${port.country}_${port.origin}`, true)
+        })
+        .catch((error) => {
+          const errorMessage = error?.response?.data?.message || "Error downloading single schedule edit file"
+          setError(errorMessage)
+          console.error("Error downloading single schedule edit file:", error)
+        })
+    })
+  }
 
-              return [
-                item.vessel_name || "",
-                item.voyage_no || "",
-                parseDate(item.cfs_closing),
-                parseDate(item.fcl_closing),
-                parseDate(item.etd),
-                parseDate(item.eta_transit),
-                parseDate(item.dst_eta),
-                item.transit_time || "",
-                item.origin || "",
-                item.transit || "",
-              ]
-            })
+  // Convert date string to Excel serial number (date only, no time)
+  const dateToExcelSerial = (dateStr) => {
+    if (!dateStr) return null
 
-            const wsData = [headers, ...rows]
+    try {
+      const date = new Date(dateStr)
 
-            const worksheet = XLSX.utils.aoa_to_sheet(wsData)
+      if (isNaN(date.getTime())) return null
 
-            worksheet["!cols"] = [
-              { wch: 15 }, // Vessel_Name
-              { wch: 10 }, // Voyage
-              { wch: 12 }, // cfs_closing
-              { wch: 12 }, // fcl_closing
-              { wch: 12 }, // Etd_Origin
-              { wch: 15 }, // ETA_Transit_Hub
-              { wch: 12 }, // ETA_Europe
-              { wch: 18 }, // Transit_time_Europe
-              { wch: 15 }, // Origin
-              { wch: 15 }, // Transit
-            ]
+      return date
+    } catch (e) {
+      console.error("Error parsing date:", dateStr, e)
+      return null
+    }
+  }
 
-            for (let i = 0; i < data.length; i++) {
-              const rowIndex = i + 1 // +1 because of header row
+  const formatScheduleData = (data, isSingle) => {
+    return data.map((item) => {
+      // Convert dates to Excel serial numbers
+      const cfsClosing = dateToExcelSerial(item?.cfs_closing)
+      const fclClosing = dateToExcelSerial(item?.fcl_closing)
+      const etdOrigin = dateToExcelSerial(item?.etd)
+      const etaTransit = dateToExcelSerial(item?.eta_transit)
+      const etaEurope = dateToExcelSerial(item?.dst_eta)
 
-              for (let j = 2; j <= 6; j++) {
-                const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: j })
-                const cell = worksheet[cellRef]
+      // Calculate USA/Canada ETA by adding 2 days to Europe ETA
+      let etaUsaCanada = null
+      if (etaEurope !== null) {
+        etaUsaCanada = etaEurope + 2
+      }
 
-                if (cell && cell.v instanceof Date) {
-                  cell.t = "d" // Set type to date
-                  cell.z = "yyyy-mm-dd" // Set format
-                }
-              }
-            }
+      const formattedItem = {
+        Vessel_Name: item?.vessel_name || "",
+        Voyage: item?.voyage_no || "",
+        cfs_closing: cfsClosing,
+        fcl_closing: fclClosing,
+        Etd_Origin: etdOrigin,
+        ETA_Transit_Hub: etaTransit,
+        ETA_Europe: etaEurope,
+        Transit_time_Europe: item.transit_time || "",
+        ETA_USA_Canada: etaUsaCanada,
+        Transit_time_USA_Canada: item.transit_time ? Number.parseInt(item.transit_time) + 2 : "",
+      }
 
-            const workbook = XLSX.utils.book_new()
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Bulk_Schedule")
+      if (!isSingle) {
+        formattedItem.Origin = item?.origin || ""
+        formattedItem.Transit = item.transit || ""
+      }
 
-            XLSX.writeFile(workbook, selectedLabel)
-          })
-          .catch((error) => {
-            setError(error?.response?.data?.message || "Error downloading bulk schedule edit file")
-            console.error("Error downloading bulk schedule edit file:", error)
-          })
+      return formattedItem
+    })
+  }
+
+  const generateAndDownloadExcel = (formattedData, filenamePrefix, isSingle) => {
+    const headers = [
+      "Vessel_Name",
+      "Voyage",
+      "cfs_closing",
+      "fcl_closing",
+      "Etd_Origin",
+      "ETA_Transit_Hub",
+      "ETA_Europe",
+      "Transit_time_Europe",
+      "ETA_USA_Canada",
+      "Transit_time_USA_Canada",
+    ]
+
+    if (!isSingle) {
+      headers.push("Origin", "Transit")
+    }
+
+    // Create worksheet from data
+    const worksheet = XLSX.utils.aoa_to_sheet([headers])
+
+    // Add data rows
+    const rows = formattedData.map((item) => {
+      const row = []
+      for (const header of headers) {
+        row.push(item[header])
+      }
+      return row
+    })
+
+    XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: "A2" })
+
+    // Set column widths
+    worksheet["!cols"] = [
+      { wch: 15 }, // Vessel_Name
+      { wch: 10 }, // Voyage
+      { wch: 12 }, // cfs_closing
+      { wch: 12 }, // fcl_closing
+      { wch: 12 }, // Etd_Origin
+      { wch: 15 }, // ETA_Transit_Hub
+      { wch: 12 }, // ETA_Europe
+      { wch: 18 }, // Transit_time_Europe
+      { wch: 15 }, // ETA_USA_Canada
+      { wch: 18 }, // Transit_time_USA_Canada
+    ]
+
+    if (!isSingle) {
+      worksheet["!cols"].push({ wch: 15 }, { wch: 15 }) // Origin, Transit
+    }
+
+    // Set date format for date columns
+    const dateColumns = [2, 3, 4, 5, 6, 8] // Indexes of date columns (0-based)
+
+    for (let i = 0; i < formattedData.length; i++) {
+      const rowIndex = i + 1 // +1 because of header row
+
+      for (const colIndex of dateColumns) {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex })
+        const cell = worksheet[cellRef]
+
+        if (cell && cell.v !== null && cell.v !== undefined) {
+          cell.t = "n" // Set type to number
+          cell.z = "yyyy-mm-dd" // Set format to date only
+        }
       }
     }
+
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, isSingle ? "Single_Schedule" : "Bulk_Schedule")
+
+    const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" })
+    const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" })
+
+    const timestamp = getCurrentTimestamp()
+
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = `${filenamePrefix}_${timestamp}.xlsx`
+    link.click()
+  }
+
+  const getCurrentTimestamp = () => {
+    const now = new Date()
+
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, "0")
+    const day = String(now.getDate()).padStart(2, "0")
+
+    const hours = String(now.getHours()).padStart(2, "0")
+    const minutes = String(now.getMinutes()).padStart(2, "0")
+    const seconds = String(now.getSeconds()).padStart(2, "0")
+
+    return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`
+  }
+
+  // Helper function to convert string to ArrayBuffer
+  const s2ab = (s) => {
+    const buf = new ArrayBuffer(s.length)
+    const view = new Uint8Array(buf)
+    for (let i = 0; i < s.length; i++) {
+      view[i] = s.charCodeAt(i) & 0xff
+    }
+    return buf
   }
 
   return (

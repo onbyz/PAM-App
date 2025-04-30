@@ -24,6 +24,7 @@ import ProtectedRoute from './components/layouts/ProtectedRoute.jsx';
 import UnProtectedRoute from './components/layouts/UnProtectedRoute.jsx';
 import RegisteredUsers from '@components/pages/users/registeredUsers.jsx';
 import AddRegisteredUser from '@components/pages/users/addUser/AddRegisteredUser.jsx';
+import EditRegisteredUser from '@components/pages/users/edit/editRegisteredUser.jsx';
 
 export default function App() {
 	const user = JSON.parse(localStorage.getItem('user'));
@@ -51,6 +52,7 @@ export default function App() {
 									<>
 										<Route path="/registered-users" element={<RegisteredUsers />} />
 										<Route path="/registered-users/add" element={<AddRegisteredUser />} />
+										<Route path="/registered-users/edit/:id" element={<EditRegisteredUser />} />
 									</>
 								) : (
 									<>

@@ -309,7 +309,7 @@ export default function RegisteredUsers() {
                         <td>{formattedDate(new Date(row.last_access))}</td>
                         <td className="py-3 px-4 cursor-pointer flex gap-6">
                           <div className="relative group inline-block">
-                            <Link to={`/user-management/edit-user/${row.id}`}>
+                            <Link to={`/registered-users/edit/${row.id}`}>
                               <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" />
                               <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">Edit</div>
                             </Link>

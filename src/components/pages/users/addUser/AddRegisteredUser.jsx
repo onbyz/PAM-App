@@ -81,8 +81,6 @@ export default function AddRegisteredUser() {
         }
     };
 
-    const roles = ["Data Management", "Administrator", "Logistics management"];
-
     return (
         <div>
             <div className="md:mr-[2.5%]">
