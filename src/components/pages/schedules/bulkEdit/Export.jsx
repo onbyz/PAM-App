@@ -84,23 +84,109 @@ export default function Export({ setError }) {
     return result
   }
 
-  const downloadSingleSchedule = () => {
-    ports.forEach((port) => {
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/port/${port.id}`
-      api
-        .get(apiUrl)
-        .then((response) => {
-          const data = response.data?.data || []
-          const formattedData = formatScheduleData(data, true)
-          generateAndDownloadExcel(formattedData, `${port.country}_${port.origin}`, true)
-        })
-        .catch((error) => {
-          const errorMessage = error?.response?.data?.message || "Error downloading single schedule edit file"
-          setError(errorMessage)
-          console.error("Error downloading single schedule edit file:", error)
-        })
-    })
-  }
+  const downloadSingleSchedule = async () => {
+    for (const [i, port] of ports.entries()) {
+      try {
+        const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/port/${port.id}`;
+        const response = await api.get(apiUrl);
+        const data = response.data?.data || [];
+        const formattedData = formatScheduleData(data, true);
+        
+        const { workbook, filename } = prepareExcelDownload(
+          formattedData, 
+          `${port.country}_${port.origin}`, 
+          true
+        );
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+      } catch (error) {
+        const errorMessage = error?.response?.data?.message || "Error downloading single schedule edit file";
+        setError(errorMessage);
+        console.error(`Error downloading schedule for port ${port.id}:`, error);
+      }
+    }
+  };
+
+  const prepareExcelDownload = (formattedData, filenamePrefix, isSingle) => {
+    const headers = [
+      "Vessel_Name",
+      "Voyage",
+      "cfs_closing",
+      "fcl_closing",
+      "Etd_Origin",
+      "ETA_Transit_Hub",
+      "ETA_Europe",
+      "Transit_time_Europe",
+      "ETA_USA_Canada",
+      "Transit_time_USA_Canada",
+    ];
+
+    if (!isSingle) {
+      headers.push("Origin", "Transit");
+    }
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headers]);
+
+    const rows = formattedData.map((item) => {
+      const row = [];
+      for (const header of headers) {
+        row.push(item[header]);
+      }
+      return row;
+    });
+
+    XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: "A2" });
+
+    worksheet["!cols"] = [
+      { wch: 15 }, // Vessel_Name
+      { wch: 10 }, // Voyage
+      { wch: 12 }, // cfs_closing
+      { wch: 12 }, // fcl_closing
+      { wch: 12 }, // Etd_Origin
+      { wch: 15 }, // ETA_Transit_Hub
+      { wch: 12 }, // ETA_Europe
+      { wch: 18 }, // Transit_time_Europe
+      { wch: 15 }, // ETA_USA_Canada
+      { wch: 18 }, // Transit_time_USA_Canada
+    ];
+
+    if (!isSingle) {
+      worksheet["!cols"].push({ wch: 15 }, { wch: 15 }); // Origin, Transit
+    }
+
+    const dateColumns = [2, 3, 4, 5, 6, 8]; // Indexes of date columns (0-based)
+
+    for (let i = 0; i < formattedData.length; i++) {
+      const rowIndex = i + 1; // +1 because of header row
+
+      for (const colIndex of dateColumns) {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+        const cell = worksheet[cellRef];
+
+        if (cell && cell.v !== null && cell.v !== undefined) {
+          cell.t = "n"; // Set type to number
+          cell.z = "dd-mm-yyyy"; // Set format to date only
+        }
+      }
+    }
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, isSingle ? "Single_Schedule" : "Bulk_Schedule");
+
+    const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" });
+    const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" });
+
+    const timestamp = getCurrentTimestamp();
+    const filename = `${filenamePrefix}_${timestamp}.xlsx`;
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+
+    return { workbook, filename };
+  };
 
   // Convert date string to Excel serial number (date only, no time)
   const dateToExcelSerial = (dateStr) => {
@@ -265,86 +351,6 @@ export default function Export({ setError }) {
     link.click()
   }
 
-  const generateAndDownloadExcel = (formattedData, filenamePrefix, isSingle) => {
-    const headers = [
-      "Vessel_Name",
-      "Voyage",
-      "cfs_closing",
-      "fcl_closing",
-      "Etd_Origin",
-      "ETA_Transit_Hub",
-      "ETA_Europe",
-      "Transit_time_Europe",
-      "ETA_USA_Canada",
-      "Transit_time_USA_Canada",
-    ]
-
-    if (!isSingle) {
-      headers.push("Origin", "Transit")
-    }
-
-    // Create worksheet from data
-    const worksheet = XLSX.utils.aoa_to_sheet([headers])
-
-    // Add data rows
-    const rows = formattedData.map((item) => {
-      const row = []
-      for (const header of headers) {
-        row.push(item[header])
-      }
-      return row
-    })
-
-    XLSX.utils.sheet_add_aoa(worksheet, rows, { origin: "A2" })
-
-    // Set column widths
-    worksheet["!cols"] = [
-      { wch: 15 }, // Vessel_Name
-      { wch: 10 }, // Voyage
-      { wch: 12 }, // cfs_closing
-      { wch: 12 }, // fcl_closing
-      { wch: 12 }, // Etd_Origin
-      { wch: 15 }, // ETA_Transit_Hub
-      { wch: 12 }, // ETA_Europe
-      { wch: 18 }, // Transit_time_Europe
-      { wch: 15 }, // ETA_USA_Canada
-      { wch: 18 }, // Transit_time_USA_Canada
-    ]
-
-    if (!isSingle) {
-      worksheet["!cols"].push({ wch: 15 }, { wch: 15 }) // Origin, Transit
-    }
-
-    // Set date format for date columns
-    const dateColumns = [2, 3, 4, 5, 6, 8] // Indexes of date columns (0-based)
-
-    for (let i = 0; i < formattedData.length; i++) {
-      const rowIndex = i + 1 // +1 because of header row
-
-      for (const colIndex of dateColumns) {
-        const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex })
-        const cell = worksheet[cellRef]
-
-        if (cell && cell.v !== null && cell.v !== undefined) {
-          cell.t = "n" // Set type to number
-          cell.z = "dd-mm-yyyy" // Set format to date only
-        }
-      }
-    }
-
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, isSingle ? "Single_Schedule" : "Bulk_Schedule")
-
-    const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" })
-    const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" })
-
-    const timestamp = getCurrentTimestamp()
-
-    const link = document.createElement("a")
-    link.href = URL.createObjectURL(blob)
-    link.download = `${filenamePrefix}_${timestamp}.xlsx`
-    link.click()
-  }
 
   const getCurrentTimestamp = () => {
     const now = new Date()
@@ -355,9 +361,9 @@ export default function Export({ setError }) {
 
     const hours = String(now.getHours()).padStart(2, "0")
     const minutes = String(now.getMinutes()).padStart(2, "0")
-    const seconds = String(now.getSeconds()).padStart(2, "0")
+    // const seconds = String(now.getSeconds()).padStart(2, "0")
 
-    return `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`
+    return `${year}-${month}-${day}_${hours}-${minutes}`
   }
 
   // Helper function to convert string to ArrayBuffer
