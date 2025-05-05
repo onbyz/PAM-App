@@ -132,7 +132,6 @@ export default function ScheduleList() {
     setSelectedPort("")
     setSelectedOriginDestination("")
     setOriginDestinationOptions([])
-    setTableData([]) // Clear table data when country changes
   }
 
   // Fetch destinations for origin port
@@ -150,7 +149,6 @@ export default function ScheduleList() {
     }
 
     setSelectedOriginDestination("")
-    setTableData([]) // Clear table data when port changes
   }
 
   // Fetch voyage references based on selected vessel
@@ -307,6 +305,8 @@ export default function ScheduleList() {
     setSelectedPort(null)
     setOriginDestinationOptions(null)
     fetchPorts(country)
+    const countryName = countryOptions.find((item) => item.uuid === country)?.name
+    setFilteredData(tableData.filter((item) => item.country_name === countryName))
   }
 
   // Handle port selection for origin port filter
@@ -316,6 +316,8 @@ export default function ScheduleList() {
     setSelectedPort(port)
     setOriginDestinationOptions(null)
     fetchOriginDestinations(selectedPort?.transit)
+    const { origin, transit} = selectedPort
+    setFilteredData(tableData.filter((item) => item.origin === origin && item.transit === transit))
   }
 
   // Handle destination selection for origin port filter
