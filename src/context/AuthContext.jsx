@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(credentials),
       });
 
-      const {data} = await response.json();
+      const {data , message} = await response.json();
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       } else {
         return { 
           success: false, 
-          message: data.message || 'Login failed' 
+          message: message || 'Login failed' 
         };
       }
     } catch (error) {

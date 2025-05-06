@@ -17,9 +17,8 @@ export default function Header() {
                 <div className='flex gap-2'>
                     <img src={Avatar} alt="Icon" className='w-[24px] h-[24px]' />
                 
-                    <p className='text-[16px] leading-[24px] flex gap-3'>
+                    <p className='text-[16px] leading-[24px] flex gap-3 mr-2'>
                         {user?.firstName} {user?.lastName}
-                        <FaChevronDown className='w-[12px] h-[24px]' />
                     </p>
                 </div>
             </div>
