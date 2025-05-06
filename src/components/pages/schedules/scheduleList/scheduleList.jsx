@@ -89,11 +89,7 @@ export default function ScheduleList() {
   // Fetch vessel names
   const fetchVesselNames = async () => {
     try {
-      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      })
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`)
       const { data } = response.data
       setVesselOptions(data || [])
     } catch (error) {
@@ -116,11 +112,7 @@ export default function ScheduleList() {
     if (!country) return
 
     try {
-      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port?countryID=${country}`, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      })
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port?countryID=${country}`)
       const { data } = response.data
       setPortOptions(data || [])
     } catch (error) {
@@ -156,11 +148,7 @@ export default function ScheduleList() {
     if (!vessel) return
 
     try {
-      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`, {
-        headers: {
-          "ngrok-skip-browser-warning": "true",
-        },
-      })
+      const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`)
       const { data } = response.data
       setVoyageOptions(data || [])
     } catch (error) {
