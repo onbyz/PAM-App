@@ -151,6 +151,11 @@ export default function ScheduleList() {
       const response = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/voyages/${vessel}`)
       const { data } = response.data
       setVoyageOptions(data || [])
+
+      const vesselResponse = await api(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${vessel}`)
+      const vesselData = vesselResponse.data?.data || []
+      setTableData(vesselData)
+      setFilteredData(vesselData)
     } catch (error) {
       console.error("Error fetching voyage refs:", error)
     }
@@ -160,7 +165,6 @@ export default function ScheduleList() {
     setSelectedDestination("")
     setTransitOptions([])
     setDestinationOptions([])
-    setTableData([]) // Clear table data when vessel changes
   }
 
   // Fetch transit hubs based on selected vessel and voyage
@@ -173,6 +177,13 @@ export default function ScheduleList() {
       )
       const { data } = response.data
       setTransitOptions(data || [])
+
+      const voyageResponse = await api(
+        `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${vessel}&voyageRef=${voyage}`
+      )
+      const voyageData = voyageResponse.data?.data || []
+      setTableData(voyageData)
+      setFilteredData(voyageData)
     } catch (error) {
       console.error("Error fetching transit hubs:", error)
     }
@@ -180,7 +191,6 @@ export default function ScheduleList() {
     setSelectedTransit("")
     setSelectedDestination("")
     setDestinationOptions([])
-    setTableData([]) // Clear table data when voyage changes
   }
 
   // Fetch destinations based on selected vessel, voyage, and transit
@@ -193,12 +203,18 @@ export default function ScheduleList() {
       )
       const { data } = response.data
       setDestinationOptions(data || [])
+
+      const transitResponse = await api(
+        `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`
+      )
+      const transitData = transitResponse.data?.data || []
+      setTableData(transitData)
+      setFilteredData(transitData)
     } catch (error) {
       console.error("Error fetching destinations:", error)
     }
 
     setSelectedDestination("")
-    setTableData([]) // Clear table data when transit changes
   }
 
   //Fetch Initial Table Data
@@ -283,7 +299,11 @@ export default function ScheduleList() {
   const handleDestinationChange = (e) => {
     const destination = e.target.value
     setSelectedDestination(destination)
-    // Table data will be fetched via useEffect when all selections are made
+
+    if (selectedVessel && selectedVoyage && selectedTransit) {
+      const filteredByDestination = filteredData.filter(item => item.destination === destination)
+      setFilteredData(filteredByDestination)
+    }
   }
 
   // Handle country selection for origin port filter
@@ -304,7 +324,7 @@ export default function ScheduleList() {
     setSelectedPort(port)
     setOriginDestinationOptions(null)
     fetchOriginDestinations(selectedPort?.transit)
-    const { origin, transit} = selectedPort
+    const { origin, transit } = selectedPort
     setFilteredData(tableData.filter((item) => item.origin === origin && item.transit === transit))
   }
 
@@ -500,7 +520,7 @@ export default function ScheduleList() {
     } catch (error) {
       setErrorMessage("Error performing bulk delete operation")
       console.error("Error in bulk delete:", error)
-    } 
+    }
 
     setTimeout(() => {
       setErrorMessage("");
