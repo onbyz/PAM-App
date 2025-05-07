@@ -208,7 +208,7 @@ export default function ScheduleList() {
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?vesselID=${vessel}&voyageRef=${voyage}&transitHub=${transit}`
       )
       const transitData = transitResponse.data?.data || []
-      setTableData(transitData)
+      // setTableData(transitData)
       setFilteredData(transitData)
     } catch (error) {
       console.error("Error fetching destinations:", error)
@@ -258,7 +258,7 @@ export default function ScheduleList() {
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule?country=${selectedCountry}&transitID=${selectedPort}&destination=${selectedOriginDestination}`,
       )
       const { data } = response.data
-      setTableData(data || [])
+      // setTableData(data || [])
       setFilteredData(data || [])
       setTotalPages(Math.ceil((data || []).length / itemsPerPage))
       setCurrentPage(1)
