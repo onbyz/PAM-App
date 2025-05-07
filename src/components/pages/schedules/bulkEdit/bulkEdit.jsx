@@ -191,11 +191,11 @@ export default function BulkScheduleUpload() {
         {uploadType === "bulk_by_origin_port" && (
           <div className="my-8">
             <div>
-              <label className="text-[14px] mb-2 block">Select Origin Port*</label>
+              <label className="text-[14px] mb-2 block">Select Origin Port*</label> 
               <select
                 value={selectedPort}
                 onChange={handlePortChange}
-                className="w-full max-w-[384px] h-[66px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
+                className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
               >
                 <option value="">Select...</option>
                 {portOptions.map((port, index) => (
