@@ -256,7 +256,7 @@ export default function VesselManangement() {
                     placeholder="Search..."
                     value={searchQuery}
                     onChange={handleSearchChange}
-                    className="border border-gray-300 px-2 py-1 text-sm w-full focus:outline-none"
+                    className="border border-gray-300 px-2 py-1 text-sm w-full focus:outline-none rounded"
                   />
                 </div>
               </div>
