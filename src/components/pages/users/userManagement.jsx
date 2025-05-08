@@ -6,6 +6,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 export default function UserManagement() {
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
+  console.log("user", user)
 
   const [tableData, setTableData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -309,7 +311,7 @@ export default function UserManagement() {
                             </Link>
                           </div>
 
-                          <div className="relative group inline-block">
+                          <div className={`relative group inline-block ${row.email === user?.email ? "hidden" : ""}`}>
                             <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => openDeleteDialog(row.id)} />
                             <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">Delete</div>
                           </div>
