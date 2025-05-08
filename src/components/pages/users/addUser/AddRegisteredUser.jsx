@@ -114,7 +114,7 @@ export default function AddRegisteredUser() {
                         <form onSubmit={form.handleSubmit(onSubmit)} className="my-8">
                             {users.map((user, index) => (
                                 <div key={user.id} className="mb-6">
-                                    <div className="flex flex-col md:flex-row md:items-end gap-12">
+                                    <div className="flex flex-col md:flex-row gap-12">
                                         <div>
                                             <FormField
                                                 control={form.control}
@@ -158,30 +158,32 @@ export default function AddRegisteredUser() {
                                         </div>
                                         
                                         {/* Action button section */}
-                                        <div>
-                                            {/* Show "Add more" button only on the last row when under the limit */}
-                                            {index === users.length - 1 && users.length < 5 ? (
-                                                <button 
-                                                    type="button" 
-                                                    className="flex gap-2 items-center mb-2" 
-                                                    onClick={addUserRow}
-                                                >
-                                                    <img src={Plus} alt="plus" className="w-[24px] h-[24px]" />
-                                                    <h5 className="text-[14px] text-black">Add more</h5>
-                                                </button>
-                                            ) : (
-                                                /* Show "Remove" button for all rows except the last row when it's the only row */
-                                                !(index === users.length - 1 && users.length === 1) && (
+                                        <div className="flex items-end">
+                                            <div>
+                                                {/* Show "Add more" button only on the last row when under the limit */}
+                                                {index === users.length - 1 && users.length < 5 ? (
                                                     <button 
                                                         type="button" 
-                                                        onClick={() => removeUserRow(user.id, index)}
-                                                        className="flex gap-2 items-center mb-2 text-red-500"
+                                                        className="flex gap-2 items-center mb-2" 
+                                                        onClick={addUserRow}
                                                     >
-                                                        <FaTrash className="w-[16px] h-[16px]" />
-                                                        <h5 className="text-[14px] text-red-500">Remove</h5>
+                                                        <img src={Plus} alt="plus" className="w-[24px] h-[24px]" />
+                                                        <h5 className="text-[14px] text-black">Add more</h5>
                                                     </button>
-                                                )
-                                            )}
+                                                ) : (
+                                                    /* Show "Remove" button for all rows except the last row when it's the only row */
+                                                    !(index === users.length - 1 && users.length === 1) && (
+                                                        <button 
+                                                            type="button" 
+                                                            onClick={() => removeUserRow(user.id, index)}
+                                                            className="flex gap-2 items-center mb-2 text-red-500"
+                                                        >
+                                                            <FaTrash className="w-[16px] h-[16px]" />
+                                                            <h5 className="text-[14px] text-red-500">Remove</h5>
+                                                        </button>
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
