@@ -36,7 +36,7 @@ export default function AddRegisteredUser() {
         defaultValues: {
             users: [{ name: "", email: "" }]
         },
-        mode: "onChange"
+        mode: "onBlur"
     });
 
     useEffect(() => {
@@ -96,6 +96,10 @@ export default function AddRegisteredUser() {
         }
     };
 
+    const handleFieldBlur = (fieldName) => {
+        form.trigger(fieldName);
+    };
+
     return (
         <div>
             <div className="md:mr-[2.5%]">
@@ -141,6 +145,7 @@ export default function AddRegisteredUser() {
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
+                                                                onBlur={() => handleFieldBlur(`users.${index}.name`)}
                                                                 className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                                                                 {...field}
                                                                 onKeyPress={(e) => {
@@ -167,6 +172,7 @@ export default function AddRegisteredUser() {
                                                         </FormLabel>
                                                         <FormControl>
                                                             <Input
+                                                                onBlur={() => handleFieldBlur(`users.${index}.email`)}
                                                                 className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                                                                 {...field}
                                                             />

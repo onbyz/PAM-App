@@ -12,7 +12,7 @@ import api from '@/lib/api';
 
 const formSchema = z.object({
   first_name: z.string().min(2, "First Name is required!"),
-  last_name: z.string().min(2, "Last Name is required!"),
+  last_name: z.string().min(1, "Last Name is required!"),
   email: z.string().email("Invalid email address").nonempty("Email is required"),
   role: z.string().min(1, "Role is required!"),
   password: z.string().min(8, "Password must be at least 8 characters long")
@@ -47,7 +47,7 @@ export default function AddUser() {
       role: "",
       password: "",
     },
-    mode: "onChange"
+    mode: "onBlur",
   });
 
   const { watch, formState } = form;
@@ -148,6 +148,10 @@ export default function AddUser() {
     }
   };
 
+  const handleFieldBlur = (fieldName) => {
+		form.trigger(fieldName);
+	};
+
   return (
     <div>
       <div className='md:mr-[2.5%]'>
@@ -190,6 +194,7 @@ export default function AddUser() {
                         </FormLabel>
                         <FormControl>
                           <Input
+                            onBlur={() => handleFieldBlur("first_name")}
                             className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                             {...field}
                             onKeyPress={(e) => {
@@ -216,6 +221,7 @@ export default function AddUser() {
                         </FormLabel>
                         <FormControl>
                           <Input
+                            onBlur={() => handleFieldBlur("last_name")}
                             className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                             {...field}
                             onKeyPress={(e) => {
@@ -242,6 +248,7 @@ export default function AddUser() {
                         </FormLabel>
                         <FormControl>
                           <Input
+                            onBlur={() => handleFieldBlur("email")}
                             className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                             {...field}
                           />
@@ -260,7 +267,7 @@ export default function AddUser() {
                       <FormLabel className="text-[14px] text-black">Role <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                          <SelectTrigger onBlur={() => handleFieldBlur("role")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                             <SelectValue placeholder="Select a role" />
                           </SelectTrigger>
                           

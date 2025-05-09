@@ -44,6 +44,7 @@ export default function AddPorts() {
       origin: "",
       transit : "",
     },
+    mode: "onBlur",
   });
 
   const handleGoBack = () => {
@@ -67,6 +68,10 @@ export default function AddPorts() {
       console.error("Error adding port:", error);
     }
   };
+
+  const handleFieldBlur = (fieldName) => {
+		form.trigger(fieldName);
+	};
 
   return (
     <div>
@@ -105,7 +110,7 @@ export default function AddPorts() {
                             <FormLabel className="text-[14px] text-black">Choose Country <span className="text-red-500">*</span></FormLabel>
                             <FormControl>
                                 <Select value={field.value} onValueChange={field.onChange}>
-                                    <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                                    <SelectTrigger onBlur={() => handleFieldBlur("country_id")}  className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                                         <SelectValue/>
                                     </SelectTrigger>
                                     <SelectContent>
@@ -133,6 +138,7 @@ export default function AddPorts() {
                         </FormLabel>
                         <FormControl>
                           <Input
+                            onBlur={() => handleFieldBlur("origin")}
                             className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                             {...field}
                           />
@@ -154,6 +160,7 @@ export default function AddPorts() {
                         </FormLabel>
                         <FormControl>
                           <Input
+                            onBlur={() => handleFieldBlur("transit")}
                             className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                             {...field}
                           />

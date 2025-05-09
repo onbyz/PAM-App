@@ -90,7 +90,7 @@ export default function CreateSchedule() {
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    mode: "onChange",
+    mode: "onBlur",
     reValidateMode: "onChange",
     defaultValues: {
       country: "",
@@ -182,6 +182,10 @@ export default function CreateSchedule() {
     navigate(-1)
   }
 
+  const handleFieldBlur = (fieldName) => {
+    form.trigger(fieldName);
+  };
+
   return (
     <div>
       <div>
@@ -231,7 +235,7 @@ export default function CreateSchedule() {
                           </FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                              <SelectTrigger onBlur={() => handleFieldBlur("country")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -260,7 +264,7 @@ export default function CreateSchedule() {
                           </FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                              <SelectTrigger onBlur={() => handleFieldBlur("port_id")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -290,6 +294,7 @@ export default function CreateSchedule() {
                           <FormControl>
                             <Input
                               type="date"
+                              onBlur={() => handleFieldBlur("etd")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               min={new Date().toISOString().split("T")[0]}
                               {...field}
@@ -322,7 +327,7 @@ export default function CreateSchedule() {
                           </FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                              <SelectTrigger onBlur={() => handleFieldBlur("vessel_id")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -351,6 +356,7 @@ export default function CreateSchedule() {
                           </FormLabel>
                           <FormControl>
                             <Input
+                              onBlur={() => handleFieldBlur("voyage_no")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               {...field}
                             />
@@ -375,6 +381,7 @@ export default function CreateSchedule() {
                           <FormControl>
                             <Input
                               type="date"
+                              onBlur={() => handleFieldBlur("cfs_closing")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               min={new Date().toISOString().split("T")[0]}
                               {...field}
@@ -398,6 +405,7 @@ export default function CreateSchedule() {
                           <FormControl>
                             <Input
                               type="date"
+                              onBlur={() => handleFieldBlur("fcl_closing")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               min={new Date().toISOString().split("T")[0]}
                               {...field}
@@ -426,6 +434,7 @@ export default function CreateSchedule() {
                         <FormControl>
                           <Input
                             type="date"
+                            onBlur={() => handleFieldBlur("eta_transit")}
                             className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                             min={etdDate ? getNextDay(etdDate) : new Date().toISOString().split("T")[0]}
                             {...field}
@@ -457,7 +466,7 @@ export default function CreateSchedule() {
                           </FormLabel>
                           <FormControl>
                             <Select value={field.value} onValueChange={field.onChange}>
-                              <SelectTrigger className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+                              <SelectTrigger onBlur={() => handleFieldBlur("destination")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -487,6 +496,7 @@ export default function CreateSchedule() {
                           <FormControl>
                             <Input
                               type="date"
+                              onBlur={() => handleFieldBlur("dst_eta")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               min={etaDubai ? getNextDay(etaDubai) : new Date().toISOString().split("T")[0]}
                               {...field}
@@ -514,6 +524,7 @@ export default function CreateSchedule() {
                           <FormControl>
                             <Input
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
+                              onBlur={() => handleFieldBlur("transit_time")}
                               value={field.value ? `${field.value} Days` : ""}
                               onChange={(e) => {
                                 const numericValue = e.target.value.replace(/\D/g, "")
@@ -545,6 +556,7 @@ export default function CreateSchedule() {
                           <FormControl>
                             <Input
                               type="date"
+                              onBlur={() => handleFieldBlur("eta_usa")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               min={etaDubai ? calculateEtaUsaCanada(etaDubai) : new Date().toISOString().split("T")[0]}
                               {...field}
@@ -568,6 +580,7 @@ export default function CreateSchedule() {
                           <FormControl>
                             <Input
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
+                              onBlur={() => handleFieldBlur("transit_time_usa")}
                               value={field.value ? `${field.value} Days` : ""}
                               onChange={(e) => {
                                 const numericValue = e.target.value.replace(/\D/g, "")

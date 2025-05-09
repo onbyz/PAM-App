@@ -11,7 +11,7 @@ import api from '@/lib/api';
 
 const formSchema = z.object({
     first_name: z.string().min(2, "First Name is required!"),
-    last_name: z.string().min(2, "Last Name is required!"),
+    last_name: z.string().min(1, "Last Name is required!"),
     email: z.string().email("Invalid email address").nonempty("Email is required"),
     role: z.string().min(1, "Role is required!"),
 });
