@@ -94,7 +94,7 @@ export default function Export({ setError }) {
         
         const { workbook, filename } = prepareExcelDownload(
           formattedData, 
-          `${port.country}_${port.origin}`, 
+          `${port.country}_${port.origin} va ${port.transit}`, 
           true
         );
         
@@ -177,8 +177,8 @@ export default function Export({ setError }) {
     const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" });
     const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" });
 
-    const timestamp = getCurrentTimestamp();
-    const filename = `${filenamePrefix}_${timestamp}.xlsx`;
+    // const timestamp = getCurrentTimestamp();
+    const filename = `${filenamePrefix}.xlsx`;
 
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -343,11 +343,11 @@ export default function Export({ setError }) {
     const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" })
     const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" })
 
-    const timestamp = getCurrentTimestamp()
+    // const timestamp = getCurrentTimestamp()
 
     const link = document.createElement("a")
     link.href = URL.createObjectURL(blob)
-    link.download = `Bulk_upload_${timestamp}.xlsx`
+    link.download = `Sea-Air Schedule.xlsx`
     link.click()
   }
 
