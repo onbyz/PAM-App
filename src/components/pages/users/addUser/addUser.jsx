@@ -57,7 +57,7 @@ export default function AddUser() {
     const { first_name, last_name, email, role } = formValues;
     const requiredFieldsFilled = 
       first_name.length >= 2 && 
-      last_name.length >= 2 && 
+      last_name.length >= 1 && 
       email.match(/^\S+@\S+\.\S+$/) && 
       role.length >= 1;
     
