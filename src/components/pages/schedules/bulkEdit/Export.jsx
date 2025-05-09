@@ -94,7 +94,7 @@ export default function Export({ setError }) {
         
         const { workbook, filename } = prepareExcelDownload(
           formattedData, 
-          `${port.country}_${port.origin} va ${port.transit}`, 
+          `${port.country}_${port.origin} via ${port.transit}`, 
           true
         );
         
