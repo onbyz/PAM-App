@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaXmark, FaTrash } from "react-icons/fa6";
 import {
     Form,
@@ -27,6 +27,7 @@ export default function AddRegisteredUser() {
     const [users, setUsers] = useState([{ id: 1 }]);
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const [isFormValid, setIsFormValid] = useState(false);
 
     const navigate = useNavigate();
 
@@ -35,7 +36,21 @@ export default function AddRegisteredUser() {
         defaultValues: {
             users: [{ name: "", email: "" }]
         },
+        mode: "onChange"
     });
+
+    useEffect(() => {
+        const subscription = form.watch((value) => {
+            const { users } = value;
+            const hasValidUser = users?.some(user => 
+                user.name && user.name.length >= 2 && 
+                user.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)
+            );
+            setIsFormValid(hasValidUser);
+        });
+
+        return () => subscription.unsubscribe();
+    }, [form.watch]);
 
     const handleGoBack = () => {
         navigate(-1);
@@ -128,6 +143,11 @@ export default function AddRegisteredUser() {
                                                             <Input
                                                                 className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                                                                 {...field}
+                                                                onKeyPress={(e) => {
+                                                                    if (!/^[a-zA-Z]$/.test(e.key)) {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage className="text-[14px]" />
@@ -192,7 +212,10 @@ export default function AddRegisteredUser() {
                             <div className="flex gap-6 mt-8">
                                 <button
                                     type="submit"
-                                    className="px-4 h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2"
+                                    disabled={!isFormValid}
+                                    className={`px-4 h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${
+                                        isFormValid ? "bg-[#16A34A]" : "bg-[#16A34A]/50 cursor-not-allowed"
+                                    }`}
                                 >
                                     Save
                                 </button>
