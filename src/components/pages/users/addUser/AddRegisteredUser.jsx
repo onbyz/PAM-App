@@ -19,7 +19,7 @@ import api from "@/lib/api";
 const formSchema = z.object({
     users: z.array(z.object({
         name: z.string().min(2, "Name is required!"),
-        email: z.string().email("Invalid email address").nonempty("Email is required"),
+        email: z.string().nonempty("Email is required").email("Invalid email address"),
     })).min(1, "At least one user is required")
 });
 
