@@ -547,7 +547,7 @@ export default function ScheduleList() {
       <div>
         <div className="md:mr-[2.5%]">
           <div className="mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2">
-            <h4 className="leading-[56px]">Schedule</h4>
+            <h4 className="leading-[56px]">Schedule Management</h4>
 
             <div className="flex flex-col md:flex-row gap-8 mb-8">
               <Link to="/schedule-list/bulk-edit">
