@@ -118,7 +118,7 @@ export default function EditRegisteredUser() {
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="my-8">
                                 <div className="mb-6">
-                                    <div className="flex flex-col md:flex-row md:items-end gap-12">
+                                    <div className="flex flex-col md:flex-row gap-12">
                                         <div>
                                             <FormField
                                                 control={form.control}
@@ -132,6 +132,11 @@ export default function EditRegisteredUser() {
                                                             <Input
                                                                 className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                                                                 {...field}
+                                                                onKeyPress={(e) => {
+                                                                    if (!/^[a-zA-Z]$/.test(e.key)) {
+                                                                        e.preventDefault();
+                                                                    }
+                                                                }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage className="text-[14px]" />
@@ -153,11 +158,6 @@ export default function EditRegisteredUser() {
                                                             <Input
                                                                 className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                                                                 {...field}
-                                                                onKeyPress={(e) => {
-                                                                    if (!/^[a-zA-Z]$/.test(e.key)) {
-                                                                        e.preventDefault();
-                                                                    }
-                                                                }}
                                                             />
                                                         </FormControl>
                                                         <FormMessage className="text-[14px]" />
