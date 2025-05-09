@@ -25,8 +25,11 @@ export default function EditPort() {
     const fetchCountries = async () => {
         try {
             const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`);
-            const data = response.data?.data || [];
-            setCountries(data);
+            // const data = response.data?.data || [];
+            // setCountries(data);
+            const data = countries.data?.data || []
+            const sortedData = data.sort((a, b) => a.name.localeCompare(b.name))
+            setCountries(sortedData)
         } catch (error) {
             console.error('Error fetching countries:', error);
         }

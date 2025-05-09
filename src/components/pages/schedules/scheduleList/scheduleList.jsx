@@ -101,7 +101,9 @@ export default function ScheduleList() {
   const fetchCountries = async () => {
     try {
       const countries = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
-      setCountryOptions(countries.data?.data || [])
+      const data = countries.data?.data || []
+      const sortedData = data.sort((a, b) => a.name.localeCompare(b.name))
+      setCountryOptions(sortedData)
     } catch (error) {
       console.error("Error fetching countries:", error)
     }

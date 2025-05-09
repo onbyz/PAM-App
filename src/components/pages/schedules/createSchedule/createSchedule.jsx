@@ -45,7 +45,9 @@ export default function CreateSchedule() {
       // setDestinations(destinationsArray)
 
       const countries = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/countries`)
-      setCountries(countries.data?.data || [])
+      const data = countries.data?.data || []
+      const sortedData = data.sort((a, b) => a.name.localeCompare(b.name))
+      setCountries(sortedData)
     } catch (error) {
       console.error("Error fetching schedules:", error)
     }
