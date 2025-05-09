@@ -124,6 +124,11 @@ export default function EditUser() {
                                                     <Input
                                                         className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                                                         {...field}
+                                                        onKeyPress={(e) => {
+                                                            if (!/^[a-zA-Z]$/.test(e.key)) {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
                                                     />
                                                 </FormControl>
                                                 <FormMessage className='text-[14px]' />
@@ -145,6 +150,11 @@ export default function EditUser() {
                                                     <Input
                                                         className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                                                         {...field}
+                                                        onKeyPress={(e) => {
+                                                            if (!/^[a-zA-Z]$/.test(e.key)) {
+                                                                e.preventDefault();
+                                                            }
+                                                        }}
                                                     />
                                                 </FormControl>
                                                 <FormMessage className='text-[14px]' />
