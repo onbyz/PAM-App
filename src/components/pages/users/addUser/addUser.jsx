@@ -15,7 +15,7 @@ const formSchema = z.object({
   last_name: z.string().min(1, "Last Name is required!"),
   email: z.string().nonempty("Email is required").email("Invalid email address"),
   role: z.string().min(1, "Role is required!"),
-  // password: z.string().min(8, "Password must be at least 8 characters long")
+  password: z.string()
 });
 
 const ROLES = {
@@ -134,6 +134,7 @@ export default function AddUser() {
   };
 
   const onSubmit = async (data) => {
+    console.log({ data })
     try {
       const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/invite`, data);
       if (response.status === 200) {
