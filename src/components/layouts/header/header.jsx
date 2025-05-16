@@ -3,6 +3,7 @@ import React from 'react';
 // import SearchIcon from "@assets/icons/search.svg";
 import Avatar from "@assets/icons/avatar.png";
 import { FaChevronDown } from "react-icons/fa6";
+import { User } from 'lucide-react';
 
 export default function Header() {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -15,7 +16,9 @@ export default function Header() {
                 {/* <img src={BellIcon} alt="Icon" className='w-[24px] h-[24px]' /> */}
 
                 <div className='flex gap-2'>
-                    <img src={Avatar} alt="Icon" className='w-[24px] h-[24px]' />
+                    <div className="bg-gray-100 w-[24px] h-[24px] rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4" />
+                    </div>
                 
                     <p className='text-[16px] leading-[24px] flex gap-3 mr-2'>
                         {user?.firstName} {user?.lastName}
