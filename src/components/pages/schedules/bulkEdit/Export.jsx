@@ -24,6 +24,8 @@ export default function Export({ setError }) {
   const exportOptions = [
     { id: "bulk", label: "Bulk Schedule Edit.xlsx" },
     { id: "single", label: "Single file upload.xlsx (All Ports)" },
+    { id: "bulk_template", label: "Bulk Schedule Template.xlsx" },
+    { id: "single_template", label: "Single file upload template.xlsx" },
   ]
 
   const handleCheckboxChange = (optionId) => {
@@ -42,6 +44,10 @@ export default function Export({ setError }) {
       downloadBulkSchedule()
     } else if (selectedOption === "single") {
       downloadSingleSchedule()
+    } else if (selectedOption === "bulk_template") {
+      downloadTemplate()
+    } else if (selectedOption === "single_template") {
+      downloadTemplate(true)
     }
     setSelectedOption(null)
   }
@@ -374,6 +380,63 @@ export default function Export({ setError }) {
       view[i] = s.charCodeAt(i) & 0xff
     }
     return buf
+  }
+
+  const downloadTemplate = (isSingle = false) => {
+    const headers = [
+      "Vessel_Name",
+      "Voyage",
+      "cfs_closing",
+      "fcl_closing",
+      "Etd_Origin",
+      "ETA_Transit_Hub",
+      "ETA_Europe",
+      "Transit_time_Europe",
+      "ETA_USA_Canada",
+      "Transit_time_USA_Canada",
+    ]
+
+    if (!isSingle) {
+      headers.push("Origin", "Transit");
+    }
+
+    const workbook = XLSX.utils.book_new()
+    const worksheet = XLSX.utils.aoa_to_sheet([headers])
+
+    // Apply bold formatting to the header row
+    const range = XLSX.utils.decode_range(worksheet['!ref'])
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col })
+      if (!worksheet[cellAddress]) continue
+      
+      worksheet[cellAddress].s = {
+        font: { bold: true }
+      }
+    }
+
+    // Set column widths
+    worksheet["!cols"] = [
+      { wch: 15 }, // Vessel_Name
+      { wch: 10 }, // Voyage
+      { wch: 12 }, // cfs_closing
+      { wch: 12 }, // fcl_closing
+      { wch: 12 }, // Etd_Origin
+      { wch: 15 }, // ETA_Transit_Hub
+      { wch: 12 }, // ETA_Europe
+      { wch: 18 }, // Transit_time_Europe
+      { wch: 15 }, // ETA_USA_Canada
+      { wch: 18 }, // Transit_time_USA_Canada
+    ]
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, isSingle ? "Single_File_Upload" : "Bulk_Schedule")
+
+    const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" })
+    const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" })
+
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = isSingle ? `Single File Upload Template.xlsx` : `Bulk Schedule Template.xlsx`
+    link.click()
   }
 
   return (
