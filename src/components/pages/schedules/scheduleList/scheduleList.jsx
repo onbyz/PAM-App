@@ -929,7 +929,7 @@ export default function ScheduleList() {
       <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Multiple Schedules</AlertDialogTitle>
+            <AlertDialogTitle>{selectedItems.length === 1 ? "Delete Schedule" : "Delete Multiple Schedules"}Delete Multiple Schedules</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete {selectedItems.length} selected schedule(s)? This action cannot be undone.
             </AlertDialogDescription>

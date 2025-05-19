@@ -392,7 +392,7 @@ export default function UserManagement() {
       <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Multiple Users</AlertDialogTitle>
+            <AlertDialogTitle>{selectedItems.length === 1 ? "Delete User" : "Delete Multiple Users"}</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete {selectedItems.length} selected user(s)? This action cannot be undone.
             </AlertDialogDescription>

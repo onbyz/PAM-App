@@ -9,11 +9,12 @@ import { useNavigate } from "react-router-dom";
 import api from '@/lib/api';
 
 const formSchema = z.object({
-  vessel_name: z.string().min(3, "Vessel Name is required!"),
+  vessel_name: z.string().nonempty("Vessel Name is required!").min(3, "Vessel Name must be at least 3 characters"),
 });
 
 export default function AddVessel() {
   const [successMessage, setSuccessMessage] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState("");
   const navigate = useNavigate();
 
   const form = useForm({
@@ -38,6 +39,7 @@ export default function AddVessel() {
         setTimeout(() => navigate("/vessel-management"), 3000);
       }
     } catch (error) {
+      setErrorMessage(error.response?.data?.message || "Error adding vessel");
       console.error("Error adding vessel:", error);
     }
   };
@@ -59,6 +61,13 @@ export default function AddVessel() {
           <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
             {successMessage}
             <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setSuccessMessage("")}/>
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className="w-full bg-red-100 text-red-800 text-start p-3 rounded-md my-6 flex justify-between">
+            {errorMessage}
+            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setErrorMessage("")}/>
           </div>
         )}
 

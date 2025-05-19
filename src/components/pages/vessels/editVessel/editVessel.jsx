@@ -9,7 +9,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from '@/lib/api';
 
 const formSchema = z.object({
-    vessel_name: z.string().min(3, "Vessel Name is required!"),
+    vessel_name: z.string().nonempty("Vessel Name is required!").min(3, "Vessel Name must be at least 3 characters"),
 });
 
 export default function EditVessel(props) {

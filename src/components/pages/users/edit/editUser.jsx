@@ -78,7 +78,7 @@ export default function EditUser() {
                 setTimeout(() => navigate("/user-management"), 3000);
             }
         } catch (error) {
-            setErrorMessage("Failed to update user. Please try again.");
+            setErrorMessage(error.response?.data?.message || "Failed to update user. Please try again.");
             console.error("Error updating user:", error);
         }
     };

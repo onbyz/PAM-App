@@ -363,7 +363,7 @@ export default function VesselManangement() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the schedule entry.
+              This action cannot be undone. This will permanently delete the vessel entry.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -382,9 +382,9 @@ export default function VesselManangement() {
       <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Multiple Schedules</AlertDialogTitle>
+            <AlertDialogTitle>{selectedItems.length > 1 ? "Delete Multiple Vessels" : "Delete Vessel"}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {selectedItems.length} selected schedule(s)? This action cannot be undone.
+              Are you sure you want to delete {selectedItems.length} selected vessel(s)? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
