@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import Logo from "@assets/login/PAM Logo.png";
+import Logo from "@assets/PAM Cargo Logo.svg";
 import ClockIcon from "@assets/icons/clock.svg";
 import VesselIcon from "@assets/icons/box.svg";
 import PortIcon from "@assets/icons/AnchorSimple.svg";

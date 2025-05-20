@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Logo from "@assets/login/PAM Logo.png";
+import Logo from "@assets/PAM Cargo Logo.svg";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@components/ui/form";
 import { Input } from "@/components/ui/input";
 import { z } from "zod";
