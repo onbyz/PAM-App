@@ -23,9 +23,9 @@ export default function Export({ setError }) {
 
   const exportOptions = [
     { id: "bulk", label: "Bulk Schedule Edit.xlsx" },
-    { id: "single", label: "Single file upload.xlsx (All Ports)" },
+    { id: "single", label: "Single File Upload.xlsx (All Ports)" },
     { id: "bulk_template", label: "Bulk Schedule Template.xlsx" },
-    { id: "single_template", label: "Single file upload template.xlsx" },
+    { id: "single_template", label: "Single File Template.xlsx" },
   ]
 
   const handleCheckboxChange = (optionId) => {
@@ -435,7 +435,7 @@ export default function Export({ setError }) {
 
     const link = document.createElement("a")
     link.href = URL.createObjectURL(blob)
-    link.download = isSingle ? `Single File Upload Template.xlsx` : `Bulk Schedule Template.xlsx`
+    link.download = isSingle ? `Single File Template.xlsx` : `Bulk Schedule Template.xlsx`
     link.click()
   }
 
