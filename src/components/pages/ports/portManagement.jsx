@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaXmark, FaPlus, FaRegPenToSquare, FaTrash } from "react-icons/fa6";
 import api from "@/lib/api";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export default function PortManagement() {
   const [tableData, setTableData] = useState([]);
@@ -10,7 +11,10 @@ export default function PortManagement() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
-  
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false)
+  const [scheduleToDelete, setScheduleToDelete] = useState(null)
+
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -35,12 +39,12 @@ export default function PortManagement() {
 
   useEffect(() => {
     // Filter data based on search query
-    const filtered = tableData.filter(item => 
+    const filtered = tableData.filter(item =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.country.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredData(filtered);
-    
+
     // Reset to first page when search changes
     setCurrentPage(1);
     // Clear selections when filtering
@@ -57,69 +61,80 @@ export default function PortManagement() {
   }, [filteredData, itemsPerPage]);
 
   const handleDelete = async (uuid) => {
-    if (confirm("Are you sure you want to delete this port?")) {
-      try {
-        const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
-        if (response.status === 200) {
-          setSuccessMessage("Port deleted successfully");
-          setTableData((prevData) => prevData.filter((item) => item.uuid !== uuid));
-          // Clear the deleted item from selection if it was selected
-          setSelectedItems(prev => prev.filter(id => id !== uuid));
-          setTimeout(() => {
-            setSuccessMessage("");
-          }, 5000);
-        }
-      } catch (error) {
-        setErrorMessage(error.response?.data?.message || "Error deleting port");
-        setTimeout(() => {
-          setErrorMessage("");
-        }, 5000);
-        console.error("Error deleting port:", error);
-      }
-    }
-  };
-
-  const handleDeleteSelected = async () => {
-    if (selectedItems.length === 0) return;
-    
-    if (confirm(`Are you sure you want to delete ${selectedItems.length} selected port(s)?`)) {
-      // Track successful deletions to update the table
-      const successfulDeletions = [];
-      const failedDeletions = [];
-      
-      // Delete each selected item
-      for (const uuid of selectedItems) {
-        try {
-          const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
-          if (response.status === 200) {
-            successfulDeletions.push(uuid);
-          }
-        } catch (error) {
-          failedDeletions.push(uuid);
-          console.error(`Error deleting port ${uuid}:`, error);
-        }
-      }
-      
-      if (successfulDeletions.length > 0) {
-        // Update table data by removing successfully deleted items
-        setTableData(prevData => prevData.filter(item => !successfulDeletions.includes(item.uuid)));
-        
-        // Clear selected items
-        setSelectedItems([]);
-        
-        setSuccessMessage(`Successfully deleted ${successfulDeletions.length} port(s)`);
+    try {
+      const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
+      if (response.status === 200) {
+        setSuccessMessage("Port deleted successfully");
+        setTableData((prevData) => prevData.filter((item) => item.uuid !== uuid));
+        // Clear the deleted item from selection if it was selected
+        setSelectedItems(prev => prev.filter(id => id !== uuid));
         setTimeout(() => {
           setSuccessMessage("");
         }, 5000);
       }
-      
-      if (failedDeletions.length > 0) {
-        setErrorMessage(`Failed to delete ${failedDeletions.length} port(s)`);
-        setTimeout(() => {
-          setErrorMessage("");
-        }, 5000);
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || "Error deleting port");
+      setTimeout(() => {
+        setErrorMessage("");
+      }, 5000);
+      console.error("Error deleting port:", error);
+    }
+    setIsDeleteDialogOpen(false)
+    setScheduleToDelete(null)
+
+  };
+
+  const openDeleteDialog = (uuid) => {
+    setScheduleToDelete(uuid)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const openBulkDeleteDialog = () => {
+    if (selectedItems.length > 0) {
+      setIsBulkDeleteDialogOpen(true)
+    }
+  }
+
+  const handleDeleteSelected = async () => {
+    if (selectedItems.length === 0) return;
+
+    // Track successful deletions to update the table
+    const successfulDeletions = [];
+    const failedDeletions = [];
+
+    // Delete each selected item
+    for (const uuid of selectedItems) {
+      try {
+        const response = await api.delete(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/delete`);
+        if (response.status === 200) {
+          successfulDeletions.push(uuid);
+        }
+      } catch (error) {
+        failedDeletions.push(uuid);
+        console.error(`Error deleting port ${uuid}:`, error);
       }
     }
+
+    if (successfulDeletions.length > 0) {
+      // Update table data by removing successfully deleted items
+      setTableData(prevData => prevData.filter(item => !successfulDeletions.includes(item.uuid)));
+
+      // Clear selected items
+      setSelectedItems([]);
+
+      setSuccessMessage(`Successfully deleted ${successfulDeletions.length} port(s)`);
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+    }
+
+    if (failedDeletions.length > 0) {
+      setErrorMessage(`Failed to delete ${failedDeletions.length} port(s)`);
+      setTimeout(() => {
+        setErrorMessage("");
+      }, 5000);
+    }
+    setIsBulkDeleteDialogOpen(false)
   };
 
   const handlePageChange = (page) => {
@@ -160,20 +175,20 @@ export default function PortManagement() {
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   // Check if all current items are selected
-  const allCurrentItemsSelected = 
-    currentItems.length > 0 && 
+  const allCurrentItemsSelected =
+    currentItems.length > 0 &&
     currentItems.every(item => selectedItems.includes(item.uuid));
 
   // Display a limited number of page buttons
   const getPageRange = () => {
     let startPage = Math.max(1, currentPage - 2);
     let endPage = Math.min(totalPages, startPage + 4);
-    
+
     // Adjust if we're at the end
     if (endPage - startPage < 4) {
       startPage = Math.max(1, endPage - 4);
     }
-    
+
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   };
 
@@ -227,14 +242,14 @@ export default function PortManagement() {
                 <div className="flex items-center space-x-2">
                   {selectedItems.length > 0 && (
                     <button
-                      onClick={handleDeleteSelected}
+                      onClick={openBulkDeleteDialog}
                       className="px-4 py-1 border border-red-600 text-red-600 rounded-md text-sm flex items-center gap-2 whitespace-nowrap"
                     >
                       <FaTrash className="w-[12px] h-[12px]" />
                       <span>Delete Selected ({selectedItems.length})</span>
                     </button>
                   )}
-                  
+
                   <input
                     type="text"
                     placeholder="Search..."
@@ -270,7 +285,7 @@ export default function PortManagement() {
                             type="checkbox"
                             checked={selectedItems.includes(row.uuid)}
                             onChange={() => toggleSelectItem(row.uuid)}
-                            className="w-4 h-4" 
+                            className="w-4 h-4"
                           />
                         </td>
                         <td>{indexOfFirstItem + index + 1}</td>
@@ -285,7 +300,7 @@ export default function PortManagement() {
                           </div>
 
                           <div className="relative group inline-block">
-                            <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => handleDelete(row.uuid)} />
+                            <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => openDeleteDialog(row.uuid)} />
                             <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">Delete</div>
                           </div>
                         </td>
@@ -316,7 +331,7 @@ export default function PortManagement() {
                 >
                   Prev
                 </button>
-                
+
                 {getPageRange().map(number => (
                   <button
                     key={number}
@@ -326,7 +341,7 @@ export default function PortManagement() {
                     {number}
                   </button>
                 ))}
-                
+
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages || totalPages === 0}
@@ -339,6 +354,44 @@ export default function PortManagement() {
           </div>
         </div>
       </div>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the port entry.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => scheduleToDelete && handleDelete(scheduleToDelete)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{selectedItems.length > 1 ? "Delete Multiple Vessels" : "Delete Vessel"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedItems.length} selected port(s)? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSelected} className="bg-red-600 hover:bg-red-700">
+              Delete Selected
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
