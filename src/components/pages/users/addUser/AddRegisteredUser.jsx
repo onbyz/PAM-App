@@ -18,9 +18,16 @@ import api from "@/lib/api";
 
 const formSchema = z.object({
     users: z.array(z.object({
-        name: z.string().min(2, "Name is required!"),
+        name: z.string().min(1, "Name is required!"),
         email: z.string().nonempty("Email is required").email("Invalid email address"),
     })).min(1, "At least one user is required")
+}).refine(data => {
+    const emails = data.users.map(user => user.email);
+    const uniqueEmails = new Set(emails);
+    return emails.length === uniqueEmails.size;
+}, {
+    message: "Duplicate emails are not allowed.",
+    path: ["users"], // This specifies where the error message should be attached
 });
 
 export default function AddRegisteredUser() {
@@ -42,8 +49,8 @@ export default function AddRegisteredUser() {
     useEffect(() => {
         const subscription = form.watch((value) => {
             const { users } = value;
-            const hasValidUser = users?.some(user => 
-                user.name && user.name.length >= 2 && 
+            const hasValidUser = users?.some(user =>
+                user.name && user.name.length >= 2 &&
                 user.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)
             );
             setIsFormValid(hasValidUser);
@@ -51,6 +58,7 @@ export default function AddRegisteredUser() {
 
         return () => subscription.unsubscribe();
     }, [form.watch]);
+
 
     const handleGoBack = () => {
         navigate(-1);
@@ -60,7 +68,7 @@ export default function AddRegisteredUser() {
         if (users.length < 5) {
             const newId = Math.max(...users.map(user => user.id), 0) + 1;
             setUsers([...users, { id: newId }]);
-            
+
             // Update form values
             const currentUsers = form.getValues().users || [];
             form.setValue("users", [...currentUsers, { name: "", email: "" }]);
@@ -70,7 +78,7 @@ export default function AddRegisteredUser() {
     const removeUserRow = (id, index) => {
         if (users.length > 1) {
             setUsers(users.filter(user => user.id !== id));
-            
+
             // Update form values
             const currentUsers = form.getValues().users;
             const newUsers = [...currentUsers];
@@ -83,16 +91,16 @@ export default function AddRegisteredUser() {
         setSuccessMessage("");
         setErrorMessage("");
         try {
-          const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/subscribers`, data);
-          if (response.status === 200) {
-            setSuccessMessage("Users invited successfully");
-            form.reset();
-            setUsers([{ id: 1 }]);
-            setTimeout(() => navigate("/registered-users"), 3000);
-          }
+            const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/subscribers`, data);
+            if (response.status === 200) {
+                setSuccessMessage(users.length > 1 ? "Users invited successfully" : "Invited successfully");
+                form.reset();
+                setUsers([{ id: 1 }]);
+                setTimeout(() => navigate("/registered-users"), 3000);
+            }
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Failed to invite users. Please try again.");
-          console.error("Error inviting users:", error);
+            console.error("Error inviting users:", error);
         }
     };
 
@@ -116,15 +124,15 @@ export default function AddRegisteredUser() {
 
                 {successMessage && (
                     <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
-                    {successMessage}
-                    <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setSuccessMessage("")} />
+                        {successMessage}
+                        <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setSuccessMessage("")} />
                     </div>
                 )}
-        
+
                 {errorMessage && (
                     <div className="w-full bg-red-100 text-red-600 text-start p-3 rounded-md my-6 flex justify-between">
-                    {errorMessage}
-                    <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setErrorMessage("")} />
+                        {errorMessage}
+                        <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setErrorMessage("")} />
                     </div>
                 )}
 
@@ -178,19 +186,23 @@ export default function AddRegisteredUser() {
                                                             />
                                                         </FormControl>
                                                         <FormMessage className="text-[14px]" />
+                                                        {typeof form.formState.errors?.users?.root?.message === "string" && (
+                                                            <p className="text-red-500 text-sm mt-1">{form.formState.errors?.users?.root?.message}</p>
+                                                        )}
+
                                                     </FormItem>
                                                 )}
                                             />
                                         </div>
-                                        
+
                                         {/* Action button section */}
                                         <div className="flex items-end">
                                             <div>
                                                 {/* Show "Add more" button only on the last row when under the limit */}
                                                 {index === users.length - 1 && users.length < 5 ? (
-                                                    <button 
-                                                        type="button" 
-                                                        className="flex gap-2 items-center mb-2" 
+                                                    <button
+                                                        type="button"
+                                                        className="flex gap-2 items-center mb-2"
                                                         onClick={addUserRow}
                                                     >
                                                         <img src={Plus} alt="plus" className="w-[24px] h-[24px]" />
@@ -199,8 +211,8 @@ export default function AddRegisteredUser() {
                                                 ) : (
                                                     /* Show "Remove" button for all rows except the last row when it's the only row */
                                                     !(index === users.length - 1 && users.length === 1) && (
-                                                        <button 
-                                                            type="button" 
+                                                        <button
+                                                            type="button"
                                                             onClick={() => removeUserRow(user.id, index)}
                                                             className="flex gap-2 items-center mb-2 text-red-500"
                                                         >
@@ -219,9 +231,8 @@ export default function AddRegisteredUser() {
                                 <button
                                     type="submit"
                                     disabled={!isFormValid}
-                                    className={`px-4 h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${
-                                        isFormValid ? "bg-[#16A34A]" : "bg-[#16A34A]/50 cursor-not-allowed"
-                                    }`}
+                                    className={`px-4 h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${isFormValid ? "bg-[#16A34A]" : "bg-[#16A34A]/50 cursor-not-allowed"
+                                        }`}
                                 >
                                     Save
                                 </button>
