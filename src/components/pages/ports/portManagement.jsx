@@ -19,6 +19,7 @@ export default function PortManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
+  const [showAll, setShowAll] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -26,7 +27,9 @@ export default function PortManagement() {
       const data = response.data?.data || [];
       setTableData(data);
       setFilteredData(data);
-      setTotalPages(Math.ceil(data.length / itemsPerPage));
+      if (!showAll) {
+        setTotalPages(Math.ceil(data.length / itemsPerPage));
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
       setErrorMessage("Failed to fetch port data");
@@ -45,20 +48,24 @@ export default function PortManagement() {
     );
     setFilteredData(filtered);
 
-    // Reset to first page when search changes
-    setCurrentPage(1);
+    // Reset to first page when search changes (only if not showing all)
+    if (!showAll) {
+      setCurrentPage(1);
+    }
     // Clear selections when filtering
     setSelectedItems([]);
   }, [searchQuery, tableData]);
 
   useEffect(() => {
-    // Recalculate total pages when items per page changes or filtered data changes
-    setTotalPages(Math.ceil(filteredData.length / itemsPerPage));
-    // Reset to first page when changing items per page
-    if (currentPage > Math.ceil(filteredData.length / itemsPerPage)) {
-      setCurrentPage(1);
+    // Recalculate total pages when items per page changes or filtered data changes (only if not showing all)
+    if (!showAll) {
+      setTotalPages(Math.ceil(filteredData.length / itemsPerPage));
+      // Reset to first page when changing items per page
+      if (currentPage > Math.ceil(filteredData.length / itemsPerPage)) {
+        setCurrentPage(1);
+      }
     }
-  }, [filteredData, itemsPerPage]);
+  }, [filteredData, itemsPerPage, showAll]);
 
   const handleDelete = async (uuid) => {
     try {
@@ -81,7 +88,6 @@ export default function PortManagement() {
     }
     setIsDeleteDialogOpen(false)
     setScheduleToDelete(null)
-
   };
 
   const openDeleteDialog = (uuid) => {
@@ -142,8 +148,16 @@ export default function PortManagement() {
   };
 
   const handleItemsPerPageChange = (e) => {
-    setItemsPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page when changing items per page
+    const value = e.target.value;
+    
+    if (value === "all") {
+      setShowAll(true);
+      setItemsPerPage(filteredData.length || 1); // Set to total items or 1 to avoid division by zero
+    } else {
+      setShowAll(false);
+      setItemsPerPage(Number(value));
+      setCurrentPage(1); // Reset to first page when changing items per page
+    }
   };
 
   const handleSearchChange = (e) => {
@@ -169,10 +183,18 @@ export default function PortManagement() {
     }
   };
 
-  // Get current items
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  // Get current items - show all if showAll is true, otherwise paginate
+  const getCurrentItems = () => {
+    if (showAll) {
+      return filteredData;
+    } else {
+      const indexOfLastItem = currentPage * itemsPerPage;
+      const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+      return filteredData.slice(indexOfFirstItem, indexOfLastItem);
+    }
+  };
+
+  const currentItems = getCurrentItems();
 
   // Check if all current items are selected
   const allCurrentItemsSelected =
@@ -191,6 +213,27 @@ export default function PortManagement() {
 
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   };
+
+  // Calculate display info for pagination summary
+  const getDisplayInfo = () => {
+    if (showAll) {
+      return {
+        start: filteredData.length > 0 ? 1 : 0,
+        end: filteredData.length,
+        total: filteredData.length
+      };
+    } else {
+      const indexOfLastItem = currentPage * itemsPerPage;
+      const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+      return {
+        start: filteredData.length > 0 ? indexOfFirstItem + 1 : 0,
+        end: Math.min(indexOfLastItem, filteredData.length),
+        total: filteredData.length
+      };
+    }
+  };
+
+  const displayInfo = getDisplayInfo();
 
   return (
     <div>
@@ -227,7 +270,7 @@ export default function PortManagement() {
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-700">Show</span>
                   <select
-                    value={itemsPerPage}
+                    value={showAll ? "all" : itemsPerPage}
                     onChange={handleItemsPerPageChange}
                     className="border border-gray-300 rounded-md px-2 py-1 text-sm"
                   >
@@ -235,6 +278,7 @@ export default function PortManagement() {
                     <option value={10}>10</option>
                     <option value={25}>25</option>
                     <option value={50}>50</option>
+                    <option value="all">All</option>
                   </select>
                   <span className="text-sm text-gray-700">entries</span>
                 </div>
@@ -278,34 +322,41 @@ export default function PortManagement() {
                 </thead>
                 <tbody>
                   {currentItems.length > 0 ? (
-                    currentItems.map((row, index) => (
-                      <tr key={row.uuid} className="border-[1px] border-[#E6EDFF]">
-                        <td className="">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.includes(row.uuid)}
-                            onChange={() => toggleSelectItem(row.uuid)}
-                            className="w-4 h-4"
-                          />
-                        </td>
-                        <td>{indexOfFirstItem + index + 1}</td>
-                        <td>{row.name}</td>
-                        <td>{row.country}</td>
-                        <td className="py-3 px-4 cursor-pointer flex gap-6">
-                          <div className="relative group inline-block">
-                            <Link to={`/port-management/edit-port/${row.uuid}`}>
-                              <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" />
-                              <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">Edit</div>
-                            </Link>
-                          </div>
+                    currentItems.map((row, index) => {
+                      // Calculate the correct serial number based on whether we're showing all or paginated
+                      const serialNumber = showAll 
+                        ? index + 1 
+                        : ((currentPage - 1) * itemsPerPage) + index + 1;
+                      
+                      return (
+                        <tr key={row.uuid} className="border-[1px] border-[#E6EDFF]">
+                          <td className="">
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.includes(row.uuid)}
+                              onChange={() => toggleSelectItem(row.uuid)}
+                              className="w-4 h-4"
+                            />
+                          </td>
+                          <td>{serialNumber}</td>
+                          <td>{row.name}</td>
+                          <td>{row.country}</td>
+                          <td className="py-3 px-4 cursor-pointer flex gap-6">
+                            <div className="relative group inline-block">
+                              <Link to={`/port-management/edit-port/${row.uuid}`}>
+                                <FaRegPenToSquare className="text-black hover:text-gray-600 cursor-pointer w-[20px] h-[20px]" />
+                                <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">Edit</div>
+                              </Link>
+                            </div>
 
-                          <div className="relative group inline-block">
-                            <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => openDeleteDialog(row.uuid)} />
-                            <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">Delete</div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                            <div className="relative group inline-block">
+                              <FaTrash className="text-black hover:text-red-600 cursor-pointer w-[20px] h-[20px]" onClick={() => openDeleteDialog(row.uuid)} />
+                              <div className="absolute bottom-full mb-1 hidden group-hover:block bg-black text-white text-xs rounded px-2 py-1 whitespace-nowrap z-10">Delete</div>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td colSpan="5" className="text-center py-4">
@@ -317,43 +368,55 @@ export default function PortManagement() {
               </table>
             </div>
 
-            {/* Pagination controls */}
-            <div className="flex items-center justify-between mt-4 pb-4">
-              <div className="text-sm text-gray-700">
-                Showing {filteredData.length > 0 ? indexOfFirstItem + 1 : 0} to {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} entries
-              </div>
+            {/* Pagination controls - Only show when not displaying all items */}
+            {!showAll && (
+              <div className="flex items-center justify-between mt-4 pb-4">
+                <div className="text-sm text-gray-700">
+                  Showing {displayInfo.start} to {displayInfo.end} of {displayInfo.total} entries
+                </div>
 
-              <div className="flex items-center space-x-1">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-black'}`}
-                >
-                  Prev
-                </button>
-
-                {getPageRange().map(number => (
+                <div className="flex items-center space-x-1">
                   <button
-                    key={number}
-                    onClick={() => handlePageChange(number)}
-                    className={`px-3 py-1 rounded ${currentPage === number ? ' text-black border' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1 rounded ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-black'}`}
                   >
-                    {number}
+                    Prev
                   </button>
-                ))}
 
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages || totalPages === 0}
-                  className={`px-3 py-1 rounded ${currentPage === totalPages || totalPages === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-black'}`}
-                >
-                  Next
-                </button>
+                  {getPageRange().map(number => (
+                    <button
+                      key={number}
+                      onClick={() => handlePageChange(number)}
+                      className={`px-3 py-1 rounded ${currentPage === number ? ' text-black border' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                    >
+                      {number}
+                    </button>
+                  ))}
+
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    className={`px-3 py-1 rounded ${currentPage === totalPages || totalPages === 0 ? 'text-gray-400 cursor-not-allowed' : 'text-black'}`}
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Show total count when displaying all items */}
+            {showAll && (
+              <div className="flex items-center justify-between mt-4 pb-4">
+                <div className="text-sm text-gray-700">
+                  Showing all {displayInfo.total} entries
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
