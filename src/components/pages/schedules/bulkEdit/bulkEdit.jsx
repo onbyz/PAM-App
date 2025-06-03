@@ -121,7 +121,7 @@ export default function BulkScheduleUpload() {
   }
 
   return (
-    <div className="pt-8 md:mr-[2.5%] flex">
+    <div className="pt-8 flex">
       <div className="w-2/3">
         <div className="flex justify-between border-b-[1px] border-[#B6A9A9] pb-2">
           <h4 className="text-2xl leading-[56px]">Bulk Edit</h4>

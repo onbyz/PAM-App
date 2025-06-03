@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Checkbox } from "@/components/ui/checkbox"
 import ExportIcon from "@assets/icons/export.svg"
+import DownloadIcon from "@assets/icons/download.svg"
 import * as XLSX from "xlsx"
 import api from "@/lib/api"
 
@@ -24,8 +25,11 @@ export default function Export({ setError }) {
   const exportOptions = [
     { id: "bulk", label: "Bulk Schedule Edit.xlsx" },
     { id: "single", label: "Single File Upload.xlsx (All Ports)" },
-    { id: "bulk_template", label: "Bulk Schedule Template.xlsx" },
-    { id: "single_template", label: "Single File Template.xlsx" },
+  ]
+  
+  const templateOptions = [
+    { id: "bulk_template", label: "Blank Bulk Schedule Template.xlsx" },
+    { id: "single_template", label: "Blank Single File Template.xlsx (All Ports)" },
   ]
 
   const handleCheckboxChange = (optionId) => {
@@ -357,21 +361,6 @@ export default function Export({ setError }) {
     link.click()
   }
 
-
-  const getCurrentTimestamp = () => {
-    const now = new Date()
-
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, "0")
-    const day = String(now.getDate()).padStart(2, "0")
-
-    const hours = String(now.getHours()).padStart(2, "0")
-    const minutes = String(now.getMinutes()).padStart(2, "0")
-    // const seconds = String(now.getSeconds()).padStart(2, "0")
-
-    return `${year}-${month}-${day}_${hours}-${minutes}`
-  }
-
   // Helper function to convert string to ArrayBuffer
   const s2ab = (s) => {
     const buf = new ArrayBuffer(s.length)
@@ -440,33 +429,67 @@ export default function Export({ setError }) {
   }
 
   return (
-    <div className="bg-gray-100 h-full flex flex-col justify-center p-5">
-      <div className="flex items-center gap-4">
-        <img src={ExportIcon || "/placeholder.svg"} alt="Export" className="w-12 h-12" />
-        <h6 className="text-2xl font-bold">Export Data</h6>
-      </div>
-
-      {exportOptions.map((option) => (
-        <div key={option.id} className="flex gap-2 items-center mt-4">
-          <Checkbox
-            id={option.id}
-            className="rounded-none"
-            checked={selectedOption === option.id}
-            onCheckedChange={() => handleCheckboxChange(option.id)}
-          />
-          <span className="text-base leading-10 font-normal">{option.label}</span>
+    <>
+      <div className="bg-[#F2F2F2] h-full flex flex-col justify-center p-5">
+        <div className="flex items-center gap-4">
+          <img src={ExportIcon || "/placeholder.svg"} alt="Export" className="w-12 h-12" />
+          <h6 className="text-lg font-medium">Export Current Data</h6>
         </div>
-      ))}
+        <p className="text-[11px] text-[#4D4444] leading-0 my-2">Download Excel files with real-time data from your system. Get fully populated spreadsheets that reflect the latest data available in the application.</p>
 
-      <div>
-        <button
-          className={`py-2 px-8 mt-4 text-white rounded-md ${selectedOption ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
-          onClick={handleDownload}
-          disabled={!selectedOption}
-        >
-          Download
-        </button>
+        {exportOptions.map((option) => (
+          <div key={option.id} className="flex gap-2 items-center my-2">
+            <Checkbox
+              id={option.id}
+              className="rounded-none"
+              checked={selectedOption === option.id}
+              onCheckedChange={() => handleCheckboxChange(option.id)}
+            />
+            <span className="text-xs font-medium">{option.label}</span>
+          </div>
+        ))}
+
+        <div>
+          <button
+            className={`py-2 px-8 mt-4 text-white rounded-md ${selectedOption ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
+            onClick={handleDownload}
+            disabled={!selectedOption}
+          >
+            Download
+          </button>
+        </div>
       </div>
-    </div>
+
+
+      <div className="bg-[#F2F2F2] h-full flex flex-col justify-center p-5 mt-4">
+        <div className="flex items-center gap-4">
+          <img src={DownloadIcon || "/placeholder.svg"} alt="Export" className="w-8" />
+          <h6 className="text-lg font-medium">Download Blank Templates</h6>
+        </div>
+        <p className="text-[11px] text-[#4D4444] leading-0 my-2">Get empty Excel formats. Use pre-formatted Excel sheets with headers and structure, ready for manual data entry or offline preparation — no pre-filled values.</p>
+
+        {templateOptions.map((option) => (
+          <div key={option.id} className="flex gap-2 items-center my-2">
+            <Checkbox
+              id={option.id}
+              className="rounded-none"
+              checked={selectedOption === option.id}
+              onCheckedChange={() => handleCheckboxChange(option.id)}
+            />
+            <span className="text-xs font-medium">{option.label}</span>
+          </div>
+        ))}
+
+        <div>
+          <button
+            className={`py-2 px-8 mt-4 text-white rounded-md ${selectedOption ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
+            onClick={handleDownload}
+            disabled={!selectedOption}
+          >
+            Download
+          </button>
+        </div>
+      </div>
+    </>
   )
 }
