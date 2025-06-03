@@ -6,7 +6,8 @@ import * as XLSX from "xlsx"
 import api from "@/lib/api"
 
 export default function Export({ setError }) {
-  const [selectedOption, setSelectedOption] = useState(null)
+  const [selectedExportOption, setSelectedExportOption] = useState(null)
+  const [selectedTemplateOption, setSelectedTemplateOption] = useState(null)
   const [ports, setPorts] = useState([])
 
   const fetchPorts = async () => {
@@ -32,28 +33,44 @@ export default function Export({ setError }) {
     { id: "single_template", label: "Blank Single File Template.xlsx (All Ports)" },
   ]
 
-  const handleCheckboxChange = (optionId) => {
-    setSelectedOption(optionId)
+  const handleExportCheckboxChange = (optionId) => {
+    setSelectedExportOption(prev => prev === optionId ? null : optionId)
+    // Clear template selection when export option is selected
+    setSelectedTemplateOption(null)
   }
 
-  const handleDownload = () => {
+  const handleTemplateCheckboxChange = (optionId) => {
+    setSelectedTemplateOption(prev => prev === optionId ? null : optionId)
+    // Clear export selection when template option is selected
+    setSelectedExportOption(null)
+  }
+
+  const handleExportDownload = () => {
     setError(null)
 
-    if (!selectedOption) return
+    if (!selectedExportOption) return
 
-    const selectedItem = exportOptions.find((option) => option.id === selectedOption)
-    if (!selectedItem) return
-
-    if (selectedOption === "bulk") {
+    if (selectedExportOption === "bulk") {
       downloadBulkSchedule()
-    } else if (selectedOption === "single") {
+    } else if (selectedExportOption === "single") {
       downloadSingleSchedule()
-    } else if (selectedOption === "bulk_template") {
-      downloadTemplate()
-    } else if (selectedOption === "single_template") {
+    }
+    
+    setSelectedExportOption(null)
+  }
+
+  const handleTemplateDownload = () => {
+    setError(null)
+
+    if (!selectedTemplateOption) return
+
+    if (selectedTemplateOption === "bulk_template") {
+      downloadTemplate(false)
+    } else if (selectedTemplateOption === "single_template") {
       downloadTemplate(true)
     }
-    setSelectedOption(null)
+    
+    setSelectedTemplateOption(null)
   }
 
   const downloadBulkSchedule = () => {
@@ -95,26 +112,28 @@ export default function Export({ setError }) {
   }
 
   const downloadSingleSchedule = async () => {
-    for (const [i, port] of ports.entries()) {
-      try {
+    try {
+      for (const [i, port] of ports.entries()) {
         const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/port/${port.id}`;
         const response = await api.get(apiUrl);
         const data = response.data?.data || [];
         const formattedData = formatScheduleData(data, true);
         
-        const { workbook, filename } = prepareExcelDownload(
+        prepareExcelDownload(
           formattedData, 
           `${port.country}_${port.origin} via ${port.transit}`, 
           true
         );
         
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-      } catch (error) {
-        const errorMessage = error?.response?.data?.message || "Error downloading single schedule edit file";
-        setError(errorMessage);
-        console.error(`Error downloading schedule for port ${port.id}:`, error);
+        // Add delay between downloads to prevent browser blocking
+        if (i < ports.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
       }
+    } catch (error) {
+      const errorMessage = error?.response?.data?.message || "Error downloading single schedule edit file";
+      setError(errorMessage);
+      console.error("Error downloading single schedule files:", error);
     }
   };
 
@@ -187,13 +206,15 @@ export default function Export({ setError }) {
     const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" });
     const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" });
 
-    // const timestamp = getCurrentTimestamp();
     const filename = `${filenamePrefix}.xlsx`;
 
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     link.click();
+
+    // Clean up the object URL
+    setTimeout(() => URL.revokeObjectURL(link.href), 100);
 
     return { workbook, filename };
   };
@@ -353,12 +374,13 @@ export default function Export({ setError }) {
     const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" })
     const blob = new Blob([s2ab(excelFile)], { type: "application/octet-stream" })
 
-    // const timestamp = getCurrentTimestamp()
-
     const link = document.createElement("a")
     link.href = URL.createObjectURL(blob)
     link.download = `Sea-Air Schedule.xlsx`
     link.click()
+
+    // Clean up the object URL
+    setTimeout(() => URL.revokeObjectURL(link.href), 100);
   }
 
   // Helper function to convert string to ArrayBuffer
@@ -417,6 +439,10 @@ export default function Export({ setError }) {
       { wch: 18 }, // Transit_time_USA_Canada
     ]
 
+    if (!isSingle) {
+      worksheet["!cols"].push({ wch: 15 }, { wch: 15 }); // Origin, Transit
+    }
+
     XLSX.utils.book_append_sheet(workbook, worksheet, isSingle ? "Single_File_Upload" : "Bulk_Schedule")
 
     const excelFile = XLSX.write(workbook, { type: "binary", bookType: "xlsx" })
@@ -426,6 +452,9 @@ export default function Export({ setError }) {
     link.href = URL.createObjectURL(blob)
     link.download = isSingle ? `Single File Template.xlsx` : `Bulk Schedule Template.xlsx`
     link.click()
+
+    // Clean up the object URL
+    setTimeout(() => URL.revokeObjectURL(link.href), 100);
   }
 
   return (
@@ -442,8 +471,8 @@ export default function Export({ setError }) {
             <Checkbox
               id={option.id}
               className="rounded-none"
-              checked={selectedOption === option.id}
-              onCheckedChange={() => handleCheckboxChange(option.id)}
+              checked={selectedExportOption === option.id}
+              onCheckedChange={() => handleExportCheckboxChange(option.id)}
             />
             <span className="text-xs font-medium">{option.label}</span>
           </div>
@@ -451,19 +480,18 @@ export default function Export({ setError }) {
 
         <div>
           <button
-            className={`py-2 px-8 mt-4 text-white rounded-md ${selectedOption ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
-            onClick={handleDownload}
-            disabled={!selectedOption}
+            className={`py-2 px-8 mt-4 text-white rounded-md ${selectedExportOption ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
+            onClick={handleExportDownload}
+            disabled={!selectedExportOption}
           >
             Download
           </button>
         </div>
       </div>
 
-
       <div className="bg-[#F2F2F2] h-full flex flex-col justify-center p-5 mt-4">
         <div className="flex items-center gap-4">
-          <img src={DownloadIcon || "/placeholder.svg"} alt="Export" className="w-8" />
+          <img src={DownloadIcon || "/placeholder.svg"} alt="Download" className="w-8" />
           <h6 className="text-lg font-medium">Download Blank Templates</h6>
         </div>
         <p className="text-[11px] text-[#4D4444] leading-0 my-2">Get empty Excel formats. Use pre-formatted Excel sheets with headers and structure, ready for manual data entry or offline preparation — no pre-filled values.</p>
@@ -473,8 +501,8 @@ export default function Export({ setError }) {
             <Checkbox
               id={option.id}
               className="rounded-none"
-              checked={selectedOption === option.id}
-              onCheckedChange={() => handleCheckboxChange(option.id)}
+              checked={selectedTemplateOption === option.id}
+              onCheckedChange={() => handleTemplateCheckboxChange(option.id)}
             />
             <span className="text-xs font-medium">{option.label}</span>
           </div>
@@ -482,9 +510,9 @@ export default function Export({ setError }) {
 
         <div>
           <button
-            className={`py-2 px-8 mt-4 text-white rounded-md ${selectedOption ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
-            onClick={handleDownload}
-            disabled={!selectedOption}
+            className={`py-2 px-8 mt-4 text-white rounded-md ${selectedTemplateOption ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
+            onClick={handleTemplateDownload}
+            disabled={!selectedTemplateOption}
           >
             Download
           </button>
