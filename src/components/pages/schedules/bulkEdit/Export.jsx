@@ -117,6 +117,7 @@ export default function Export({ setError }) {
         const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/port/${port.id}`;
         const response = await api.get(apiUrl);
         const data = response.data?.data || [];
+        if (data.length === 0) continue;
         const formattedData = formatScheduleData(data, true);
         
         prepareExcelDownload(
