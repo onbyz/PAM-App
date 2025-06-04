@@ -74,7 +74,7 @@ const BulkScheduleUpload = () => {
     return (
         <div className="pt-20">
             <div className='mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2'>
-                <h4 className='leading-[56px]'>Bulk Edit</h4>
+                <h4 className='leading-[56px] text-[26px] font-medium'>Bulk Edit</h4>
             </div>
             <div className="flex gap-5 my-10">
                 <label className="flex items-center cursor-pointer">

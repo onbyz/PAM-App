@@ -474,7 +474,7 @@ export default function Export({ setError }) {
               checked={selectedExportOption === option.id}
               onCheckedChange={() => handleExportCheckboxChange(option.id)}
             />
-            <span className="text-xs font-medium">{option.label}</span>
+            <span className="text-xs font-bold">{option.label}</span>
           </div>
         ))}
 
@@ -504,7 +504,7 @@ export default function Export({ setError }) {
               checked={selectedTemplateOption === option.id}
               onCheckedChange={() => handleTemplateCheckboxChange(option.id)}
             />
-            <span className="text-xs font-medium">{option.label}</span>
+            <span className="text-xs font-bold">{option.label}</span>
           </div>
         ))}
 

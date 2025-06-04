@@ -193,7 +193,7 @@ export default function CreateSchedule() {
       <div>
         <div className="md:mr-[2.5%]">
           <div className="mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2">
-            <h4 className="leading-[56px]">Create Schedule</h4>
+            <h4 className="leading-[56px] text-[26px] font-medium">Create Schedule</h4>
 
             <button
               onClick={handleGoBack}

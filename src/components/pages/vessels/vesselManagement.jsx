@@ -242,7 +242,7 @@ export default function VesselManangement() {
       <div>
         <div className="md:mr-[2.5%]">
           <div className="mt-8 flex justify-between border-b-[1px] border-[#B6A9A9] pb-2">
-            <h4 className="leading-[56px]">Vessel Management</h4>
+            <h4 className="leading-[56px] text-[26px] font-medium">Vessel Management</h4>
 
             <Link to="/vessel-management/add-vessel">
               <button className="w-[165px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ">

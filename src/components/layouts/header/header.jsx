@@ -9,9 +9,9 @@ export default function Header() {
     const user = JSON.parse(localStorage.getItem('user'));
     return (
         <div className='flex justify-between mt-4'>
-            <h3 className='leading-[150%]'>Welcome, {user?.firstName}</h3>
+            {/* <h3 className='leading-[150%]'>Welcome, {user?.firstName}</h3> */}
 
-            <div className='flex gap-6'>
+            <div className='flex gap-6 ml-auto'>
                 {/* <img src={SearchIcon} alt="Icon" className='w-[24px] h-[24px]' /> */}
                 {/* <img src={BellIcon} alt="Icon" className='w-[24px] h-[24px]' /> */}
 
