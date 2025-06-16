@@ -14,7 +14,7 @@ export default function EditSchedule() {
 
 	const [vessels, setVessels] = useState([]);
 	const [ports, setPorts] = useState([]);
-	const [destinations, setDestinations] = useState([{destination: 'Europe'}])
+	const [destinations, setDestinations] = useState([{ destination: 'Europe' }])
 
 	const [etdDate, setEtdDate] = useState("");
 	const [etaDubai, setEtaDubaiDate] = useState("");
@@ -24,11 +24,11 @@ export default function EditSchedule() {
 	const [successMessage, setSuccessMessage] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
 	const [countries, setCountries] = useState([]);
-    const [scheduleData, setScheduleData] = useState({});
+	const [scheduleData, setScheduleData] = useState({});
 
 	const [etaUsaCanada, setEtaUsaCanada] = useState("");
 	const [transitTimeUsaCanada, setTransitTimeUsaCanada] = useState("");
-    const [selectedCountryId, setSelectedCountryId] = useState(null);
+	const [selectedCountryId, setSelectedCountryId] = useState(null);
 
 	const fetchSchedules = async () => {
 		try {
@@ -115,8 +115,8 @@ export default function EditSchedule() {
 			const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/${uuid}`);
 			if (response.status === 200) {
 				const fetchedData = response.data?.data[0];
-                setScheduleData(fetchedData);
-				
+				setScheduleData(fetchedData);
+
 				if (fetchedData) {
 					if (fetchedData.etd) setEtdDate(formatedDate(fetchedData.etd));
 					if (fetchedData.eta_transit) setEtaDubaiDate(formatedDate(fetchedData.eta_transit));
@@ -141,11 +141,11 @@ export default function EditSchedule() {
 
 	const selectedCountry = form.watch("country");
 	const selectedCountryObject = countries.find((country) => country.uuid === selectedCountry);
-	
+
 	const filteredPorts = ports.filter((port) => {
-        return selectedCountryObject ? port.country_id === selectedCountryObject.id : 
-               selectedCountryId ? port.country_id === selectedCountryId : false;
-    });
+		return selectedCountryObject ? port.country_id === selectedCountryObject.id :
+			selectedCountryId ? port.country_id === selectedCountryId : false;
+	});
 
 	useEffect(() => {
 		fetchScheduleData();
@@ -153,30 +153,30 @@ export default function EditSchedule() {
 
 	useEffect(() => {
 		if (!scheduleData || Object.keys(scheduleData).length === 0 || !countries.length || !ports.length || !vessels.length) return;
-		
+
 		const countryUuid = countries.find(country => country.id === scheduleData.country_id)?.uuid;
-		
+
 		const portUuid = ports.find(port => port.id === scheduleData.port_id)?.uuid;
-		
+
 		const vesselUuid = vessels.find(vessel => vessel.id === scheduleData.vessel_id)?.uuid;
-		
-        if (countryUuid && portUuid && vesselUuid) {
-            form.reset({
-                country: countryUuid,
-                port_id: portUuid,
-                etd: formatedDate(scheduleData.etd) || "",
-                vessel_id: vesselUuid,
-                voyage_no: scheduleData.voyage_no || "",
-                cfs_closing: formatedDate(scheduleData.cfs_closing) || "",
-                fcl_closing: formatedDate(scheduleData.fcl_closing) || "",
-                eta_transit: formatedDate(scheduleData.eta_transit) || "",
-                destination: scheduleData.destination || "",
-                dst_eta: formatedDate(scheduleData.dst_eta) || "",
-                transit_time: scheduleData.transit_time?.toString() || "",
-                eta_usa: formatedDate(scheduleData.eta_usa) || "",
-                transit_time_usa: scheduleData.transit_time_usa?.toString() || "",
-            });
-        }
+
+		if (countryUuid && portUuid && vesselUuid) {
+			form.reset({
+				country: countryUuid,
+				port_id: portUuid,
+				etd: formatedDate(scheduleData.etd) || "",
+				vessel_id: vesselUuid,
+				voyage_no: scheduleData.voyage_no || "",
+				cfs_closing: formatedDate(scheduleData.cfs_closing) || "",
+				fcl_closing: formatedDate(scheduleData.fcl_closing) || "",
+				eta_transit: formatedDate(scheduleData.eta_transit) || "",
+				destination: scheduleData.destination || "",
+				dst_eta: formatedDate(scheduleData.dst_eta) || "",
+				transit_time: scheduleData.transit_time?.toString() || "",
+				eta_usa: formatedDate(scheduleData.eta_usa) || "",
+				transit_time_usa: scheduleData.transit_time_usa?.toString() || "",
+			});
+		}
 	}, [scheduleData, countries, ports, vessels, form]);
 
 	const onSubmit = async (data) => {
@@ -252,6 +252,12 @@ export default function EditSchedule() {
 		form.trigger(fieldName);
 	};
 
+	const getPreviousDay = (date) => {
+		if (!date) return ""
+		const prevDay = new Date(date)
+		prevDay.setDate(prevDay.getDate() - 1)
+		return prevDay.toISOString().split("T")[0]
+	}
 	return (
 		<div>
 			<div>
@@ -298,7 +304,7 @@ export default function EditSchedule() {
 													</FormLabel>
 													<FormControl>
 														<Select value={field.value} onValueChange={field.onChange}>
-															<SelectTrigger  onBlur={() => handleFieldBlur("country")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
+															<SelectTrigger onBlur={() => handleFieldBlur("country")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
 																<SelectValue />
 															</SelectTrigger>
 															<SelectContent>
@@ -443,6 +449,8 @@ export default function EditSchedule() {
 															onBlur={() => handleFieldBlur("cfs_closing")}
 															className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
 															{...field}
+															max={etdDate ? getPreviousDay(etdDate) : ""}
+
 														/>
 													</FormControl>
 													<FormMessage className="text-[14px]" />
@@ -466,6 +474,8 @@ export default function EditSchedule() {
 															onBlur={() => handleFieldBlur("fcl_closing")}
 															className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
 															{...field}
+															max={etdDate ? getPreviousDay(etdDate) : ""}
+
 														/>
 													</FormControl>
 													<FormMessage className="text-[14px]" />

@@ -13,7 +13,7 @@ export default function CreateSchedule() {
   const [schedules, setSchedules] = useState([])
   const [vessels, setVessels] = useState([])
   const [ports, setPorts] = useState([])
-  const [destinations, setDestinations] = useState([{destination: 'Europe'}])
+  const [destinations, setDestinations] = useState([{ destination: 'Europe' }])
 
   const [etdDate, setEtdDate] = useState("")
   const [etaDubai, setEtaDubaiDate] = useState("")
@@ -70,6 +70,13 @@ export default function CreateSchedule() {
   //     setDayDifference(calculateDayDifference(etdDate, etaDate));
   //   }
   // }, [etdDate, etaDate]);
+
+  const getPreviousDay = (date) => {
+    if (!date) return ""
+    const prevDay = new Date(date)
+    prevDay.setDate(prevDay.getDate() - 1)
+    return prevDay.toISOString().split("T")[0]
+  }
 
   const formSchema = z.object({
     country: z.string().nonempty("Country is required"),
@@ -386,6 +393,7 @@ export default function CreateSchedule() {
                               onBlur={() => handleFieldBlur("cfs_closing")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               min={new Date().toISOString().split("T")[0]}
+                              max={etdDate ? getPreviousDay(etdDate) : ""}
                               {...field}
                             />
                           </FormControl>
@@ -410,6 +418,7 @@ export default function CreateSchedule() {
                               onBlur={() => handleFieldBlur("fcl_closing")}
                               className="w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white"
                               min={new Date().toISOString().split("T")[0]}
+                              max={etdDate ? getPreviousDay(etdDate) : ""}
                               {...field}
                             />
                           </FormControl>
