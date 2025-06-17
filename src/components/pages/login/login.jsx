@@ -92,7 +92,7 @@ export default function Login() {
                           onClick={() => setShowPassword((prev) => !prev)}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                         >
-                          {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                          {!showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                         </button>
                       </div>
                     </FormControl>
