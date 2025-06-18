@@ -10,6 +10,7 @@ const BulkScheduleUpload = () => {
     const [uploadType, setUploadType] = useState("bulk") // 'bulk' or 'origin'
     const [deleteOldData, setDeleteOldData] = useState(true)
 
+    
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0]
         setFile(selectedFile)

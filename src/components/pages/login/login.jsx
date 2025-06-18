@@ -9,11 +9,14 @@ import { FaEye, FaEyeSlash, FaXmark } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from '@/context/AuthContext';
 import LoginFormImg from "@/assets/login/login-img.png";
+import { useLoading } from '@/hooks/useLoading';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function Login() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { isLoading, withLoading } = useLoading()
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(null);
@@ -33,7 +36,7 @@ export default function Login() {
     },
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = withLoading(async (data) => {
     try {
       const result = await login(data);
       if (result.success) {
@@ -45,7 +48,7 @@ export default function Login() {
       console.log('An unexpected error occurred', err);
     }
 
-  };
+  })
 
 
   return (
@@ -103,9 +106,16 @@ export default function Login() {
 
               <button
                 type="submit"
-                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+                className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition disabled:cursor-not-allowed"
+                disabled={isLoading()}
               >
-                Login →
+                {isLoading() ? (
+                  <>
+                    <Spinner size="sm"  />
+                  </>
+                ) : (
+                  "Login →"
+                )}
               </button>
 
               <p className="mt-4 text-center">

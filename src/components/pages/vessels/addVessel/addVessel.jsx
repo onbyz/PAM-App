@@ -7,6 +7,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import api from '@/lib/api';
+import { useLoading } from '@/hooks/useLoading';
+import { Spinner } from '@/components/ui/spinner';
 
 const formSchema = z.object({
   vessel_name: z.string().nonempty("Vessel Name is required!").min(3, "Vessel Name must be at least 3 characters"),
@@ -16,6 +18,7 @@ export default function AddVessel() {
   const [successMessage, setSuccessMessage] = React.useState("");
   const [errorMessage, setErrorMessage] = React.useState("");
   const navigate = useNavigate();
+  const { isLoading, withLoading } = useLoading()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -25,10 +28,10 @@ export default function AddVessel() {
   });
 
   const handleGoBack = () => {
-    navigate(-1); 
+    navigate(-1);
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = withLoading(async (data) => {
     try {
       const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel`, {
         name: data.vessel_name,
@@ -42,7 +45,7 @@ export default function AddVessel() {
       setErrorMessage(error.response?.data?.message || "Error adding vessel");
       console.error("Error adding vessel:", error);
     }
-  };
+  })
 
   return (
     <div>
@@ -51,7 +54,7 @@ export default function AddVessel() {
           <h4 className='leading-[56px] text-[26px] font-medium'>Add New Vessel</h4>
           <button
             onClick={handleGoBack}
-            className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'> 
+            className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'>
             <FaXmark className='mt-[2px]' />
             Close
           </button>
@@ -60,14 +63,14 @@ export default function AddVessel() {
         {successMessage && (
           <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
             {successMessage}
-            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setSuccessMessage("")}/>
+            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setSuccessMessage("")} />
           </div>
         )}
 
         {errorMessage && (
           <div className="w-full bg-red-100 text-red-800 text-start p-3 rounded-md my-6 flex justify-between">
             {errorMessage}
-            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setErrorMessage("")}/>
+            <FaXmark className='mt-[2px] hover:cursor-pointer' onClick={() => setErrorMessage("")} />
           </div>
         )}
 
@@ -89,7 +92,7 @@ export default function AddVessel() {
                           {...field}
                           onKeyPress={(e) => {
                             if (!/^[a-zA-Z0-9]$/.test(e.key)) { // Allow only letters and numbers
-                                e.preventDefault();
+                              e.preventDefault();
                             }
                           }}
                         />
@@ -103,8 +106,16 @@ export default function AddVessel() {
               <div className='flex gap-6 mt-8'>
                 <button
                   type='submit'
-                  className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'>
-                  Save
+                  className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 disabled:cursor-not-allowed'
+                  disabled={isLoading()}
+                  >
+                  {isLoading() ? (
+                    <>
+                      <Spinner size="sm" />
+                    </>
+                  ) : (
+                    "Save"
+                  )}
                 </button>
 
                 <button

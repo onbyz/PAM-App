@@ -15,6 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import Plus from "@assets/icons/plus.svg";
 import api from "@/lib/api";
+import { useLoading } from "@/hooks/useLoading";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
     users: z.array(z.object({
@@ -35,6 +37,7 @@ export default function AddRegisteredUser() {
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [isFormValid, setIsFormValid] = useState(false);
+    const { isLoading, withLoading } = useLoading()
 
     const navigate = useNavigate();
 
@@ -87,7 +90,7 @@ export default function AddRegisteredUser() {
         }
     };
 
-    const onSubmit = async (data) => {
+    const onSubmit = withLoading(async (data) => {
         setSuccessMessage("");
         setErrorMessage("");
         try {
@@ -102,7 +105,7 @@ export default function AddRegisteredUser() {
             setErrorMessage(error.response?.data?.message || "Failed to invite users. Please try again.");
             console.error("Error inviting users:", error);
         }
-    };
+    })
 
     const handleFieldBlur = (fieldName) => {
         form.trigger(fieldName);
@@ -230,11 +233,17 @@ export default function AddRegisteredUser() {
                             <div className="flex gap-6 mt-8">
                                 <button
                                     type="submit"
-                                    disabled={!isFormValid}
-                                    className={`px-4 h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${isFormValid ? "bg-[#16A34A]" : "bg-[#16A34A]/50 cursor-not-allowed"
+                                    disabled={!isFormValid || isLoading()}
+                                    className={`px-4 h-[40px] rounded-md text-white text-[14px] flex justify-center disabled:cursor-not-allowed items-center gap-2 ${isFormValid ? "bg-[#16A34A]" : "bg-[#16A34A]/50 cursor-not-allowed"
                                         }`}
                                 >
-                                    Save
+                                    {isLoading() ? (
+                                        <>
+                                            <Spinner size="sm" />
+                                        </>
+                                    ) : (
+                                        "Save"
+                                    )}
                                 </button>
 
                                 <button

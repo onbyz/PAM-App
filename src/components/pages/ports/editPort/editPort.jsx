@@ -8,6 +8,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
 import api from '@/lib/api';
+import { useLoading } from '@/hooks/useLoading';
+import { Spinner } from '@/components/ui/spinner';
 
 const formSchema = z.object({
     country_id: z.string().min(1, "Country is required!"),
@@ -17,6 +19,7 @@ const formSchema = z.object({
 
 export default function EditPort() {
     const { uuid } = useParams();
+    const { isLoading, withLoading } = useLoading()
     const [countries, setCountries] = React.useState([]);
     const [successMessage, setSuccessMessage] = React.useState("");
     const [errorMessage, setErrorMessage] = React.useState("");
@@ -75,9 +78,9 @@ export default function EditPort() {
         return str?.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
     }
 
-    const onSubmit = async (data) => {
+    const onSubmit = withLoading(async (data) => {
         try {
-            const response = await api.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/edit`, {...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim())});
+            const response = await api.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/port/${uuid}/edit`, { ...data, origin: toCapitalCase(data.origin?.trim()), transit: toCapitalCase(data.transit?.trim()) });
             if (response.status === 200) {
                 setSuccessMessage("Port updated successfully");
                 form.reset();
@@ -87,7 +90,7 @@ export default function EditPort() {
             setErrorMessage(error.response?.data?.message || "Error updating port");
             console.error("Error updating port:", error);
         }
-    };
+    })
 
     return (
         <div>
@@ -189,8 +192,16 @@ export default function EditPort() {
                             <div className='flex gap-6 mt-8'>
                                 <button
                                     type='submit'
-                                    className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'>
-                                    Save
+                                    className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'
+                                    disabled={isLoading()}
+                                >
+                                    {isLoading() ? (
+                                        <>
+                                            <Spinner size="sm" />
+                                        </>
+                                    ) : (
+                                        "Save"
+                                    )}
                                 </button>
 
                                 <button

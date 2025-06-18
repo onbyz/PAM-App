@@ -8,9 +8,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
+import { useLoading } from "@/hooks/useLoading";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function EditSchedule() {
 	const { uuid } = useParams();
+	const { isLoading, withLoading } = useLoading()
 
 	const [vessels, setVessels] = useState([]);
 	const [ports, setPorts] = useState([]);
@@ -179,7 +182,7 @@ export default function EditSchedule() {
 		}
 	}, [scheduleData, countries, ports, vessels, form]);
 
-	const onSubmit = async (data) => {
+	const onSubmit = withLoading(async (data) => {
 		data = { ...data, created_by: scheduleData?.created_by };
 
 		try {
@@ -198,7 +201,7 @@ export default function EditSchedule() {
 			}
 			console.error("Error Updating Schedule : ", error);
 		}
-	};
+	})
 
 	const getNextDay = (date) => {
 		if (!date) return new Date().toISOString().split("T")[0];
@@ -663,8 +666,17 @@ export default function EditSchedule() {
 								</div>
 
 								<div className="flex gap-6 mt-8">
-									<button type="submit" className="w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ">
-										Save
+									<button type="submit" className="w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 disabled:cursor-not-allowed"
+										disabled={isLoading()}
+
+									>
+										{isLoading() ? (
+											<>
+												<Spinner size="sm" />
+											</>
+										) : (
+											"Save"
+										)}
 									</button>
 
 									<button
