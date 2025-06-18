@@ -9,6 +9,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, RefreshCw } from "lucide-react";
 import api from '@/lib/api';
+import { useLoading } from '@/hooks/useLoading';
+import { Spinner } from '@/components/ui/spinner';
 
 const formSchema = z.object({
   first_name: z.string().min(2, "First Name is required!"),
@@ -37,6 +39,7 @@ export default function AddUser() {
   const [allFieldsFilled, setAllFieldsFilled] = useState(false);
 
   const navigate = useNavigate();
+  const { isLoading, withLoading } = useLoading()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -55,12 +58,12 @@ export default function AddUser() {
 
   useEffect(() => {
     const { first_name, last_name, email, role } = formValues;
-    const requiredFieldsFilled = 
-      first_name.length >= 2 && 
-      last_name.length >= 1 && 
-      email.match(/^\S+@\S+\.\S+$/) && 
+    const requiredFieldsFilled =
+      first_name.length >= 2 &&
+      last_name.length >= 1 &&
+      email.match(/^\S+@\S+\.\S+$/) &&
       role.length >= 1;
-    
+
     if (requiredFieldsFilled && !allFieldsFilled) {
       setAllFieldsFilled(true);
       generatePassword();
@@ -74,19 +77,19 @@ export default function AddUser() {
     const length = 12;
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
     let password = "";
-    
-    password += getRandomChar("ABCDEFGHIJKLMNOPQRSTUVWXYZ"); 
-    password += getRandomChar("abcdefghijklmnopqrstuvwxyz"); 
-    password += getRandomChar("0123456789"); 
-    password += getRandomChar("!@#$%^&*()-_=+"); 
-    
+
+    password += getRandomChar("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    password += getRandomChar("abcdefghijklmnopqrstuvwxyz");
+    password += getRandomChar("0123456789");
+    password += getRandomChar("!@#$%^&*()-_=+");
+
     for (let i = password.length; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
     }
-    
+
     password = shuffleString(password);
-    
+
     form.setValue("password", password);
     return password;
   };
@@ -116,7 +119,7 @@ export default function AddUser() {
   const copyPasswordToClipboard = () => {
     const password = form.getValues("password");
     if (!password) return;
-    
+
     navigator.clipboard.writeText(password)
       .then(() => {
         setPasswordCopied(true);
@@ -133,7 +136,7 @@ export default function AddUser() {
     }
   };
 
-  const onSubmit = async (data) => {
+  const onSubmit = withLoading(async (data) => {
     console.log({ data })
     try {
       const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/invite`, data);
@@ -147,11 +150,11 @@ export default function AddUser() {
       setErrorMessage(error.response?.data?.message || "Failed to invite user. Please try again.");
       console.error("Error inviting user:", error);
     }
-  };
+  })
 
   const handleFieldBlur = (fieldName) => {
-		form.trigger(fieldName);
-	};
+    form.trigger(fieldName);
+  };
 
   return (
     <div>
@@ -160,7 +163,7 @@ export default function AddUser() {
           <h4 className='leading-[56px] text-[26px] font-medium'>User Management</h4>
           <button
             onClick={handleGoBack}
-            className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'> 
+            className='w-[116px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'>
             <FaXmark className='mt-[2px]' />
             Close
           </button>
@@ -200,7 +203,7 @@ export default function AddUser() {
                             {...field}
                             onKeyPress={(e) => {
                               if (!/^[a-zA-Z]$/.test(e.key)) {
-                                  e.preventDefault();
+                                e.preventDefault();
                               }
                             }}
                           />
@@ -227,7 +230,7 @@ export default function AddUser() {
                             {...field}
                             onKeyPress={(e) => {
                               if (!/^[a-zA-Z]$/.test(e.key)) {
-                                  e.preventDefault();
+                                e.preventDefault();
                               }
                             }}
                           />
@@ -271,7 +274,7 @@ export default function AddUser() {
                           <SelectTrigger onBlur={() => handleFieldBlur("role")} className="text-[16px] flex-end w-[300px] h-[40px] border border-[#E2E8F0] rounded-md px-3 focus:outline-none appearance-none bg-white">
                             <SelectValue placeholder="Select a role" />
                           </SelectTrigger>
-                          
+
                           <SelectContent>
                             {roleOptions.map((role) => (
                               <SelectItem key={role.value} value={role.value} className="text-[16px]">
@@ -281,7 +284,7 @@ export default function AddUser() {
                           </SelectContent>
                         </Select>
                       </FormControl>
-                      <FormMessage className='text-[14px]'/>
+                      <FormMessage className='text-[14px]' />
                     </FormItem>
                   )} />
                 </div>
@@ -352,12 +355,17 @@ export default function AddUser() {
               <div className='flex gap-6 mt-8'>
                 <button
                   type='submit'
-                  disabled={!allFieldsFilled}
-                  className={`w-[108px] h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 ${
-                    allFieldsFilled ? 'bg-[#16A34A]' : 'bg-gray-400 cursor-not-allowed'
-                  }`}
+                  disabled={!allFieldsFilled || isLoading()}
+                  className={`w-[108px] h-[40px] rounded-md text-white text-[14px] flex justify-center items-center gap-2 disabled:cursor-not-allowed ${allFieldsFilled ? 'bg-[#16A34A]' : 'bg-gray-400 cursor-not-allowed'
+                    }`}
                 >
-                  Invite User
+                  {isLoading() ? (
+                    <>
+                      <Spinner size="sm" />
+                    </>
+                  ) : (
+                    "Invite User"
+                  )}
                 </button>
 
                 <button

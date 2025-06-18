@@ -8,6 +8,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
 import api from '@/lib/api';
+import { useLoading } from '@/hooks/useLoading';
+import { Spinner } from '@/components/ui/spinner';
 
 const formSchema = z.object({
     first_name: z.string().min(2, "First Name is required!"),
@@ -32,6 +34,7 @@ export default function EditUser() {
     const navigate = useNavigate();
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const { isLoading, withLoading } = useLoading()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -48,8 +51,8 @@ export default function EditUser() {
             try {
                 const response = await api.get(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${userId}`);
                 if (response.status === 200) {
-                    const userData = response.data.data;    
-                    
+                    const userData = response.data.data;
+
                     form.reset({
                         first_name: userData.first_name,
                         last_name: userData.last_name,
@@ -69,7 +72,7 @@ export default function EditUser() {
         navigate(-1);
     };
 
-    const onSubmit = async (data) => {
+    const onSubmit = withLoading(async (data) => {
         console.log("Form submitted:", data);
         try {
             const response = await api.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/users/${userId}/edit`, data);
@@ -81,7 +84,7 @@ export default function EditUser() {
             setErrorMessage(error.response?.data?.message || "Failed to update user. Please try again.");
             console.error("Error updating user:", error);
         }
-    };
+    })
 
     return (
         <div>
@@ -216,8 +219,15 @@ export default function EditUser() {
                             <div className='flex gap-6 mt-8'>
                                 <button
                                     type='submit'
-                                    className='w-[108px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'>
-                                    Update User
+                                    disabled={isLoading()}
+                                    className='w-[108px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 disabled:cursor-not-allowed'>
+                                    {isLoading() ? (
+                                        <>
+                                            <Spinner size="sm" />
+                                        </>
+                                    ) : (
+                                        "Update User"
+                                    )}
                                 </button>
 
                                 <button

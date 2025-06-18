@@ -8,10 +8,13 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import LoginFormImg from "@/assets/login/forgot-password.png";
+import { useLoading } from '@/hooks/useLoading';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function ForgotPassword() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const { isLoading, withLoading } = useLoading()
 
   const emailFormSchema = z.object({
     email: z.string().nonempty("Email is required").email("Invalid email address"),
@@ -26,7 +29,7 @@ export default function ForgotPassword() {
     },
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = withLoading(async (data) => {
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/auth/forgot-password`, { email: data.email });
       const result = response.data;
@@ -40,7 +43,7 @@ export default function ForgotPassword() {
     } catch (error) {
       console.error("Error occurred while verifying email: ", error);
     }
-  };
+  })
 
 
   return (
@@ -79,9 +82,16 @@ export default function ForgotPassword() {
 
                   <button
                     type="submit"
-                    className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition"
+                    className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition disabled:cursor-not-allowed"
+                    disabled={isLoading()}
                   >
-                    Next
+                    {isLoading() ? (
+                      <>
+                        <Spinner size="sm" />
+                      </>
+                    ) : (
+                      "Next"
+                    )}
                   </button>
                 </form>
               </Form>
