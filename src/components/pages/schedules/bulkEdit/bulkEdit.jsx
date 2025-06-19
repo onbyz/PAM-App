@@ -18,19 +18,7 @@ export default function BulkScheduleUpload() {
 
   const navigate = useNavigate();
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files?.[0]
-    if (selectedFile) {
-      setFile(selectedFile)
-      setError(null)
-      setResponse(null)
-      setSuccessMessage(`${selectedFile.name} file added successfully!`)
-
-      // Auto-hide success message after 5 seconds
-      setTimeout(() => setSuccessMessage(null), 5000)
-    }
-  }
-
+  
   const validateFile = (file) => {
     if (!file) {
       setError("Please select a file")
@@ -72,24 +60,49 @@ export default function BulkScheduleUpload() {
     setSelectedPort(e.target.value)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (!validateFile(file)) {
-      return
-    }
-
-    if (uploadType === "bulk_by_origin_port" && !selectedPort) {
-      setError("Please select an origin port")
-      return
-    }
-
-    setIsLoading(true)
+const handleFileChange = (e) => {
+  const selectedFile = e.target.files?.[0]
+  if (selectedFile) {
+    setFile(null)
     setError(null)
     setResponse(null)
+    setSuccessMessage(null)
+    
+    setFile(selectedFile)
+    setSuccessMessage(`${selectedFile.name} file added successfully!`)
+    setTimeout(() => setSuccessMessage(null), 5000)
+  }
+}
 
-    const formData = new FormData()
-    if (file) formData.append("scheduleFile", file)
+const handleSubmit = async (e) => {
+  e.preventDefault()
+
+  if (!validateFile(file)) {
+    return
+  }
+
+  if (uploadType === "bulk_by_origin_port" && !selectedPort) {
+    setError("Please select an origin port")
+    return
+  }
+
+  if (file && file.size === 0) {
+    setError("The selected file appears to be empty. Please check the file and try again.")
+    return
+  }
+
+  setIsLoading(true)
+  setError(null)
+  setResponse(null)
+
+  const formData = new FormData()
+  
+  try {
+    if (!file) {
+      throw new Error("No file selected")
+    }
+    
+    formData.append("scheduleFile", file)
     formData.append("deleteOldData", deleteOldData.toString())
     formData.append("uploadType", uploadType)
 
@@ -97,21 +110,34 @@ export default function BulkScheduleUpload() {
       formData.append("originPort", selectedPort)
     }
 
-    try {
-      // Using import.meta.env for environment variables
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`
-      const response = await api.post(apiUrl, formData)
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule/bulk`
+    const response = await api.post(apiUrl, formData)
 
-      const {data} = response
+    setFile(null)
+      const fileInput = document.getElementById("scheduleFile")
+      if (fileInput) {
+        fileInput.value = ""
+      }
 
-      setResponse(data)
-      setSuccessMessage("File processed successfully!")
-    } catch (err) {
-      setError(err.message || "Something went wrong")
-    } finally {
-      setIsLoading(false)
+    const {data} = response
+    setResponse(data)
+    setSuccessMessage("File processed successfully!")
+    
+  } catch (err) {
+    if (err.message && err.message.includes('Network Error')) {
+      setError("The file was modified after selection. Please select the file again.")
+      setFile(null)
+      const fileInput = document.getElementById("scheduleFile")
+      if (fileInput) {
+        fileInput.value = ""
+      }
+    } else {
+      setError(err.response?.data?.message || err.message || "Something went wrong")
     }
+  } finally {
+    setIsLoading(false)
   }
+}
   const handleGoBack = () => {
     setFile(null)
     setError(null)
