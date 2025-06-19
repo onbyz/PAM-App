@@ -8,8 +8,13 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "react-router-dom"
 import api from "@/lib/api"
+import { Spinner } from "@/components/ui/spinner"
+import { useLoading } from "@/hooks/useLoading"
 
 export default function CreateSchedule() {
+
+  const { isLoading, withLoading } = useLoading()
+
   const [schedules, setSchedules] = useState([])
   const [vessels, setVessels] = useState([])
   const [ports, setPorts] = useState([])
@@ -121,7 +126,7 @@ export default function CreateSchedule() {
   const selectedCountryID = countries.find((country) => country.uuid === form.watch("country"))
   const filteredPorts = ports.filter((port) => port.country_id === selectedCountryID?.id)
 
-  const onSubmit = async (data) => {
+  const onSubmit = withLoading(async (data) => {
     console.log("Submitting Data:", data)
     try {
       const response = await api.post(`${import.meta.env.VITE_API_BASE_URL}/api/admin/schedule`, data)
@@ -129,7 +134,7 @@ export default function CreateSchedule() {
       window.scrollTo({ top: 0, behavior: "smooth" })
       setSuccessMessage("Schedule created successfully")
       setTimeout(() => setSuccessMessage(""), 8000)
-      form.reset()
+      // form.reset()
     } catch (error) {
       if (error.response && error.response.data && error.response.data.message) {
         setErrorMessage(error.response.data.data)
@@ -140,7 +145,7 @@ export default function CreateSchedule() {
       }
       console.error("Error Creating Schedule : ", error)
     }
-  }
+  })
 
   const getNextDay = (date) => {
     const nextDay = new Date(date)
@@ -609,9 +614,17 @@ export default function CreateSchedule() {
                 <div className="flex gap-6 mt-8">
                   <button
                     type="submit"
-                    className="w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 "
-                  >
-                    Save
+                    className="w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 disabled:cursor-not-allowed"
+                    disabled={isLoading()}
+
+                  >{isLoading() ? (
+                    <>
+                      <Spinner size="sm" />
+                    </>
+                  ) : (
+                    "Save"
+                  )}
+
                   </button>
 
                   <button

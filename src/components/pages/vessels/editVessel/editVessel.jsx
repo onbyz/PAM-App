@@ -7,6 +7,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
 import api from '@/lib/api';
+import { useLoading } from '@/hooks/useLoading';
+import { Spinner } from '@/components/ui/spinner';
 
 const formSchema = z.object({
     vessel_name: z.string().nonempty("Vessel Name is required!").min(3, "Vessel Name must be at least 3 characters"),
@@ -17,6 +19,7 @@ export default function EditVessel(props) {
     const [successMessage, setSuccessMessage] = React.useState("");
     const [errorMessage, setErrorMessage] = React.useState("");
     const navigate = useNavigate();
+    const { isLoading, withLoading } = useLoading()
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -32,7 +35,7 @@ export default function EditVessel(props) {
                 const fetchedData = response.data?.data;
                 form.reset({
                     vessel_name: fetchedData?.name || "",
-                }); 
+                });
             }
         } catch (error) {
             setErrorMessage(error.response?.data?.message || "Error fetching vessel data");
@@ -44,13 +47,13 @@ export default function EditVessel(props) {
         fetchVesselData();
     }, [uuid, form]);
 
-    
+
 
     const handleGoBack = () => {
         navigate(-1);
     };
 
-    const onSubmit = async (data) => {
+    const onSubmit = withLoading(async (data) => {
         try {
             const response = await api.put(`${import.meta.env.VITE_API_BASE_URL}/api/admin/vessel/${uuid}/edit`, {
                 name: data.vessel_name,
@@ -63,7 +66,7 @@ export default function EditVessel(props) {
             setErrorMessage(error.response?.data?.message || "Error updating vessel");
             console.error("Error updating vessel:", error);
         }
-    };
+    })
 
     return (
         <div>
@@ -119,8 +122,16 @@ export default function EditVessel(props) {
                             <div className='flex gap-6 mt-8'>
                                 <button
                                     type='submit'
-                                    className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2'>
-                                    Save
+                                    className='w-[80px] h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 disabled:cursor-not-allowed'
+                                    disabled={isLoading()}
+                                >
+                                    {isLoading() ? (
+                                        <>
+                                            <Spinner size="sm" />
+                                        </>
+                                    ) : (
+                                        "Save"
+                                    )}
                                 </button>
 
                                 <button

@@ -14,6 +14,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "@/lib/api";
+import { Spinner } from "@/components/ui/spinner";
+import { useLoading } from "@/hooks/useLoading";
 
 const formSchema = z.object({
     name: z.string().min(2, "Name is required!"),
@@ -25,6 +27,7 @@ export default function EditRegisteredUser() {
     const [isLoading, setIsLoading] = useState(true);
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
+    const {isLoading:isFormLoading,withLoading} = useLoading()
 
     const navigate = useNavigate();
 
@@ -66,7 +69,7 @@ export default function EditRegisteredUser() {
         navigate(-1);
     };
 
-    const onSubmit = async (data) => {
+    const onSubmit = withLoading(async (data) => {
         setSuccessMessage("");
         setErrorMessage("");
         try {
@@ -79,7 +82,7 @@ export default function EditRegisteredUser() {
             setErrorMessage(error.response?.data?.message || "Failed to update user. Please try again.");
             console.error("Error updating user:", error);
         }
-    };
+    })
 
     return (
         <div>
@@ -97,15 +100,15 @@ export default function EditRegisteredUser() {
 
                 {successMessage && (
                     <div className="w-full bg-green-100 text-green-800 text-start p-3 rounded-md my-6 flex justify-between">
-                    {successMessage}
-                    <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setSuccessMessage("")} />
+                        {successMessage}
+                        <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setSuccessMessage("")} />
                     </div>
                 )}
-        
+
                 {errorMessage && (
                     <div className="w-full bg-red-100 text-red-600 text-start p-3 rounded-md my-6 flex justify-between">
-                    {errorMessage}
-                    <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setErrorMessage("")} />
+                        {errorMessage}
+                        <FaXmark className="mt-[2px] hover:cursor-pointer" onClick={() => setErrorMessage("")} />
                     </div>
                 )}
 
@@ -171,9 +174,16 @@ export default function EditRegisteredUser() {
                                 <div className="flex gap-6 mt-8">
                                     <button
                                         type="submit"
-                                        className="px-4 h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2"
+                                        className="px-4 h-[40px] bg-[#16A34A] rounded-md text-white text-[14px] flex justify-center items-center gap-2 disabled:cursor-not-allowed"
+                                        disabled={isFormLoading()}
                                     >
-                                        Save
+                                        {isFormLoading() ? (
+                                            <>
+                                                <Spinner size="sm" />
+                                            </>
+                                        ) : (
+                                            "Save"
+                                        )}
                                     </button>
 
                                     <button
